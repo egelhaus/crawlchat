@@ -26,7 +26,7 @@ export async function authenticate(
     const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: decoded.userId },
     });
     if (!user) {
       res.status(401).json({ error: "Invalid token" });

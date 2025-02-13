@@ -38,6 +38,7 @@ import {
 import { ScrapeCard } from "~/scrapes/card";
 import { Page } from "~/components/page";
 import { createToken } from "~/jwt";
+import { makeMessage } from "./socket-util";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -52,6 +53,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     user,
     scrapes,
+    token: createToken(user!.id),
   };
 }
 
@@ -73,12 +75,14 @@ export async function action({ request }: { request: Request }) {
     const maxLinks = formData.get("maxLinks");
     const skipRegex = formData.get("skipRegex");
 
+    const token = createToken(user!.id);
+
     const response = await fetch("http://localhost:3000/scrape", {
       method: "POST",
       body: JSON.stringify({ url, maxLinks, skipRegex }),
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${createToken(user!.id)}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -119,9 +123,10 @@ export default function LandingPage({
     socket.current = new WebSocket("ws://localhost:3000");
     socket.current.onopen = () => {
       socket.current?.send(
-        JSON.stringify({
-          type: "join-room",
-          data: { userId: loaderData.user!.id },
+        makeMessage("join-room", {
+          headers: {
+            Authorization: `Bearer ${loaderData.token}`,
+          },
         })
       );
     };

@@ -18,10 +18,7 @@ import { getLinkTitle, getThreadName } from "~/thread-util";
 import { sleep } from "~/util";
 import { AppContext } from "./context";
 import { Button } from "~/components/ui/button";
-
-function makeMessage(type: string, data: any) {
-  return JSON.stringify({ type, data });
-}
+import { makeMessage } from "./socket-util";
 
 function LinkCard({ link }: { link: ScrapeLink }) {
   return (
@@ -113,7 +110,7 @@ export default function ChatBox({
     socket.current = new WebSocket("ws://localhost:3000");
     socket.current.onopen = () => {
       socket.current!.send(
-        makeMessage("auth", {
+        makeMessage("join-room", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -171,7 +171,7 @@ expressWs.app.ws("/", (ws: any, req) => {
     try {
       const message = JSON.parse(msg.toString());
 
-      if (message.type === "auth") {
+      if (message.type === "join-room") {
         const authHeader = message.data.headers.Authorization;
         if (!authHeader?.startsWith("Bearer ")) {
           ws.send(makeMessage("error", { message: "Unauthorized" }));
@@ -182,6 +182,7 @@ expressWs.app.ws("/", (ws: any, req) => {
         const token = authHeader.split(" ")[1];
         const user = verifyToken(token);
         userId = user.userId;
+        getRoomIds({ userId }).forEach((roomId) => joinRoom(roomId, ws));
         return;
       }
 
@@ -190,10 +191,6 @@ expressWs.app.ws("/", (ws: any, req) => {
         ws.send(makeMessage("error", { message: "Not authenticated" }));
         ws.close();
         return;
-      }
-
-      if (message.type === "join-room") {
-        getRoomIds({ userId }).forEach((roomId) => joinRoom(roomId, ws));
       }
 
       if (message.type === "create-thread") {
