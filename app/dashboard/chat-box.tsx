@@ -17,6 +17,7 @@ import { Prose } from "~/components/ui/prose";
 import { getLinkTitle, getThreadName } from "~/thread-util";
 import { sleep } from "~/util";
 import { AppContext } from "./context";
+import { Button } from "~/components/ui/button";
 
 function makeMessage(type: string, data: any) {
   return JSON.stringify({ type, data });
@@ -96,6 +97,8 @@ export default function ChatBox({
   const containerRef = useRef<HTMLDivElement>(null);
   const promptBoxRef = useRef<HTMLDivElement>(null);
   const [deleteActive, setDeleteActive] = useState(false);
+  const selectionPopoverRef = useRef<HTMLDivElement>(null);
+  const [selectedText, setSelectedText] = useState("");
 
   const title = useMemo(() => getThreadName(messages), [messages]);
 
@@ -144,7 +147,42 @@ export default function ChatBox({
     }));
   }, [title]);
 
-  async function handleAsk() {
+  useEffect(() => {
+    function handleMouseUp() {
+      const selection = window.getSelection();
+      if (!selection || selection.toString().trim().length === 0) {
+        if (selectionPopoverRef.current) {
+          selectionPopoverRef.current.style.display = "none";
+        }
+        setSelectedText("");
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      const selectedText = selection.toString().trim();
+      setSelectedText(selectedText);
+      if (selectionPopoverRef.current) {
+        selectionPopoverRef.current.style.display = "block";
+        const popoverRect = selectionPopoverRef.current.getBoundingClientRect();
+
+        selectionPopoverRef.current.style.left = `${
+          rect.left + rect.width / 2 - popoverRect.width / 2
+        }px`;
+        selectionPopoverRef.current.style.top = `${
+          rect.top - popoverRect.height - 6
+        }px`;
+      }
+    }
+
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
+
+  async function handleAsk(query: string) {
     if (query.length === 0) return;
 
     socket.current!.send(
@@ -203,6 +241,15 @@ export default function ChatBox({
     }));
   }
 
+  function handleAskSelectedText(prefix: string) {
+    if (selectedText.length === 0) return;
+    handleAsk(`${prefix} ${selectedText}`);
+    setSelectedText("");
+    if (selectionPopoverRef.current) {
+      selectionPopoverRef.current.style.display = "none";
+    }
+  }
+
   return (
     <Stack w={"full"} h="full" ref={containerRef}>
       <Stack>
@@ -251,14 +298,60 @@ export default function ChatBox({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleAsk();
+              handleAsk(query);
             }
           }}
         />
-        <IconButton onClick={handleAsk} disabled={query.length === 0}>
+        <IconButton
+          onClick={() => handleAsk(query)}
+          disabled={query.length === 0}
+        >
           <TbSend />
         </IconButton>
       </Group>
+
+      <Box
+        position={"fixed"}
+        top={0}
+        left={0}
+        ref={selectionPopoverRef}
+        p={1}
+        rounded={"md"}
+        bg="brand.white"
+        shadow={"md"}
+        display={"none"}
+      >
+        <Group attached>
+          <Button
+            variant={"outline"}
+            size="xs"
+            onClick={() => handleAskSelectedText("What is")}
+          >
+            What?
+          </Button>
+          <Button
+            variant={"outline"}
+            size="xs"
+            onClick={() => handleAskSelectedText("Why is")}
+          >
+            Why?
+          </Button>
+          <Button
+            variant={"outline"}
+            size="xs"
+            onClick={() => handleAskSelectedText("How is")}
+          >
+            How?
+          </Button>
+          <Button
+            variant={"outline"}
+            size="xs"
+            onClick={() => handleAskSelectedText("When is")}
+          >
+            When?
+          </Button>
+        </Group>
+      </Box>
     </Stack>
   );
 }
