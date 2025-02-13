@@ -18,6 +18,8 @@ export default [
     route("app", "dashboard/page.tsx"),
     route("threads/new", "dashboard/thread-new.tsx"),
     route("threads/:id", "dashboard/thread.tsx"),
+    route("collections", "scrapes/page.tsx"),
+    route("settings", "dashboard/settings.tsx"),
   ]),
 
   route("test", "test.tsx"),

@@ -16,8 +16,8 @@ export function ScrapeCard({
   deleting,
 }: {
   scrape: Scrape;
-  onDelete: () => void;
-  deleting: boolean;
+  onDelete?: () => void;
+  deleting?: boolean;
 }) {
   const [deleteActive, setDeleteActive] = useState(false);
 
@@ -34,7 +34,9 @@ export function ScrapeCard({
       setDeleteActive(true);
       return;
     }
-    onDelete();
+    if (onDelete) {
+      onDelete();
+    }
   }
 
   return (
@@ -49,14 +51,16 @@ export function ScrapeCard({
               <TbMessage />
             </Link>
           </IconButton>
-          <IconButton
-            size={"xs"}
-            variant={deleteActive ? "solid" : "subtle"}
-            colorPalette={"red"}
-            onClick={handleDelete}
-          >
-            {deleteActive ? <TbCheck /> : <TbTrash />}
-          </IconButton>
+          {onDelete && (
+            <IconButton
+              size={"xs"}
+              variant={deleteActive ? "solid" : "subtle"}
+              colorPalette={"red"}
+              onClick={handleDelete}
+            >
+              {deleteActive ? <TbCheck /> : <TbTrash />}
+            </IconButton>
+          )}
         </Group>
       </Group>
 
