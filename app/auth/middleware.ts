@@ -1,3 +1,4 @@
+import type { User } from "@prisma/client";
 import { redirect } from "react-router";
 import { prisma } from "~/prisma";
 import { getSession } from "~/session";
@@ -21,9 +22,12 @@ export async function getAuthUser(
     });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: sessionUser?.id },
-  });
+  let user: User | null = null;
+  if (sessionUser) {
+    user = await prisma.user.findUnique({
+      where: { id: sessionUser?.id },
+    });
+  }
 
   return user;
 }
