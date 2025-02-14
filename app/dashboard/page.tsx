@@ -78,7 +78,7 @@ export async function action({ request }: { request: Request }) {
 
     const token = createToken(user!.id);
 
-    const response = await fetch("http://localhost:3000/scrape", {
+    const response = await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
       method: "POST",
       body: JSON.stringify({ url, maxLinks, skipRegex }),
       headers: {
@@ -161,6 +161,7 @@ export default function LandingPage({
 
   const loading =
     scrapeFetcher.state !== "idle" || ["scraping", "scraped"].includes(stage);
+  const cardsToShow = 4;
 
   return (
     <Page title="Home" icon={<TbHome />}>
@@ -259,16 +260,18 @@ export default function LandingPage({
 
         <Stack w={"400px"}>
           <SimpleGrid columns={2} gap={4}>
-            {loaderData.scrapes.slice(0, 4).map((scrape) => (
+            {loaderData.scrapes.slice(0, cardsToShow).map((scrape) => (
               <GridItem key={scrape.id}>
                 <ScrapeCard scrape={scrape} />
               </GridItem>
             ))}
           </SimpleGrid>
           <Group justifyContent={"flex-end"}>
-            <ChakraLink asChild variant={"underline"}>
-              <Link to="/collections">View all</Link>
-            </ChakraLink>
+            {loaderData.scrapes.length > cardsToShow && (
+              <ChakraLink asChild variant={"underline"}>
+                <Link to="/collections">View all</Link>
+              </ChakraLink>
+            )}
           </Group>
         </Stack>
       </Stack>
