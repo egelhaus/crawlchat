@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           defer
           src="https://api.pirsch.io/pa.js"
           id="pianjs"
-          data-code="rOOWz7Lz5Ijr9nIE2664QfRooy7nPNq8"
+          data-code="aO7kKYfA1oQ3g4FLHanketwYCWPu2cE0"
         ></script>
         <Meta />
         <Links />
