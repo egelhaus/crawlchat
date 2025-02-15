@@ -67,14 +67,19 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
-  const result = await scrape(
-    "https://docs.shipped.club"
-  );
-  // const result = await scrape("https://github.com/mendableai/firecrawl/tree/main/apps/ui/ingestion-ui/src/components/ui");
+  // const result = await search(
+  //   "6790c3cc84f4e51db33779c5",
+  //   "67b09ed1857e093b09ca7ace",
+  //   await makeEmbedding("How to setup google auth?")
+  // );
 
-  console.log(result.links);
-  await fs.writeFile("test.md", result.markdown);
-  res.json({ message: "ok" });
+  const result = await scrape(
+    "https://www.hindustantimes.com/entertainment/tv/ranveer-allahbadia-s-new-note-my-remark-was-insensitive-101739630398181.html"
+  );
+
+  await fs.writeFile("test.md", result.text);
+
+  res.json({ result });
 });
 
 app.get(
@@ -130,7 +135,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           broadcast(roomId, makeMessage("scrape-complete", { url }))
         );
       },
-      afterScrape: async (url, markdown) => {
+      afterScrape: async (url, text) => {
         const scrapedUrlCount = Object.values(store.urls).length;
         const maxLinks = req.body.maxLinks
           ? parseInt(req.body.maxLinks)
@@ -149,7 +154,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
             })
           )
         );
-        const chunks = await chunkText(markdown);
+        const chunks = await chunkText(text);
 
         const batchSize = 20;
         for (let i = 0; i < chunks.length; i += batchSize) {

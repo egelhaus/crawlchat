@@ -4,7 +4,7 @@ import { parseHtml } from "./parse";
 export type ScrapeStore = {
   urls: Record<
     string,
-    | { markdown: string; metaTags: { key: string; value: string }[] }
+    | { metaTags: { key: string; value: string }[]; text: string }
     | undefined
     | null
   >;
@@ -54,14 +54,10 @@ export async function scrapeWithLinks(
   if (options?.onPreScrape) {
     options.onPreScrape(url, store);
   }
-  const {
-    markdown: linkMarkdown,
-    links: linkLinks,
-    metaTags,
-  } = await scrape(url);
+  const { links: linkLinks, metaTags, text } = await scrape(url);
   store.urls[url] = {
-    markdown: linkMarkdown,
     metaTags,
+    text,
   };
   for (const link of linkLinks) {
     if (!link.href) continue;
@@ -82,7 +78,7 @@ export async function scrapeWithLinks(
     store.urlSet.add(linkUrlStr);
   }
 
-  return linkMarkdown;
+  return text;
 }
 
 export function urlsNotFetched(store: ScrapeStore) {
@@ -97,17 +93,17 @@ export async function scrapeLoop(
     skipRegex?: RegExp[];
     onPreScrape?: (url: string, store: ScrapeStore) => Promise<void>;
     onComplete?: () => Promise<void>;
-    afterScrape?: (url: string, markdown: string) => Promise<void>;
+    afterScrape?: (url: string, text: string) => Promise<void>;
   }
 ) {
-  const { limit = 1000 } = options ?? {};
+  const { limit = 300 } = options ?? {};
 
   while (urlsNotFetched(store).length > 0) {
     const url = urlsNotFetched(store)[0];
-    const markdown = await scrapeWithLinks(url, store, baseUrl, options);
+    const text = await scrapeWithLinks(url, store, baseUrl, options);
 
     if (options?.afterScrape) {
-      await options.afterScrape(url, markdown);
+      await options.afterScrape(url, text);
     }
 
     if (Object.keys(store.urls).length >= limit) {

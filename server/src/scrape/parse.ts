@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import TurndownService from "turndown";
+import { removeConsecutiveLinks, markdownToText } from "./markdown";
 
 function cleanHtml($: cheerio.CheerioAPI) {
   $("script").remove();
@@ -44,11 +45,13 @@ export function parseHtml(html: string) {
     },
   });
 
-  const markdown = turndownService.turndown($("body").html()!);
+  let markdown = turndownService.turndown($("body").html()!);
+  markdown = removeConsecutiveLinks(markdown);
 
   return {
     markdown,
     links,
     metaTags,
+    text: markdownToText(markdown),
   };
 }
