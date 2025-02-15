@@ -1,4 +1,4 @@
-import { GridItem, SimpleGrid } from "@chakra-ui/react";
+import { EmptyState, GridItem, SimpleGrid, VStack } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
 import { TbFolder } from "react-icons/tb";
 import { Page } from "~/components/page";
@@ -55,7 +55,7 @@ export default function ScrapesPage({ loaderData }: Route.ComponentProps) {
 
   return (
     <Page title="Collections" icon={<TbFolder />}>
-      <Stack maxW={"1000px"}>
+      <Stack>
         <SimpleGrid columns={[1, 2, 3, 4, 5]} gap={4}>
           {loaderData.scrapes.map((scrape) => (
             <GridItem key={scrape.id}>
@@ -67,6 +67,21 @@ export default function ScrapesPage({ loaderData }: Route.ComponentProps) {
             </GridItem>
           ))}
         </SimpleGrid>
+        {loaderData.scrapes.length === 0 && (
+          <EmptyState.Root>
+            <EmptyState.Content>
+              <EmptyState.Indicator>
+                <TbFolder />
+              </EmptyState.Indicator>
+              <VStack textAlign="center">
+                <EmptyState.Title>No collections found</EmptyState.Title>
+                <EmptyState.Description>
+                  Scrape a website to get started
+                </EmptyState.Description>
+              </VStack>
+            </EmptyState.Content>
+          </EmptyState.Root>
+        )}
       </Stack>
     </Page>
   );

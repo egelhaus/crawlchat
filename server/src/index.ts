@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import type { Express, Request, Response } from "express";
 import ws from "express-ws";
-import { scrapeLoop, type ScrapeStore } from "./scrape/crawl";
+import { scrape, scrapeLoop, type ScrapeStore } from "./scrape/crawl";
 import { OrderedSet } from "./scrape/ordered-set";
 import cors from "cors";
 import OpenAI from "openai";
@@ -66,6 +66,8 @@ app.get("/", function (req: Request, res: Response) {
 });
 
 app.get("/test", async function (req: Request, res: Response) {
+  const result = await scrape("https://react-icons.github.io/react-icons/icons/tb")
+  console.log(result.markdown);
   res.json({ message: "ok" });
 });
 

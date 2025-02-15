@@ -34,7 +34,7 @@ import { RiChatVoiceAiFill } from "react-icons/ri";
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
   { label: "Collections", to: "/collections", icon: <TbFolder /> },
-  { label: "Settings", to: "/settings", icon: <TbSettings /> },
+  // { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
 
 function SideMenuItem({
