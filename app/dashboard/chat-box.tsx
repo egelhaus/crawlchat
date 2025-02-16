@@ -21,6 +21,7 @@ import { makeMessage } from "./socket-util";
 import { toaster } from "~/components/ui/toaster";
 import type { FetcherWithComponents } from "react-router";
 import type { ResponseType } from "@prisma/client";
+import remarkGfm from "remark-gfm";
 
 function LinkCard({ link }: { link: ScrapeLink }) {
   return (
@@ -54,7 +55,7 @@ function AssistantMessage({
       opacity={containerWidth ? 1 : 0}
     >
       <Prose size="lg" maxW="full">
-        <Markdown>{content}</Markdown>
+        <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
       </Prose>
       <SimpleGrid columns={[1, 2, 3]} gap={2}>
         {links.map((link, index) => (
