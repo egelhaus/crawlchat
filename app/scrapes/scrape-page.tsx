@@ -20,17 +20,19 @@ import {
   TbLink,
   TbRefresh,
   TbSettings,
+  TbTrash,
   TbWorld,
 } from "react-icons/tb";
 import moment from "moment";
 import { SettingsSection } from "~/dashboard/settings";
-import { Outlet, useFetcher, useNavigate } from "react-router";
+import { Outlet, redirect, useFetcher, useNavigate } from "react-router";
 import type { Prisma } from "@prisma/client";
 import { SegmentedControl } from "~/components/ui/segmented-control";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { createToken } from "~/jwt";
 import { toaster } from "~/components/ui/toaster";
+import { Tooltip } from "~/components/ui/tooltip";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -71,6 +73,22 @@ export async function action({ request, params }: Route.ActionArgs) {
     });
     return { action: "re-crawl", status: "success" };
   }
+
+  if (request.method === "DELETE") {
+    await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
+      method: "DELETE",
+      body: JSON.stringify({ scrapeId: formData.get("id") }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${createToken(user!.id)}`,
+      },
+    });
+    const id = formData.get("id");
+    await prisma.scrape.delete({
+      where: { id: id as string },
+    });
+    throw redirect("/collections");
+  }
 }
 
 export default function ScrapePage({
@@ -80,6 +98,8 @@ export default function ScrapePage({
   const [tab, setTab] = useState<string>(loaderData.tab);
   const navigate = useNavigate();
   const recrawlFetcher = useFetcher();
+  const deleteFetcher = useFetcher();
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (actionData?.status === "success" && actionData.action === "re-crawl") {
@@ -89,6 +109,14 @@ export default function ScrapePage({
       });
     }
   }, [actionData]);
+
+  useEffect(() => {
+    if (deleteConfirm) {
+      setTimeout(() => {
+        setDeleteConfirm(false);
+      }, 5000);
+    }
+  }, [deleteConfirm]);
 
   function handleTabChange(value: string) {
     setTab(value);
@@ -105,12 +133,41 @@ export default function ScrapePage({
     });
   }
 
+  function handleDelete() {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      return;
+    }
+
+    deleteFetcher.submit(null, {
+      method: "delete",
+    });
+  }
+
   return (
     <Page
       title={getScrapeTitle(loaderData.scrape)}
       icon={<TbWorld />}
       right={
         <Group>
+          <Tooltip
+            content={deleteConfirm ? "Sure to delete?" : "Delete"}
+            showArrow
+            open={deleteConfirm}
+          >
+            <IconButton
+              colorPalette={"red"}
+              variant={deleteConfirm ? "solid" : "subtle"}
+              onClick={handleDelete}
+              disabled={deleteFetcher.state !== "idle"}
+            >
+              {deleteFetcher.state !== "idle" ? (
+                <Spinner size="sm" />
+              ) : (
+                <TbTrash />
+              )}
+            </IconButton>
+          </Tooltip>
           <IconButton variant={"subtle"} onClick={copyUrl}>
             <TbLink />
           </IconButton>

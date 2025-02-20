@@ -1,7 +1,9 @@
 import type { Message } from "@prisma/client";
-import { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { toaster } from "~/components/ui/toaster";
+import { AppContext } from "~/dashboard/context";
 import { makeMessage } from "~/dashboard/socket-util";
+import { getThreadName } from "~/thread-util";
 
 export type AskStage = "idle" | "asked" | "answering";
 
@@ -16,10 +18,19 @@ export function useScrapeChat({
   threadId: string;
   defaultMessages: Message[];
 }) {
+  const { setThreadTitle } = useContext(AppContext);
   const socket = useRef<WebSocket>(null);
   const [messages, setMessages] = useState<Message[]>(defaultMessages);
   const [content, setContent] = useState("");
   const [askStage, setAskStage] = useState<AskStage>("idle");
+
+  useEffect(() => {
+    const title = getThreadName(messages);
+    setThreadTitle((titles) => ({
+      ...titles,
+      [threadId]: title,
+    }));
+  }, [messages]);
 
   function connect() {
     socket.current = new WebSocket(import.meta.env.VITE_SERVER_WS_URL);
@@ -124,6 +135,6 @@ export function useScrapeChat({
     setMessages,
     ask,
     allMessages,
-    askStage
+    askStage,
   };
 }

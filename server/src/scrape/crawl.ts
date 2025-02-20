@@ -48,9 +48,13 @@ export async function scrapeFetch(url: string): Promise<ScrapeResult> {
   return { parseOutput };
 }
 
-export async function scrape(url: string): Promise<ScrapeResult> {
+export async function scrape(
+  url: string,
+  options?: { dynamicFallbackContentLength?: number }
+): Promise<ScrapeResult> {
+  const { dynamicFallbackContentLength = 100 } = options ?? {};
   let output = await scrapeFetch(url);
-  if (output.parseOutput.text.length <= 100) {
+  if (output.parseOutput.text.length <= dynamicFallbackContentLength) {
     try {
       output.parseOutput = parseHtml(await scrapePw(url));
     } catch (e: any) {
@@ -67,12 +71,13 @@ export async function scrapeWithLinks(
   options?: {
     skipRegex?: RegExp[];
     onPreScrape?: (url: string, store: ScrapeStore) => Promise<void>;
+    dynamicFallbackContentLength?: number;
   }
 ) {
   if (options?.onPreScrape) {
     options.onPreScrape(url, store);
   }
-  const { parseOutput } = await scrape(url);
+  const { parseOutput } = await scrape(url, options);
   const { links: linkLinks, metaTags, text, markdown } = parseOutput;
   store.urls[url] = {
     metaTags,
@@ -117,6 +122,7 @@ export async function scrapeLoop(
       url: string,
       opts: { text: string; markdown: string }
     ) => Promise<void>;
+    dynamicFallbackContentLength?: number;
   }
 ) {
   const { limit = 300 } = options ?? {};

@@ -1,5 +1,3 @@
-import { TbTrash } from "react-icons/tb";
-import { TbCheck } from "react-icons/tb";
 import { Badge, Link as ChakraLink, IconButton, Image } from "@chakra-ui/react";
 import { TbMessage } from "react-icons/tb";
 import { Group, Text } from "@chakra-ui/react";
@@ -13,13 +11,9 @@ import { getScrapeTitle } from "./util";
 
 export function ScrapeCard({
   scrape,
-  onDelete,
-  deleting,
   itemsCount,
 }: {
   scrape: Scrape;
-  onDelete?: () => void;
-  deleting?: boolean;
   itemsCount: number;
 }) {
   const [deleteActive, setDeleteActive] = useState(false);
@@ -48,16 +42,6 @@ export function ScrapeCard({
     }
   }, [deleteActive]);
 
-  function handleDelete() {
-    if (!deleteActive) {
-      setDeleteActive(true);
-      return;
-    }
-    if (onDelete) {
-      onDelete();
-    }
-  }
-
   return (
     <Stack bg="brand.gray.100" p={4} rounded={"lg"} h="full" className="group">
       <Group h={"30px"}>
@@ -75,16 +59,6 @@ export function ScrapeCard({
               <TbMessage />
             </Link>
           </IconButton>
-          {onDelete && (
-            <IconButton
-              size={"xs"}
-              variant={deleteActive ? "solid" : "subtle"}
-              colorPalette={"red"}
-              onClick={handleDelete}
-            >
-              {deleteActive ? <TbCheck /> : <TbTrash />}
-            </IconButton>
-          )}
         </Group>
       </Group>
 

@@ -82,6 +82,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
   const userId = req.user!.id;
   const url = req.body.url;
   const scrapeId = req.body.scrapeId!;
+  const dynamicFallbackContentLength = req.body.dynamicFallbackContentLength;
 
   const scraping = await prisma.scrape.count({
     where: {
@@ -116,6 +117,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
     store.urlSet.add(url ?? scrape.url);
 
     await scrapeLoop(store, req.body.url ?? scrape.url, {
+      dynamicFallbackContentLength,
       limit: req.body.maxLinks
         ? parseInt(req.body.maxLinks)
         : url

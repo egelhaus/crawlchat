@@ -22,6 +22,7 @@ import {
   TbChevronUp,
   TbCircleCheckFilled,
   TbHome,
+  TbInfoCircle,
 } from "react-icons/tb";
 import { Link, redirect, useFetcher } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -41,6 +42,11 @@ import { Page } from "~/components/page";
 import { createToken } from "~/jwt";
 import { makeMessage } from "./socket-util";
 import { toaster } from "~/components/ui/toaster";
+import {
+  NumberInputField,
+  NumberInputRoot,
+} from "~/components/ui/number-input";
+import { Tooltip } from "~/components/ui/tooltip";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -85,6 +91,9 @@ export async function action({ request }: { request: Request }) {
     const url = formData.get("url");
     const maxLinks = formData.get("maxLinks");
     const skipRegex = formData.get("skipRegex");
+    const dynamicFallbackContentLength = formData.get(
+      "dynamicFallbackContentLength"
+    );
 
     if (!url) {
       return { error: "URL is required" };
@@ -102,7 +111,12 @@ export async function action({ request }: { request: Request }) {
 
     const response = await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
       method: "POST",
-      body: JSON.stringify({ maxLinks, skipRegex, scrapeId: scrape.id }),
+      body: JSON.stringify({
+        maxLinks,
+        skipRegex,
+        scrapeId: scrape.id,
+        dynamicFallbackContentLength,
+      }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -225,6 +239,7 @@ export default function LandingPage({
                         placeholder="Ex: /blog or /docs/v1"
                       />
                     </Field>
+
                     <SelectRoot name="maxLinks" collection={maxLinks}>
                       <SelectLabel>Select max links</SelectLabel>
                       <SelectTrigger>
@@ -238,6 +253,31 @@ export default function LandingPage({
                         ))}
                       </SelectContent>
                     </SelectRoot>
+
+                    <Field
+                      label={
+                        <Group>
+                          <Text>Dynamic fallback content length</Text>
+                          <Tooltip
+                            content="If the content length is less than this number, the content will be fetched dynamically (for client side rendered content)"
+                            positioning={{ placement: "top" }}
+                            showArrow
+                          >
+                            <Text>
+                              <TbInfoCircle />
+                            </Text>
+                          </Tooltip>
+                        </Group>
+                      }
+                    >
+                      <NumberInputRoot
+                        name="dynamicFallbackContentLength"
+                        defaultValue="100"
+                        w="full"
+                      >
+                        <NumberInputField />
+                      </NumberInputRoot>
+                    </Field>
                   </Stack>
                 </>
               )}
