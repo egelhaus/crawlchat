@@ -14,8 +14,6 @@ import {
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Text } from "@chakra-ui/react";
-import { getMetaTitle } from "server/src/scrape/parse";
 import { MarkdownProse } from "~/widget/markdown-prose";
 import { TbX } from "react-icons/tb";
 
@@ -52,7 +50,7 @@ export default function ScrapeItem({ loaderData }: Route.ComponentProps) {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>
-            {getMetaTitle(loaderData.item?.metaTags ?? [])}
+            Scraped Markdown
           </DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
