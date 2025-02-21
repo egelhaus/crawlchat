@@ -51,10 +51,12 @@ async function makeMcpServer(scrapeId: string) {
 
 export const handleSse = async (res: ServerResponse, scrapeId: string) => {
   const transportId = uuidv4();
-  const transport = new SSEServerTransport(`/sse/message/${transportId}`, res);
-  transports[transportId] = transport;
+  transports[transportId] = new SSEServerTransport(
+    `/sse/message/${transportId}`,
+    res
+  );
   const mcpServer = await makeMcpServer(scrapeId);
-  mcpServer.connect(transport);
+  mcpServer.connect(transports[transportId]);
   console.log("SSE connected");
 };
 
@@ -63,9 +65,8 @@ export const handlePostMessage = async (
   res: ServerResponse,
   transportId: string
 ) => {
-  const transport = transports[transportId];
-  if (!transport) {
+  if (!transports[transportId]) {
     throw new Error("Transport not found");
   }
-  await transport.handlePostMessage(req, res);
+  await transports[transportId].handlePostMessage(req, res);
 };
