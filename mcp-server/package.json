@@ -1,11 +1,11 @@
 {
-  "name": "mcp-server",
+  "name": "crawl-chat-mcp",
   "version": "0.1.0",
-  "description": "A Model Context Protocol server example",
+  "description": "A Model Context Protocol server for crawl-chat",
   "private": true,
   "type": "module",
   "bin": {
-    "mcp-server": "./build/index.js"
+    "crawl-chat-mcp": "./build/index.js"
   },
   "files": [
     "build"
