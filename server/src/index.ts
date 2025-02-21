@@ -332,6 +332,8 @@ expressWs.app.ws("/", (ws: any, req) => {
 });
 
 app.get("/mcp/:scrapeId", async (req, res) => {
+  console.log(`MCP request for ${req.params.scrapeId} and ${req.query.query}`);
+
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: req.params.scrapeId },
   });
