@@ -24,12 +24,13 @@ import { authenticate, verifyToken } from "./jwt";
 import fs from "fs/promises";
 import { getMetaTitle } from "./scrape/parse";
 import { splitMarkdown } from "./scrape/markdown-splitter";
+import { handlePostMessage, handleSse } from "./mcp";
 
 const app: Express = express();
 const expressWs = ws(app);
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(/\/((?!sse).)*/, express.json());
 app.use(cors());
 
 function makeMessage(type: string, data: any) {
@@ -329,6 +330,14 @@ expressWs.app.ws("/", (ws: any, req) => {
   ws.on("close", () => {
     userKey = null;
   });
+});
+
+app.get("/sse/:scrapeId", async (req, res) => {
+  await handleSse(res, req.params.scrapeId);
+});
+
+app.post("/sse/message/:transportId", async (req, res) => {
+  return await handlePostMessage(req, res, req.params.transportId);
 });
 
 app.listen(port, async () => {
