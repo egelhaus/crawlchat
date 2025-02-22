@@ -187,16 +187,23 @@ export default function Index() {
           <div className="flex items-center space-x-6">
             <button
               onClick={() => scrollToSection("use-cases")}
-              className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              className="text-gray-600 hover:text-gray-900 transition-colors font-medium hidden md:block"
             >
               Use Cases
             </button>
             <button
               onClick={() => scrollToSection("pricing")}
-              className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              className="text-gray-600 hover:text-gray-900 transition-colors font-medium hidden md:block"
             >
               Pricing
             </button>
+            <Link
+              className="border border-purple-600 text-purple-600 hover:bg-purple-700 hover:text-white px-4 py-2 font-medium flex justify-center items-center rounded-md"
+              href="/login"
+            >
+              Login
+              <TbArrowRight className="ml-1 h-5 w-5" />
+            </Link>
           </div>
         </div>
       </nav>
