@@ -6,6 +6,7 @@ import "highlight.js/styles/vs.css";
 import ChatBox from "~/dashboard/chat-box";
 import { commitSession, getSession } from "~/session";
 import { data, redirect } from "react-router";
+import { useEffect } from "react";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const scrape = await prisma.scrape.findUnique({
@@ -39,7 +40,12 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     },
   });
   return data(
-    { scrape, userToken, thread },
+    {
+      scrape,
+      userToken,
+      thread,
+      embed: new URL(request.url).searchParams.get("embed") === "true",
+    },
     {
       headers: {
         "Set-Cookie": await commitSession(session),
@@ -57,19 +63,36 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
+  useEffect(() => {
+    if (loaderData.embed) {
+      document.documentElement.style.background = "transparent";
+    }
+  }, [loaderData.embed]);
+
+  function handleClose() {
+    if (loaderData.embed) {
+      window.parent.postMessage("close", "*");
+    }
+  }
+
   return (
-    <Stack h="100dvh" bg="brand.gray.100" p={4}>
+    <Stack
+      h="100dvh"
+      bg={loaderData.embed ? "blackAlpha.700" : "brand.gray.100"}
+    >
       <ChatBox
         thread={loaderData.thread}
         scrape={loaderData.scrape!}
         userToken={loaderData.userToken}
         key={loaderData.thread.id}
+        onBgClick={handleClose}
       />
       <Group
         justifyContent={"center"}
         opacity={0.4}
         _hover={{ opacity: 1 }}
         transition={"opacity 100ms ease"}
+        p={4}
       >
         <Text>
           Made by{" "}

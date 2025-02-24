@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { Stack, Text } from "@chakra-ui/react";
 import type { Scrape, Thread } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TbArrowUp, TbChevronRight, TbMessage } from "react-icons/tb";
 import { useScrapeChat, type AskStage } from "~/widget/use-chat";
 import { MarkdownProse } from "~/widget/markdown-prose";
@@ -22,7 +22,22 @@ function ChatInput({
   onAsk: (query: string) => void;
   stage: AskStage;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+
+  useEffect(function () {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+
+    const handleOnMessage = (event: MessageEvent) => {
+      if (event.data === "focus") {
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("message", handleOnMessage);
+    return () => window.removeEventListener("message", handleOnMessage);
+  }, []);
 
   function handleAsk() {
     onAsk(query);
@@ -51,6 +66,7 @@ function ChatInput({
     >
       <Group flex={1}>
         <Input
+          ref={inputRef}
           placeholder={getPlaceholder()}
           size={"xl"}
           p={0}
@@ -182,10 +198,12 @@ export default function ScrapeWidget({
   thread,
   scrape,
   userToken,
+  onBgClick,
 }: {
   thread: Thread;
   scrape: Scrape;
   userToken: string;
+  onBgClick?: () => void;
 }) {
   const chat = useScrapeChat({
     token: userToken,
@@ -219,10 +237,16 @@ export default function ScrapeWidget({
     }
   }
 
+  function handleBgClick(event: React.MouseEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget) {
+      onBgClick?.();
+    }
+  }
+
   const messages = chat.allMessages();
 
   return (
-    <Center h="full">
+    <Center h="full" onClick={handleBgClick} p={4}>
       <Stack
         border="1px solid"
         borderColor={"brand.outline"}

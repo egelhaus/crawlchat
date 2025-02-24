@@ -20,7 +20,10 @@ export function MarkdownProse({ children }: PropsWithChildren) {
               return <code {...rest}>{children}</code>;
             }
 
-            const language = className?.replace("language-", "");
+            let language = className?.replace("language-", "");
+            if (language === "env") {
+              language = "bash";
+            }
             const code = children as string;
 
             const highlighted = hljs.highlight(code ?? "", {
