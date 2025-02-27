@@ -21,7 +21,6 @@ export const sessionStorage = createCookieSessionStorage<
   cookie: {
     name: "__session",
     secrets: ["s3cr3t"],
-    sameSite: "none",
   },
 });
 
