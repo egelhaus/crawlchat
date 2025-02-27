@@ -125,8 +125,9 @@ export async function scrapeLoop(
     onComplete?: () => Promise<void>;
     afterScrape?: (
       url: string,
-      opts: { text: string; markdown: string }
+      opts: { text: string; markdown: string; error?: string }
     ) => Promise<void>;
+    beforeScrape?: (url: string) => Promise<void>;
     dynamicFallbackContentLength?: number;
     removeHtmlTags?: string;
   }
@@ -135,15 +136,24 @@ export async function scrapeLoop(
 
   while (urlsNotFetched(store).length > 0) {
     const url = urlsNotFetched(store)[0];
-    const { text, markdown } = await scrapeWithLinks(
-      url,
-      store,
-      baseUrl,
-      options
-    );
+
+    if (options?.beforeScrape) {
+      await options.beforeScrape(url);
+    }
+
+    let error = null;
+    let text = "";
+    let markdown = "";
+    try {
+      const result = await scrapeWithLinks(url, store, baseUrl, options);
+      text = result.text;
+      markdown = result.markdown;
+    } catch (e: any) {
+      error = e.message;
+    }
 
     if (options?.afterScrape) {
-      await options.afterScrape(url, { text, markdown });
+      await options.afterScrape(url, { text, markdown, error });
     }
 
     if (Object.keys(store.urls).length >= limit) {

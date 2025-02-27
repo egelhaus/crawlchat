@@ -93,12 +93,6 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
     },
   });
 
-  if (scraping > 0) {
-    console.log("Too many scrapes", userId, scraping);
-    res.json({ message: "Too many scrapes" });
-    return;
-  }
-
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: scrapeId, userId },
   });
@@ -149,76 +143,99 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
           broadcast(roomId, makeMessage("scrape-complete", { scrapeId }))
         );
       },
-      afterScrape: async (url, { markdown }) => {
-        const scrapedUrlCount = Object.values(store.urls).length;
-        const maxLinks = req.body.maxLinks
-          ? parseInt(req.body.maxLinks)
-          : undefined;
-        const actualRemainingUrlCount = store.urlSet.size() - scrapedUrlCount;
-        const remainingUrlCount = maxLinks
-          ? Math.min(maxLinks, actualRemainingUrlCount)
-          : actualRemainingUrlCount;
+      afterScrape: async (url, { markdown, error }) => {
+        try {
+          if (error) {
+            throw new Error(error);
+          }
 
-        const chunks = await splitMarkdown(markdown);
-        const chunkDocs = await Promise.all(
-          chunks.map(async (chunk) => ({
-            id: makeRecordId(scrape.id, uuidv4()),
-            embedding: await makeEmbedding(chunk),
-            metadata: { content: chunk, url },
-          }))
-        );
-        await saveEmbedding(scrape.id, chunkDocs);
+          const scrapedUrlCount = Object.values(store.urls).length;
+          const maxLinks = req.body.maxLinks
+            ? parseInt(req.body.maxLinks)
+            : undefined;
+          const actualRemainingUrlCount = store.urlSet.size() - scrapedUrlCount;
+          const remainingUrlCount = maxLinks
+            ? Math.min(maxLinks, actualRemainingUrlCount)
+            : actualRemainingUrlCount;
 
-        if (scrape.url === url) {
-          await prisma.scrape.update({
-            where: { id: scrape.id },
-            data: { title: getMetaTitle(store.urls[url]?.metaTags ?? []) },
+          const chunks = await splitMarkdown(markdown);
+          const chunkDocs = await Promise.all(
+            chunks.map(async (chunk) => ({
+              id: makeRecordId(scrape.id, uuidv4()),
+              embedding: await makeEmbedding(chunk),
+              metadata: { content: chunk, url },
+            }))
+          );
+          await saveEmbedding(scrape.id, chunkDocs);
+
+          if (scrape.url === url) {
+            await prisma.scrape.update({
+              where: { id: scrape.id },
+              data: { title: getMetaTitle(store.urls[url]?.metaTags ?? []) },
+            });
+          }
+
+          const existingItem = await prisma.scrapeItem.findFirst({
+            where: { scrapeId: scrape.id, url },
+          });
+          if (existingItem) {
+            await deleteByIds(
+              existingItem.embeddings.map((embedding) => embedding.id)
+            );
+          }
+
+          await prisma.scrapeItem.upsert({
+            where: { scrapeId_url: { scrapeId: scrape.id, url } },
+            update: {
+              markdown,
+              title: getMetaTitle(store.urls[url]?.metaTags ?? []),
+              metaTags: store.urls[url]?.metaTags,
+              embeddings: chunkDocs.map((doc) => ({
+                id: doc.id,
+              })),
+              status: "completed",
+            },
+            create: {
+              userId,
+              scrapeId: scrape.id,
+              url,
+              markdown,
+              title: getMetaTitle(store.urls[url]?.metaTags ?? []),
+              metaTags: store.urls[url]?.metaTags,
+              embeddings: chunkDocs.map((doc) => ({
+                id: doc.id,
+              })),
+              status: "completed",
+            },
+          });
+
+          roomIds.forEach((roomId) =>
+            broadcast(
+              roomId,
+              makeMessage("scrape-pre", {
+                url,
+                scrapedUrlCount,
+                remainingUrlCount,
+                markdown: includeMarkdown ? markdown : undefined,
+              })
+            )
+          );
+        } catch (error: any) {
+          await prisma.scrapeItem.upsert({
+            where: { scrapeId_url: { scrapeId: scrape.id, url } },
+            update: {
+              status: "failed",
+              error: error.message.toString(),
+            },
+            create: {
+              userId,
+              scrapeId: scrape.id,
+              url,
+              status: "failed",
+              error: error.message.toString(),
+            },
           });
         }
-
-        const existingItem = await prisma.scrapeItem.findFirst({
-          where: { scrapeId: scrape.id, url },
-        });
-        if (existingItem) {
-          await deleteByIds(
-            existingItem.embeddings.map((embedding) => embedding.id)
-          );
-        }
-
-        await prisma.scrapeItem.upsert({
-          where: { scrapeId_url: { scrapeId: scrape.id, url } },
-          update: {
-            markdown,
-            title: getMetaTitle(store.urls[url]?.metaTags ?? []),
-            metaTags: store.urls[url]?.metaTags,
-            embeddings: chunkDocs.map((doc) => ({
-              id: doc.id,
-            })),
-          },
-          create: {
-            userId,
-            scrapeId: scrape.id,
-            url,
-            markdown,
-            title: getMetaTitle(store.urls[url]?.metaTags ?? []),
-            metaTags: store.urls[url]?.metaTags,
-            embeddings: chunkDocs.map((doc) => ({
-              id: doc.id,
-            })),
-          },
-        });
-
-        roomIds.forEach((roomId) =>
-          broadcast(
-            roomId,
-            makeMessage("scrape-pre", {
-              url,
-              scrapedUrlCount,
-              remainingUrlCount,
-              markdown: includeMarkdown ? markdown : undefined,
-            })
-          )
-        );
       },
     });
 

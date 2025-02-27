@@ -10,7 +10,7 @@ import type { Route } from "./+types/scrape-links";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
 import moment from "moment";
-import { TbCheck, TbRefresh } from "react-icons/tb";
+import { TbCheck, TbRefresh, TbX } from "react-icons/tb";
 import { Tooltip } from "~/components/ui/tooltip";
 import { Link, Outlet } from "react-router";
 
@@ -33,6 +33,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       title: true,
       createdAt: true,
       updatedAt: true,
+      status: true,
     },
   });
 
@@ -80,13 +81,28 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
               </Table.Cell>
               <Table.Cell>
                 <ChakraLink asChild>
-                  <Link to={item.id}>{item.title}</Link>
+                  <Link to={item.id}>{item.title ?? "-"}</Link>
                 </ChakraLink>
               </Table.Cell>
               <Table.Cell>
-                <Badge variant={"surface"} colorPalette={"brand"}>
-                  <TbCheck />
-                  Success
+                <Badge
+                  variant={"surface"}
+                  colorPalette={
+                    item.status === "completed"
+                      ? "brand"
+                      : item.status === "failed"
+                      ? "red"
+                      : "gray"
+                  }
+                >
+                  {item.status === "completed" ? (
+                    <TbCheck />
+                  ) : item.status === "failed" ? (
+                    <TbX />
+                  ) : (
+                    <TbRefresh />
+                  )}
+                  {item.status === "completed" ? "Success" : "Failed"}
                 </Badge>
               </Table.Cell>
               <Table.Cell>{moment(item.updatedAt).fromNow()}</Table.Cell>
