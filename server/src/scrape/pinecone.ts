@@ -1,5 +1,4 @@
 import { Pinecone } from "@pinecone-database/pinecone";
-import { v4 as uuidv4 } from "uuid";
 import {
   pipeline,
   AutoTokenizer,
@@ -23,6 +22,10 @@ async function getEmbedder() {
 
 function makeIndexName() {
   return "earth";
+}
+
+export function makeRecordId(scrapeId: string, id: string) {
+  return `${scrapeId}/${id}`;
 }
 
 export async function makeEmbedding(text: string) {
@@ -72,12 +75,16 @@ export async function saveEmbedding(
       content: string;
       url: string;
     };
+    id: string;
   }[]
 ) {
+  if (docs.length === 0) {
+    return;
+  }
   const index = pc.index(makeIndexName());
   await index.upsert(
     docs.map((doc) => ({
-      id: scrapeId + "/" + uuidv4(),
+      id: doc.id,
       values: Array.from(doc.embedding),
       metadata: {
         ...doc.metadata,
@@ -125,4 +132,12 @@ export async function deleteScrape(scrapeId: string) {
 
     await index.deleteMany(ids);
   } while (page.pagination?.next);
+}
+
+export async function deleteByIds(ids: string[]) {
+  if (ids.length === 0) {
+    return;
+  }
+  const index = pc.index(makeIndexName());
+  await index.deleteMany(ids);
 }

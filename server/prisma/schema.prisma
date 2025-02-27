@@ -36,6 +36,16 @@ type MetaTag {
   value String
 }
 
+enum WidgetSize {
+  small
+  large
+  full_screen
+}
+
+type WidgetConfig {
+  size WidgetSize
+}
+
 model Scrape {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   userId          String   @db.ObjectId
@@ -47,6 +57,7 @@ model Scrape {
   title           String?
   chatPrompt      String?
   mcpToolName     String?
+  widgetConfig    WidgetConfig?
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   threads         Thread[]
@@ -87,6 +98,10 @@ model Thread {
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+type Embedding {
+  id String
+}
+
 model ScrapeItem {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   scrapeId        String   @db.ObjectId
@@ -96,6 +111,7 @@ model ScrapeItem {
   title           String?
   markdown        String?
   metaTags        MetaTag[]
+  embeddings      Embedding[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

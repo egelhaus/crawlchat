@@ -1,9 +1,7 @@
 import {
   Badge,
-  Box,
   Group,
   Link as ChakraLink,
-  Spinner,
   Stack,
   Table,
   Text,
@@ -14,9 +12,7 @@ import { prisma } from "~/prisma";
 import moment from "moment";
 import { TbCheck, TbRefresh } from "react-icons/tb";
 import { Tooltip } from "~/components/ui/tooltip";
-import type { ScrapeItem } from "@prisma/client";
-import { Link, Outlet, useFetcher } from "react-router";
-import { createToken } from "~/jwt";
+import { Link, Outlet } from "react-router";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -31,53 +27,28 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const items = await prisma.scrapeItem.findMany({
     where: { scrapeId: scrape.id },
-    select: { id: true, url: true, title: true, createdAt: true },
+    select: {
+      id: true,
+      url: true,
+      title: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
   return { scrape, items };
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
-  const user = await getAuthUser(request);
-
-  const formData = await request.formData();
-  const url = formData.get("url");
-
-  const token = createToken(user!.id);
-
-  await fetch(`${process.env.VITE_SERVER_URL}/scrape`, {
-    method: "POST",
-    body: JSON.stringify({ url, scrapeId: params.id }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
-
-function LinkRefresh({ url }: { url: string }) {
-  const fetcher = useFetcher();
-
+function LinkRefresh({ scrapeId, url }: { scrapeId: string; url: string }) {
   return (
     <Tooltip
       content="Refresh content"
       positioning={{ placement: "top" }}
       showArrow
     >
-      <fetcher.Form method="post">
-        <input type="hidden" name="url" value={url} />
-        <Box
-          opacity={fetcher.state === "idle" ? 0 : 1}
-          _groupHover={{ opacity: 1 }}
-          color="brand.fg"
-          cursor={"pointer"}
-          asChild
-        >
-          <button type="submit" disabled={fetcher.state !== "idle"}>
-            {fetcher.state !== "idle" ? <Spinner size="xs" /> : <TbRefresh />}
-          </button>
-        </Box>
-      </fetcher.Form>
+      <Link to={`/scrape?url=${url}&collection=${scrapeId}&links=1`}>
+        <TbRefresh />
+      </Link>
     </Tooltip>
   );
 }
@@ -91,7 +62,7 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
             <Table.ColumnHeader>Url</Table.ColumnHeader>
             <Table.ColumnHeader>Title</Table.ColumnHeader>
             <Table.ColumnHeader>Status</Table.ColumnHeader>
-            <Table.ColumnHeader>Created</Table.ColumnHeader>
+            <Table.ColumnHeader>Updated</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -99,8 +70,12 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
             <Table.Row key={item.id}>
               <Table.Cell className="group">
                 <Group>
-                  <Text>{new URL(item.url).pathname}</Text>
-                  <LinkRefresh url={item.url} />
+                  <Text>
+                    <ChakraLink href={item.url} target="_blank">
+                      {new URL(item.url).pathname}
+                    </ChakraLink>
+                  </Text>
+                  <LinkRefresh scrapeId={loaderData.scrape.id} url={item.url} />
                 </Group>
               </Table.Cell>
               <Table.Cell>
@@ -114,7 +89,7 @@ export default function ScrapeLinks({ loaderData }: Route.ComponentProps) {
                   Success
                 </Badge>
               </Table.Cell>
-              <Table.Cell>{moment(item.createdAt).fromNow()}</Table.Cell>
+              <Table.Cell>{moment(item.updatedAt).fromNow()}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
