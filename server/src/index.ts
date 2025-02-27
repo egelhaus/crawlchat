@@ -117,7 +117,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
     const roomIds = getRoomIds({ userKey: userId, roomId });
 
     roomIds.forEach((roomId) =>
-      broadcast(roomId, makeMessage("scrape-complete", { scrapeId }))
+      broadcast(roomId, makeMessage("scrape-start", { scrapeId }))
     );
     await prisma.scrape.update({
       where: { id: scrape.id },
@@ -131,6 +131,7 @@ app.post("/scrape", authenticate, async function (req: Request, res: Response) {
     store.urlSet.add(url ?? scrape.url);
 
     await scrapeLoop(store, req.body.url ?? scrape.url, {
+      removeHtmlTags: req.body.removeHtmlTags,
       dynamicFallbackContentLength,
       limit: getLimit(),
       skipRegex: req.body.skipRegex

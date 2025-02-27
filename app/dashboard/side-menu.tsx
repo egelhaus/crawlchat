@@ -2,7 +2,6 @@ import {
   Group,
   Heading,
   IconButton,
-  Image,
   Separator,
   Spinner,
   Stack,
@@ -14,8 +13,7 @@ import {
   TbHome,
   TbLogout,
   TbMessage,
-  TbSettings,
-  TbWand,
+  TbScan,
 } from "react-icons/tb";
 import { Link, NavLink } from "react-router";
 import { Avatar } from "~/components/ui/avatar";
@@ -29,10 +27,11 @@ import type { Thread, User } from "@prisma/client";
 import { getThreadName } from "~/thread-util";
 import { useContext } from "react";
 import { AppContext } from "./context";
-import { RiChatVoiceAiFill } from "react-icons/ri";
+import { LogoText } from "~/landing/page";
 
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
+  { label: "Scrape", to: "/scrape", icon: <TbScan /> },
   { label: "Collections", to: "/collections", icon: <TbFolder /> },
   // { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
@@ -103,8 +102,7 @@ export function SideMenu({
             asChild
           >
             <Group>
-              <RiChatVoiceAiFill />
-              <Link to="/app">CrawlChat</Link>
+              <LogoText />
             </Group>
           </Heading>
         </Stack>
