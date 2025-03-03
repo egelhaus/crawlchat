@@ -202,8 +202,14 @@ function AssistantMessage({
   onUnpin: () => void;
   onDelete: () => void;
 }) {
+  const uniqueLinks = useMemo(() => {
+    return links.filter(
+      (link, index, self) => index === self.findIndex((t) => t.url === link.url)
+    );
+  }, [links]);
+
   return (
-    <Stack pb={4}>
+    <Stack>
       <Stack px={4} gap={0}>
         <MarkdownProse>{content}</MarkdownProse>
         <Group>
@@ -225,9 +231,9 @@ function AssistantMessage({
           </IconButton>
         </Group>
       </Stack>
-      {links.length > 0 && (
+      {uniqueLinks.length > 0 && (
         <Stack borderTop="1px solid" borderColor={"brand.outline"} gap={0}>
-          {links.map((link, index) => (
+          {uniqueLinks.map((link, index) => (
             <SourceLink key={index} link={link} />
           ))}
         </Stack>

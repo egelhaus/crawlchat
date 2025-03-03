@@ -1,5 +1,8 @@
-import { FeatureExtractionPipeline, pipeline } from "@huggingface/transformers";
-import { Pinecone } from "@pinecone-database/pinecone";
+import {
+  Pinecone,
+  RecordMetadata,
+  QueryResponse,
+} from "@pinecone-database/pinecone";
 import { Indexer } from "./indexer";
 import { IndexDocument } from "./indexer";
 
@@ -123,5 +126,30 @@ export class MarsIndexer implements Indexer {
     });
 
     return queryResponse;
+  }
+
+  async process(query: string, result: QueryResponse<RecordMetadata>) {
+    const rerank = await this.pinecone.inference.rerank(
+      "bge-reranker-v2-m3",
+      query,
+      result.matches.map((m) => ({
+        id: m.id,
+        text: m.metadata!.content as string,
+        url: m.metadata!.url as string,
+      })),
+      {
+        topN: 4,
+        returnDocuments: true,
+        parameters: {
+          truncate: "END",
+        },
+      }
+    );
+
+    return rerank.data.map((r) => ({
+      content: r.document!.text,
+      url: r.document!.url,
+      score: r.score,
+    }));
   }
 }

@@ -15,4 +15,11 @@ export interface Indexer {
     options?: { topK?: number; excludeIds?: string[] }
   ): Promise<QueryResponse<RecordMetadata>>;
   getMinBestScore(): number;
+  process(query: string, result: QueryResponse<RecordMetadata>): Promise<
+    {
+      content: string;
+      url: string;
+      score: number;
+    }[]
+  >;
 }

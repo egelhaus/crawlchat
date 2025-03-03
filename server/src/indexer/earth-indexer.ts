@@ -1,5 +1,9 @@
 import { FeatureExtractionPipeline, pipeline } from "@huggingface/transformers";
-import { Pinecone } from "@pinecone-database/pinecone";
+import {
+  Pinecone,
+  RecordMetadata,
+  QueryResponse,
+} from "@pinecone-database/pinecone";
 import { Indexer } from "./indexer";
 import { IndexDocument } from "./indexer";
 
@@ -95,5 +99,19 @@ export class EarthIndexer implements Indexer {
       includeMetadata: true,
       filter,
     });
+  }
+
+  async process(query: string, result: QueryResponse<RecordMetadata>): Promise<
+    {
+      content: string;
+      url: string;
+      score: number;
+    }[]
+  > {
+    return result.matches.map((m) => ({
+      content: m.metadata!.content as string,
+      url: m.metadata!.url as string,
+      score: m.score ?? 0,
+    }));
   }
 }

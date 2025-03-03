@@ -343,7 +343,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           .map((m) => m.custom?.result)
           .filter((r) => r !== undefined)
           .flat();
-          
+
         const links: MessageSourceLink[] = [];
         for (const match of matches) {
           const item = await prisma.scrapeItem.findFirst({
@@ -397,8 +397,9 @@ app.get("/mcp/:scrapeId", async (req, res) => {
 
   const indexer = makeIndexer({ key: scrape.indexer });
   const result = await indexer.search(scrape.id, query);
+  const processed = await indexer.process(query, result);
 
-  res.json(result.matches.map((match) => match.metadata));
+  res.json(processed);
 });
 
 app.listen(port, async () => {

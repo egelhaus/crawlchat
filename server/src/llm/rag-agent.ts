@@ -51,32 +51,12 @@ export class RAGAgent extends Agent<{}, RAGAgentCustomMessage> {
             topK: 20,
           });
 
-          const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
-          const rerank = await pc.inference.rerank(
-            "bge-reranker-v2-m3",
-            query,
-            result.matches.map((m) => ({
-              id: m.id,
-              text: m.metadata!.content as string,
-              url: m.metadata!.url as string,
-            })),
-            {
-              topN: 4,
-              returnDocuments: true,
-              parameters: {
-                truncate: "END",
-              },
-            }
-          );
+          const processed = await this.indexer.process(query, result);
 
           return {
-            content: rerank.data.map((r) => r.document!.text).join("\n\n"),
+            content: processed.map((r) => r.content).join("\n\n"),
             customMessage: {
-              result: rerank.data.map((r) => ({
-                content: r.document!.text,
-                url: r.document!.url,
-                score: r.score,
-              })),
+              result: processed,
             },
           };
         },
