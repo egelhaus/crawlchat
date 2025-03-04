@@ -36,6 +36,7 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "~/components/ui/menu";
+import { track } from "~/pirsch";
 
 function ChatInput({
   onAsk,
@@ -76,6 +77,7 @@ function ChatInput({
 
   function handleAsk() {
     onAsk(query);
+    track("chat_ask", { query });
     setQuery("");
   }
 
