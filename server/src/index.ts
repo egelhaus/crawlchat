@@ -347,11 +347,13 @@ expressWs.app.ws("/", (ws: any, req) => {
         const links: MessageSourceLink[] = [];
         for (const match of matches) {
           const item = await prisma.scrapeItem.findFirst({
-            where: { url: match.url },
+            where: {
+              OR: [{ url: match.url }, { id: match.scrapeItemId }],
+            },
           });
           if (item) {
             links.push({
-              url: match.url,
+              url: match.url ?? null,
               title: item.title,
               score: match.score ?? null,
             });
@@ -423,6 +425,163 @@ app.get("/mcp/:scrapeId", async (req, res) => {
   });
 
   res.json(processed);
+});
+
+app.post("/resource/:scrapeId", authenticate, async (req, res) => {
+  const userId = req.user!.id;
+  const scrapeId = req.params.scrapeId;
+  const markdown = req.body.markdown;
+  const title = req.body.title;
+
+  if (!scrapeId || !markdown || !title) {
+    res.status(400).json({ message: "Missing scrapeId or markdown or title" });
+    return;
+  }
+
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: scrapeId, userId },
+  });
+
+  const indexer = makeIndexer({ key: scrape.indexer });
+  const chunks = await splitMarkdown(markdown);
+
+  let scrapeItem = await prisma.scrapeItem.create({
+    data: {
+      userId,
+      scrapeId: scrape.id,
+      markdown,
+      title,
+      metaTags: [],
+      embeddings: [],
+      status: "completed",
+    },
+  });
+
+  const documents = chunks.map((chunk) => ({
+    id: makeRecordId(scrape.id, uuidv4()),
+    text: chunk,
+    metadata: { content: chunk, scrapeItemId: scrapeItem.id },
+  }));
+  await indexer.upsert(scrape.id, documents);
+  scrapeItem = await prisma.scrapeItem.update({
+    where: { id: scrapeItem.id },
+    data: {
+      embeddings: documents.map((doc) => ({
+        id: doc.id,
+      })),
+    },
+  });
+
+  res.json({ scrapeItem });
+});
+
+app.get("/answer/:scrapeId", async (req, res) => {
+  const scrape = await prisma.scrape.findFirstOrThrow({
+    where: { id: req.params.scrapeId },
+  });
+
+  let thread = await prisma.thread.findFirst({
+    where: { scrapeId: scrape.id, isDefault: true },
+  });
+  if (!thread) {
+    thread = await prisma.thread.create({
+      data: {
+        scrapeId: scrape.id,
+        isDefault: true,
+      },
+    });
+  }
+  const query = req.query.query as string;
+
+  const indexer = makeIndexer({ key: scrape.indexer });
+  const result = await indexer.search(scrape.id, query);
+  const processed = await indexer.process(query, result);
+
+  await addMessage(thread.id, {
+    uuid: uuidv4(),
+    llmMessage: { role: "user", content: query },
+    links: [],
+    createdAt: new Date(),
+    pinnedAt: null,
+  });
+
+  const flow = new Flow<{}, RAGAgentCustomMessage>(
+    {
+      "rag-agent": new RAGAgent(indexer, scrape.id),
+    },
+    {
+      messages: [
+        {
+          llmMessage: {
+            role: "user",
+            content: query,
+          },
+        },
+      ],
+    }
+  );
+  flow.addNextAgents(["rag-agent"]);
+
+  while (await flow.stream()) {}
+
+  const content = (flow.getLastMessage().llmMessage.content as string) ?? "";
+
+  const matches = flow.flowState.state.messages
+    .map((m) => m.custom?.result)
+    .filter((r) => r !== undefined)
+    .flat();
+
+  const links: MessageSourceLink[] = [];
+  for (const match of matches) {
+    const item = await prisma.scrapeItem.findFirst({
+      where: {
+        OR: [{ url: match.url }, { id: match.scrapeItemId }],
+      },
+    });
+    if (item) {
+      links.push({
+        url: match.url ?? null,
+        title: item.title,
+        score: match.score ?? null,
+      });
+    }
+  }
+
+  await addMessage(thread.id, {
+    uuid: uuidv4(),
+    llmMessage: { role: "user", content: query },
+    links: processed.map((p) => ({
+      url: p.url,
+      title: null,
+      score: p.score,
+    })),
+    createdAt: new Date(),
+    pinnedAt: null,
+  });
+
+  const newAnswerMessage: Message = {
+    uuid: uuidv4(),
+    llmMessage: { role: "assistant", content },
+    links,
+    createdAt: new Date(),
+    pinnedAt: null,
+  };
+  addMessage(thread.id, newAnswerMessage);
+
+  res.json({ message: newAnswerMessage });
+});
+
+app.get("/discord/:channelId", async (req, res) => {
+  const scrape = await prisma.scrape.findFirst({
+    where: { discordServerId: req.params.channelId },
+  });
+
+  if (!scrape) {
+    res.status(404).json({ scrapeId: null, userId: null });
+    return;
+  }
+
+  res.json({ scrapeId: scrape.id, userId: scrape.userId });
 });
 
 app.listen(port, async () => {
