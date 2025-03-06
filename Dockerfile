@@ -14,6 +14,7 @@ COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 WORKDIR /app
 RUN rm -rf server
 RUN rm -rf mcp-server
+RUN rm -rf docker-bot
 RUN npm run build
 RUN npx prisma generate
 
