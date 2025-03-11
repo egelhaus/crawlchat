@@ -19,13 +19,13 @@ import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
 import { Message, MessageSourceLink } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
-
-const app: Express = express();
 import { Flow } from "./llm/flow";
 import { RAGAgent, RAGAgentCustomMessage } from "./llm/rag-agent";
 import { ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { name } from "libs";
-import { consumeCredits } from "libs/user-plan";
+import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
+
+const app: Express = express();
 const expressWs = ws(app);
 const port = process.env.PORT || 3000;
 
@@ -285,6 +285,16 @@ expressWs.app.ws("/", (ws: any, req) => {
           where: { id: thread.scrapeId },
         });
 
+        if (!(await hasEnoughCredits(scrape.userId, "messages"))) {
+          ws.send(
+            makeMessage("error", {
+              message: "Not enough credits. Contact the owner!",
+            })
+          );
+          ws.close();
+          return;
+        }
+
         const newQueryMessage: Message = {
           uuid: uuidv4(),
           llmMessage: { role: "user", content: message.data.query },
@@ -400,6 +410,11 @@ app.get("/mcp/:scrapeId", async (req, res) => {
     where: { id: req.params.scrapeId },
   });
 
+  if (!(await hasEnoughCredits(scrape.userId, "messages"))) {
+    res.status(400).json({ message: "Not enough credits" });
+    return;
+  }
+
   let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },
   });
@@ -485,6 +500,11 @@ app.get("/answer/:scrapeId", async (req, res) => {
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: req.params.scrapeId },
   });
+
+  if (!(await hasEnoughCredits(scrape.userId, "messages"))) {
+    res.status(400).json({ message: "Not enough credits" });
+    return;
+  }
 
   let thread = await prisma.thread.findFirst({
     where: { scrapeId: scrape.id, isDefault: true },

@@ -77,10 +77,10 @@ function CreditProgress({
       <Group justify="space-between" fontSize={"sm"}>
         <Text>{title}</Text>
         <Text>
-          {numberToKMB(used)}/{numberToKMB(total)}
+          {numberToKMB(used)} / {numberToKMB(total)}
         </Text>
       </Group>
-      <Progress.Root value={used} max={total}>
+      <Progress.Root value={Math.min(used, total)} max={total}>
         <Progress.Track rounded="full">
           <Progress.Range />
         </Progress.Track>

@@ -178,3 +178,17 @@ export const addTopup = async (
     },
   });
 };
+
+export async function hasEnoughCredits(
+  userId: string,
+  type: "messages" | "scrapes",
+  options?: { amount?: number }
+) {
+  const amount = options?.amount ?? 1;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+  const available = user?.plan?.credits?.[type] ?? 0;
+  return available >= amount;
+}

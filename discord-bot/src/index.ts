@@ -110,15 +110,23 @@ client.on(Events.MessageCreate, async (message) => {
 
     const { stopTyping } = await sendTyping(message.channel as TextChannel);
 
-    const { answer } = await query(
+    let response = "Something went wrong";
+    const { answer, error } = await query(
       scrapeId,
       discordPrompt(rawQuery),
       createToken(userId)
     );
 
+    if (error) {
+      response = `‼️ Attention required: ${error}`;
+    }
+    if (answer) {
+      response = answer;
+    }
+
     stopTyping();
 
-    message.reply(answer);
+    message.reply(response);
   }
 });
 

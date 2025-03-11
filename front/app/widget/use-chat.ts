@@ -142,10 +142,9 @@ export function useScrapeChat({
   }
 
   function handleError(message: string) {
-    toaster.error({
-      title: "Failed to connect",
-      description: message,
-    });
+    alert(message);
+    setContent("");
+    setAskStage("idle");
   }
 
   function disconnect() {

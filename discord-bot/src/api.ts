@@ -9,10 +9,18 @@ export async function query(scrapeId: string, query: string, token: string) {
     }
   );
 
-  const answerJson = await result.json();
-  const answer = answerJson.message.llmMessage.content;
+  let answer = null;
+  let answerJson: any = {};
+  let error = null;
 
-  return { answer, json: answerJson };
+  if (result.status === 400) {
+    error = (await result.json()).message;
+  } else {
+    answerJson = await result.json();
+    answer = answerJson.message.llmMessage.content;
+  }
+
+  return { answer, json: answerJson, error };
 }
 
 export async function learn(scrapeId: string, content: string, token: string) {
