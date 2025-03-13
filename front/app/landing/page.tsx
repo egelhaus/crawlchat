@@ -313,7 +313,7 @@ function Demo() {
               objectFit: "cover",
             }}
             poster="/demo-poster.png"
-            src="https://slickwid-public.s3.us-east-1.amazonaws.com/CrawlChat+Demo.mp4"
+            src="https://slickwid-public.s3.us-east-1.amazonaws.com/CrawlChat-Overview-2.mp4"
             controls
           >
             Your browser does not support the video tag.
