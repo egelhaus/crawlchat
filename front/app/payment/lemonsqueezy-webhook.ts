@@ -11,8 +11,8 @@ import {
 import type { Plan } from "libs/user-plan";
 
 const productIdPlanMap: Record<number, Plan> = {
-  404106: PLAN_STARTER,
-  404102: PLAN_PRO,
+  466349: PLAN_STARTER,
+  466350: PLAN_PRO,
 };
 
 function validateRequest(headers: Headers, body: string) {
