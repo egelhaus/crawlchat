@@ -313,6 +313,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           data: {
             threadId,
             llmMessage: { role: "user", content: message.data.query },
+            ownerUserId: scrape.userId,
           },
         });
 
@@ -394,6 +395,7 @@ expressWs.app.ws("/", (ws: any, req) => {
             threadId,
             llmMessage: { role: "assistant", content },
             links,
+            ownerUserId: scrape.userId,
           },
         });
         ws.send(
@@ -456,6 +458,7 @@ app.get("/mcp/:scrapeId", async (req, res) => {
         title: null,
         score: p.score,
       })),
+      ownerUserId: scrape.userId,
     },
   });
 
@@ -543,6 +546,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
     data: {
       threadId: thread.id,
       llmMessage: { role: "user", content: query },
+      ownerUserId: scrape.userId,
     },
   });
 
@@ -600,6 +604,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
       threadId: thread.id,
       llmMessage: { role: "user", content: query },
       links,
+      ownerUserId: scrape.userId,
     },
   });
 
@@ -609,6 +614,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
       threadId: thread.id,
       llmMessage: { role: "assistant", content },
       links,
+      ownerUserId: scrape.userId,
     },
   });
 

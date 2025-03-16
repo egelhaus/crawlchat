@@ -24,6 +24,7 @@ model User {
 
   scrapes         Scrape[]
   scrapeItems     ScrapeItem[]
+  ownedMessages   Message[]
 }
 
 enum ScrapeStatus {
@@ -83,6 +84,7 @@ type MessageSourceLink {
 model Message {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   threadId        String   @db.ObjectId
+  ownerUserId     String   @db.ObjectId
 
   llmMessage      Json
   links           MessageSourceLink[]
@@ -92,6 +94,7 @@ model Message {
   updatedAt       DateTime @updatedAt
 
   thread          Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  ownerUser       User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
 }
 
 enum ResponseType {

@@ -25,60 +25,51 @@ type MessagePair = {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
-  const scrapes = await prisma.scrape.findMany({
-    where: {
-      userId: user!.id,
-    },
-  });
 
   const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
 
-  const threads = await prisma.thread.findMany({
+  const messages = await prisma.message.findMany({
     where: {
-      scrapeId: {
-        in: scrapes.map((s) => s.id),
+      ownerUserId: user!.id,
+      createdAt: {
+        gte: ONE_WEEK_AGO,
       },
-    },
-    include: {
-      messages: true,
     },
   });
 
   let poorMessages: MessagePair[] = [];
 
-  for (const thread of threads) {
-    function findUserMessage(i: number) {
-      for (let j = i; j >= 0; j--) {
-        if ((thread.messages[j].llmMessage as any).role === "user") {
-          return thread.messages[j];
-        }
+  function findUserMessage(i: number) {
+    for (let j = i; j >= 0; j--) {
+      if ((messages[j].llmMessage as any).role === "user") {
+        return messages[j];
       }
     }
+  }
 
-    for (let i = 0; i < thread.messages.length; i++) {
-      const message = thread.messages[i];
-      const { links } = message;
-      if (links.length === 0) {
-        continue;
-      }
-      const maxScore = Math.max(
-        ...links.filter((l) => l.score !== null).map((l) => l.score!)
-      );
-      const minScore = Math.min(
-        ...links.filter((l) => l.score !== null).map((l) => l.score!)
-      );
-      if (maxScore < 0.3) {
-        poorMessages.push({
-          queryMessage: findUserMessage(i),
-          responseMessage: message,
-          maxScore,
-          minScore,
-          uniqueLinks: links
-            .filter((l) => l.score !== null)
-            .map((l) => l.url as string)
-            .filter((u, i, a) => i === a.findIndex((u2) => u2 === u)),
-        });
-      }
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    const { links } = message;
+    if (links.length === 0) {
+      continue;
+    }
+    const maxScore = Math.max(
+      ...links.filter((l) => l.score !== null).map((l) => l.score!)
+    );
+    const minScore = Math.min(
+      ...links.filter((l) => l.score !== null).map((l) => l.score!)
+    );
+    if (maxScore < 0.3) {
+      poorMessages.push({
+        queryMessage: findUserMessage(i),
+        responseMessage: message,
+        maxScore,
+        minScore,
+        uniqueLinks: links
+          .filter((l) => l.score !== null)
+          .map((l) => l.url as string)
+          .filter((u, i, a) => i === a.findIndex((u2) => u2 === u)),
+      });
     }
   }
 
