@@ -65,6 +65,6 @@ If you have any questions or concerns, please contact us at:
 
 **CrawlChat**  
 Website: [https://crawlchat.app](https://crawlchat.app)  
-Email: [pramodkumar.damam73@gmail.com](mailto:pramodkumar.damam73@gmail.com)
+Email: [support@crawlchat.app](mailto:support@crawlchat.app)
 
 Thank you for choosing CrawlChat — happy building!

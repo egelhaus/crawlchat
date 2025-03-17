@@ -725,7 +725,7 @@ export function Footer() {
             <ChakraLink href={"/terms"}>Terms</ChakraLink>
             <ChakraLink href={"/policy"}>Privacy policy</ChakraLink>
             <Group gap={4} fontSize={"xl"}>
-              <ChakraLink href={"mailto:pramodkumar.damam73@gmail.com"}>
+              <ChakraLink href={"mailto:support@crawlchat.app"}>
                 <TbMail />
               </ChakraLink>
               <ChakraLink href={"https://x.com/pramodk73"} target="_blank">

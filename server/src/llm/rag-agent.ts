@@ -62,7 +62,10 @@ export class RAGAgent extends Agent<RAGState, RAGAgentCustomMessage> {
           processed = processed.filter((r) => r.score >= 0.1);
 
           return {
-            content: processed.map((r) => r.content).join("\n\n"),
+            content:
+              processed.length > 0
+                ? processed.map((r) => r.content).join("\n\n")
+                : "No relevant information found and don't answer the query.",
             customMessage: {
               result: processed,
             },

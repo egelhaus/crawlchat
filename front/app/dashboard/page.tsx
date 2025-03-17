@@ -43,35 +43,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 
-  const threads = await prisma.thread.findMany({
-    where: {
-      scrapeId: {
-        in: scrapes.map((scrape) => scrape.id),
-      },
-    },
-    select: {
-      id: true,
-      createdAt: true,
-    },
-  });
-
   const messages = await prisma.message.findMany({
     where: {
-      threadId: {
-        in: threads.map((thread) => thread.id),
-      },
+      ownerUserId: user!.id,
       createdAt: {
         gte: new Date(Date.now() - ONE_WEEK),
       },
     },
   });
 
-  const dailyThreads: Record<string, number> = {};
-  for (const thread of threads) {
-    const date = new Date(thread.createdAt);
-    const key = date.toISOString().split("T")[0];
-    dailyThreads[key] = (dailyThreads[key] ?? 0) + messages.length;
-  }
   const dailyMessages: Record<string, number> = {};
 
   for (const message of messages) {
@@ -83,16 +63,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const today = new Date();
   const todayKey = today.toISOString().split("T")[0];
-  const threadsToday = dailyThreads[todayKey] ?? 0;
   const messagesToday = dailyMessages[todayKey] ?? 0;
 
   return {
     user,
     scrapes,
     itemsCount,
-    dailyThreads,
     dailyMessages,
-    threadsToday,
     messagesToday,
   };
 }
@@ -139,12 +116,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       const key = date.toISOString().split("T")[0];
       data.push({
         name: key,
-        Conversations: loaderData.dailyThreads[key] ?? 0,
         Messages: loaderData.dailyMessages[key] ?? 0,
       });
     }
     return data.reverse();
-  }, [loaderData.dailyThreads, loaderData.dailyMessages]);
+  }, [loaderData.dailyMessages]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -157,22 +133,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       <Stack height={"100%"} gap={8} ref={containerRef}>
         <Group>
           <StatCard
-            label="Chats today"
-            value={loaderData.threadsToday}
-            icon={<TbHelp />}
-          />
-          <StatCard
             label="Messages today"
             value={loaderData.messagesToday}
             icon={<TbMessage />}
-          />
-          <StatCard
-            label="Chats this week"
-            value={Object.values(loaderData.dailyThreads).reduce(
-              (acc, curr) => acc + curr,
-              0
-            )}
-            icon={<TbHelp />}
           />
           <StatCard
             label="Messages this week"
@@ -183,26 +146,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             icon={<TbMessage />}
           />
         </Group>
-
-        <Stack>
-          <Heading>
-            <Group>
-              <TbHelp />
-              <Text>Chats</Text>
-            </Group>
-          </Heading>
-          <AreaChart width={width - 10} height={200} data={chartData}>
-            <XAxis dataKey="name" />
-            <Tooltip />
-            <CartesianGrid strokeDasharray="3 3" />
-            <Area
-              type="monotone"
-              dataKey="Conversations"
-              stroke={"var(--chakra-colors-brand-emphasized)"}
-              fill={"var(--chakra-colors-brand-muted)"}
-            />
-          </AreaChart>
-        </Stack>
 
         <Stack>
           <Heading>

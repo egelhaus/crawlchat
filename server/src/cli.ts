@@ -8,6 +8,7 @@ import {
 } from "./llm/rag-agent";
 import { makeIndexer } from "./indexer/factory";
 import { logMessage } from "./llm/agentic";
+import { cleanupThreads } from "./scripts/thread-cleanup";
 dotenv.config();
 
 async function main() {
@@ -67,4 +68,5 @@ async function main() {
 }
 
 console.log("Starting...");
-main();
+// main();
+cleanupThreads();

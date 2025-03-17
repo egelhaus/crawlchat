@@ -53,7 +53,7 @@ If you have any questions or concerns about this Privacy Policy or our data prac
 
 **CrawlChat**  
 Website: [https://crawlchat.app](https://crawlchat.app)  
-Email: [pramodkumar.damam73@gmail.com](mailto:pramodkumar.damam73@gmail.com)
+Email: [support@crawlchat.app](mailto:support@crawlchat.app)
 
 ---
 
