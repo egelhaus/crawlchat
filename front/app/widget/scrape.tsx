@@ -32,7 +32,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   session.set("chatSessionKeys", chatSessionKeys);
 
-  const userToken = await createToken(chatSessionKeys[scrape.id]);
+  const userToken = await createToken(chatSessionKeys[scrape.id], {
+    expiresInSeconds: 60 * 60,
+  });
 
   const thread = await prisma.thread.upsert({
     where: { id: chatSessionKeys[scrape.id] },
