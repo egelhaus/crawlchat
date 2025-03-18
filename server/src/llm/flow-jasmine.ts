@@ -37,7 +37,7 @@ export function makeRagTool(scrapeId: string, indexerKey: string) {
       });
 
       let processed = await indexer.process(query, result);
-      processed = processed.filter((r) => r.score >= 0.1);
+      // processed = processed.filter((r) => r.score >= 0.1);
 
       return {
         content:

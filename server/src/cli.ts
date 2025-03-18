@@ -32,7 +32,8 @@ async function main() {
       "Return the missing details in a list of strings.",
       "If nothing is missing, return an empty list.",
       "Keep the list short and concise. Don't include unnecessary details.",
-      "Only focus on the query and the context, include details only if they are directly mentioned in the query."
+      "Only focus on the query and the context, include details only if they are directly mentioned in the query.",
+      "Don't repeat the same or similar queries.",
     ]),
     schema: z.object({
       missingDetails: z.array(z.string()),

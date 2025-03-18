@@ -350,7 +350,10 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                                     href={`/collections/${pair.scrapeId}/links/${link.scrapeItemId}`}
                                     target="_blank"
                                   >
-                                    {link.title}
+                                    {link.title}{" "}
+                                    <Badge colorPalette={"brand"}>
+                                      {link.score?.toFixed(2)}
+                                    </Badge>
                                   </Link>
                                 </List.Item>
                               ))}
