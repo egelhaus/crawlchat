@@ -14,11 +14,11 @@ type FlowState<CustomState, CustomMessage> = {
 };
 
 export class Flow<CustomState, CustomMessage> {
-  private agents: Record<string, Agent<CustomState, CustomMessage>>;
+  private agents: Agent<CustomState, CustomMessage>[];
   public flowState: FlowState<CustomState, CustomMessage>;
 
   constructor(
-    agents: Record<string, Agent<CustomState, CustomMessage>>,
+    agents: Agent<CustomState, CustomMessage>[],
     state: State<CustomState, CustomMessage>
   ) {
     this.agents = agents;
@@ -29,7 +29,7 @@ export class Flow<CustomState, CustomMessage> {
   }
 
   getAgent(id: string) {
-    return this.agents[id];
+    return this.agents.find((agent) => agent.id === id);
   }
 
   getLastMessage() {
@@ -44,8 +44,8 @@ export class Flow<CustomState, CustomMessage> {
       if (!tools) {
         continue;
       }
-      for (const [name, tool] of Object.entries(tools)) {
-        if (name === toolName) {
+      for (const tool of tools) {
+        if (tool.id === toolName) {
           const { content, customMessage } = await tool.execute(args);
           const message: FlowMessage<CustomMessage> = {
             llmMessage: {
@@ -110,7 +110,7 @@ export class Flow<CustomState, CustomMessage> {
     }
 
     const result = await handleStream(
-      await this.getAgent(agentId).stream(this.flowState.state),
+      await this.getAgent(agentId)!.stream(this.flowState.state),
       options
     );
 

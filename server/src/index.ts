@@ -16,13 +16,12 @@ import { getMetaTitle } from "./scrape/parse";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { makeLLMTxt } from "./llm-txt";
 import { v4 as uuidv4 } from "uuid";
-import { Message, MessageSourceLink } from "libs/prisma";
+import { MessageSourceLink } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
-import { Flow } from "./llm/flow";
-import { Answerer, RAGAgent, RAGAgentCustomMessage } from "./llm/rag-agent";
 import { ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
+import { makeFlow } from "./llm/flow-jasmine";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -319,25 +318,13 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         ws.send(makeMessage("query-message", newQueryMessage));
 
-        const indexer = makeIndexer({ key: scrape.indexer });
-        const flow = new Flow<{}, RAGAgentCustomMessage>(
-          {
-            "rag-agent": new RAGAgent(indexer, scrape.id),
-            answerer: new Answerer(message.data.query, scrape.chatPrompt),
-          },
-          {
-            messages: [
-              ...thread.messages.map((message) => ({
-                llmMessage: message.llmMessage as any,
-              })),
-              {
-                llmMessage: {
-                  role: "user",
-                  content: message.data.query,
-                },
-              },
-            ],
-          }
+        const flow = makeFlow(
+          scrape.id,
+          scrape.chatPrompt ?? "",
+          message.data.query,
+          thread.messages.map((message) => ({
+            llmMessage: message.llmMessage as any,
+          }))
         );
         flow.addNextAgents(["rag-agent", "answerer"]);
 
@@ -541,8 +528,6 @@ app.post("/answer/:scrapeId", async (req, res) => {
     query = messages[messages.length - 1].content;
   }
 
-  const indexer = makeIndexer({ key: scrape.indexer });
-
   await prisma.message.create({
     data: {
       threadId: thread.id,
@@ -551,28 +536,18 @@ app.post("/answer/:scrapeId", async (req, res) => {
     },
   });
 
-  const flow = new Flow<{}, RAGAgentCustomMessage>(
-    {
-      "rag-agent": new RAGAgent(indexer, scrape.id),
-      answerer: new Answerer(query),
-    },
-    {
-      messages: [
-        ...messages.map((m) => ({
-          llmMessage: {
-            role: m.role as "user" | "assistant",
-            content: m.content,
-          },
-        })),
-        {
-          llmMessage: {
-            role: "user",
-            content: query,
-          },
-        },
-      ],
-    }
+  const flow = makeFlow(
+    scrape.id,
+    scrape.chatPrompt ?? "",
+    query,
+    messages.map((m) => ({
+      llmMessage: {
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      },
+    }))
   );
+
   flow.addNextAgents(["rag-agent", "answerer"]);
 
   while (await flow.stream()) {}

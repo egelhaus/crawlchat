@@ -7,6 +7,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 export type LlmMessage = ChatCompletionMessageParam;
 export type LlmTool<T extends ZodSchema<any>, CustomMessage> = {
+  id: string;
   description: string;
   schema: T;
   execute: (
@@ -33,13 +34,16 @@ export function logMessage(message: any) {
 }
 
 export class Agent<CustomState = {}, CustomMessage = {}> {
+  public id: string;
   private openai: OpenAI;
   private model: string;
-  constructor() {
+
+  constructor(id: string) {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
     this.model = "gpt-4o-mini";
+    this.id = id;
   }
 
   async stream(
@@ -77,7 +81,7 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
     });
   }
 
-  getTools(): Record<string, LlmTool<any, CustomMessage>> | null {
+  getTools(): LlmTool<any, CustomMessage>[] | null {
     return null;
   }
 
@@ -89,5 +93,77 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
 
   getResponseSchema(): ZodSchema<any> | null {
     return null;
+  }
+}
+
+export class SimpleAgent<CustomMessage> extends Agent<{}, CustomMessage> {
+  private prompt: string;
+  private schema?: ZodSchema<any>;
+  private tools?: LlmTool<any, CustomMessage>[];
+
+  constructor({
+    id,
+    prompt,
+    schema,
+    tools,
+  }: {
+    id: string;
+    prompt: string;
+    schema?: ZodSchema<any>;
+    tools?: LlmTool<any, CustomMessage>[];
+  }) {
+    super(id);
+    this.prompt = prompt;
+    this.schema = schema;
+    this.tools = tools;
+  }
+
+  async getSystemPrompt(): Promise<string> {
+    return this.prompt;
+  }
+
+  getResponseSchema(): ZodSchema<any> | null {
+    return this.schema ?? null;
+  }
+
+  getTools(): LlmTool<any, CustomMessage>[] | null {
+    return this.tools ?? null;
+  }
+}
+
+export class SimpleTool<CustomMessage> {
+  private id: string;
+  private description: string;
+  private schema: ZodSchema<any>;
+  private execute: (
+    input: z.infer<ZodSchema<any>>
+  ) => Promise<{ content: string; customMessage?: CustomMessage }>;
+
+  constructor({
+    id,
+    description,
+    schema,
+    execute,
+  }: {
+    id: string;
+    description: string;
+    schema: ZodSchema<any>;
+    execute: (
+      input: z.infer<ZodSchema<any>>
+    ) => Promise<{ content: string; customMessage?: CustomMessage }>;
+  }) {
+    this.id = id;
+    this.description = description;
+    this.schema = schema;
+    this.execute = execute;
+  }
+
+  make(): LlmTool<ZodSchema<any>, CustomMessage> {
+    return {
+      id: this.id,
+      description: this.description,
+      schema: this.schema,
+      execute: this.execute,
+    };
   }
 }
