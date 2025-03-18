@@ -16,7 +16,7 @@ import {
   Flex,
   Image,
 } from "@chakra-ui/react";
-import type { PropsWithChildren } from "react";
+import { useEffect, useMemo, useState, type PropsWithChildren } from "react";
 import {
   TbArrowRight,
   TbBrandDiscord,
@@ -25,14 +25,20 @@ import {
   TbCircleCheck,
   TbCode,
   TbCrown,
+  TbFileAi,
+  TbFileX,
   TbMail,
   TbMarkdown,
   TbMessage,
+  TbMessage2,
   TbRobotFace,
   TbSettings,
   TbStarFilled,
   TbWorld,
   TbX,
+  TbFileInfo,
+  TbAi,
+  TbLink,
 } from "react-icons/tb";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -775,6 +781,202 @@ function UsedBy() {
   );
 }
 
+function FeatureCard({ feature }: { feature: FeatureItem }) {
+  return (
+    <Stack
+      bg="brand.white"
+      p={3}
+      px={4}
+      rounded={"lg"}
+      shadow={"sm"}
+      outline={"2px solid"}
+      outlineColor="brand.muted"
+      shadowColor="brand.muted"
+      flex={1}
+      alignItems={"flex-start"}
+      h="fit-content"
+      position={"relative"}
+    >
+      <Text color="brand.fg" fontSize={"3xl"} opacity={0.5}>
+        {feature.icon}
+      </Text>
+      <Stack gap={2}>
+        <Text as="h4">{feature.title}</Text>
+        <Text fontSize={"sm"} opacity={0.4}>
+          {feature.description}
+        </Text>
+      </Stack>
+      {feature.comingSoon && (
+        <Box
+          position={"absolute"}
+          top={0}
+          right={0}
+          transform={"translate(14%, -40%)"}
+        >
+          <Badge colorPalette={"brand"} variant={"surface"} fontSize={"xs"}>
+            Coming!
+          </Badge>
+        </Box>
+      )}
+      {feature.new && (
+        <Box
+          position={"absolute"}
+          top={0}
+          right={0}
+          transform={"translate(14%, -40%)"}
+        >
+          <Badge colorPalette={"brand"} variant={"solid"} fontSize={"xs"}>
+            <TbStarFilled />
+            New!
+          </Badge>
+        </Box>
+      )}
+    </Stack>
+  );
+}
+
+type FeatureItem = {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  comingSoon?: boolean;
+  new?: boolean;
+};
+
+function Features() {
+  const features = useMemo<FeatureItem[]>(
+    () => [
+      {
+        title: "Embed Ask AI",
+        icon: <TbAi />,
+        description:
+          "You can embed the popular Ask AI widget on your website without any hassle",
+      },
+      {
+        title: "Scrape from any website",
+        icon: <TbWorld />,
+        description:
+          "CrawlChat relies on scraping as a default way to fetch the content. So it supports anything on web by default!",
+      },
+      {
+        title: "MCP server",
+        icon: <TbRobotFace />,
+        description:
+          "Your technical documentation needs to be available through MCP in the AI era and CrawlChat gives that out of the box!",
+        new: true,
+      },
+      {
+        title: "Discord bot",
+        icon: <TbBrandDiscord />,
+        new: true,
+        description:
+          "Have a community on Discord? CrawlChat Discord Bot is here to answer all the questions for you.",
+      },
+      {
+        title: "APIs to integrate",
+        icon: <TbCode />,
+        description:
+          "Use the APIs to integrate the chat capabilitie into your own app.",
+        comingSoon: true,
+      },
+      {
+        title: "Sources of information",
+        icon: <TbFileInfo />,
+        description:
+          "AI hallucinations are irritating and CrawlChat eliminates it by making AI only answer from your own documentation. Thanks to RAG!",
+      },
+      {
+        title: "System prompts",
+        icon: <TbMessage2 />,
+        description:
+          "Get full control over the LLMs by giving system prompts that match your product's style.",
+      },
+      {
+        title: "Upload PDFs",
+        icon: <TbFileAi />,
+        comingSoon: true,
+        description:
+          "Also upload PDFs and other documents to your knowledge base.",
+      },
+      {
+        title: "Widget customization",
+        icon: <TbSettings />,
+        description:
+          "Customize the widget that matches your brand. Configure colors and welcome screens.",
+      },
+      {
+        title: "View conversations",
+        icon: <TbMessage />,
+        description:
+          "Get full visibility into the conversations happening on your website so that you can fine tune your documentation.",
+        new: true,
+      },
+      {
+        title: "Find data gaps",
+        icon: <TbFileX />,
+        description:
+          "Find out what questions are not performing well using the scores. Use it to fill the gaps in your documentation.",
+      },
+      {
+        title: "Email notifications",
+        icon: <TbMail />,
+        description:
+          "Get notified about the conversations and stats regularly.",
+      },
+      {
+        title: "Shareable links",
+        icon: <TbLink />,
+        description:
+          "Quickly share the chat page links with your customers. Embedding the widget is not the only way to use CrawlChat!",
+      },
+    ],
+    []
+  );
+  const [vw, setVw] = useState(1200);
+  const grouped = useMemo(() => {
+    const n = Math.floor(vw / 400);
+    const groups: FeatureItem[][] = Array.from({ length: n }, () => []);
+
+    let nextIndex = 0;
+    for (let i = 0; i < features.length; i++) {
+      groups[nextIndex].push(features[i]);
+      nextIndex = (nextIndex + 1) % n;
+    }
+
+    return groups;
+  }, [features, vw]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setVw(window.innerWidth);
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return (
+    <Stack w={"full"} px={8} py={12} bg="brand.gray.50">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <LandingHeading>Features</LandingHeading>
+          <Group alignItems={"flex-start"} gap={6} w="full">
+            {grouped.map((group, i) => (
+              <Stack key={i} flex={1} w="full" gap={6}>
+                {group.map((feature) => (
+                  <FeatureCard key={feature.title} feature={feature} />
+                ))}
+              </Stack>
+            ))}
+          </Group>
+        </Stack>
+      </Container>
+    </Stack>
+  );
+}
+
 export default function LandingPage() {
   return (
     <Stack gap={0} w="full">
@@ -784,6 +986,7 @@ export default function LandingPage() {
       <UsedBy />
       <HowItWorks />
       <UseCases />
+      <Features />
       <Pricing />
       <CTA />
       <Footer />
