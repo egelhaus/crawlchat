@@ -90,7 +90,7 @@ export async function action({ request }: { request: Request }) {
         "#repos-file-tree",
       ]
       removeHtmlTags = removeSelectors.join(",");
-      maxLinks = "1000";
+      maxLinks = "100";
     }
 
     if (!url) {
