@@ -9,7 +9,7 @@ generator client {
 
 type UserSettings {
   openaiApiKey String?
-  systemPrompt String?
+  weeklyUpdates Boolean?
 }
 
 model User {

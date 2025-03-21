@@ -18,6 +18,7 @@ import {
   TbMessage,
   TbRoad,
   TbScan,
+  TbSettings,
 } from "react-icons/tb";
 import { Link, NavLink } from "react-router";
 import { Avatar } from "~/components/ui/avatar";
@@ -37,6 +38,7 @@ const links = [
   { label: "Scrape", to: "/scrape", icon: <TbScan /> },
   { label: "Collections", to: "/collections", icon: <TbFolder /> },
   { label: "Messages", to: "/messages", icon: <TbMessage /> },
+  { label: "Settings", to: "/settings", icon: <TbSettings /> },
 ];
 
 function SideMenuItem({

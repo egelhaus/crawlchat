@@ -35,6 +35,9 @@ export async function sendWeeklyForUser(user: User) {
 export async function sendWeeklyForAllUsers() {
   const users = await prisma.user.findMany();
   for (const user of users) {
+    if (user.settings?.weeklyUpdates === false) {
+      continue;
+    }
     await sendWeeklyForUser(user);
   }
 }

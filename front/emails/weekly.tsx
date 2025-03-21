@@ -244,7 +244,7 @@ export default function WeeklyEmail(props: {
                   opacity: 0.4,
                   color: "#000000",
                 }}
-                href={`${emailConfig.baseUrl}/settings/email`}
+                href={`${emailConfig.baseUrl}/settings`}
               >
                 Update email preferences
               </Link>

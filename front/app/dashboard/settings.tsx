@@ -7,6 +7,7 @@ import type { Route } from "./+types/settings";
 import { getAuthUser } from "~/auth/middleware";
 import type { UserSettings } from "libs/prisma";
 import { prisma } from "~/prisma";
+import { Switch } from "~/components/ui/switch";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -17,16 +18,17 @@ export async function action({ request }: Route.ActionArgs) {
   const user = await getAuthUser(request);
 
   const formData = await request.formData();
+  const intent = formData.get("intent");
   const openaiApiKey = formData.get("openaiApiKey");
-  const systemPrompt = formData.get("systemPrompt");
+  const weeklyUpdates = formData.get("weeklyUpdates");
 
   const update: Partial<UserSettings> = {};
 
   if (openaiApiKey !== null) {
     update.openaiApiKey = openaiApiKey as string;
   }
-  if (systemPrompt !== null) {
-    update.systemPrompt = systemPrompt as string;
+  if (intent === "weekly-updates") {
+    update.weeklyUpdates = weeklyUpdates === "on";
   }
 
   await prisma.user.update({
@@ -96,29 +98,17 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
       <Stack maxW={"1000px"} gap={8}>
         <SettingsSection
           fetcher={openaiApiKeyFetcher}
-          title="OpenAI API Key"
-          description="Enter your OpenAI API key to use the AI features."
+          title="Weekly Updates"
+          description="Enable weekly updates to be sent to your email."
         >
           <Stack>
-            <Input
-              name="openaiApiKey"
-              placeholder="Ex: sk-..."
-              defaultValue={loaderData.user.settings?.openaiApiKey ?? ""}
-            />
-          </Stack>
-        </SettingsSection>
-
-        <SettingsSection
-          fetcher={systemPromptFetcher}
-          title="System Prompt"
-          description="Enter a system prompt that will be used for all threads while chatting."
-        >
-          <Stack>
-            <Input
-              name="systemPrompt"
-              placeholder="Ex: You are a helpful assistant."
-              defaultValue={loaderData.user.settings?.systemPrompt ?? ""}
-            />
+            <input type="hidden" name="intent" value="weekly-updates" />
+            <Switch
+              name="weeklyUpdates"
+              defaultChecked={loaderData.user.settings?.weeklyUpdates ?? true}
+            >
+              Receive weekly email summary
+            </Switch>
           </Stack>
         </SettingsSection>
       </Stack>
