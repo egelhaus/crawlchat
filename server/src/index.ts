@@ -602,7 +602,7 @@ app.post("/answer/:scrapeId", async (req, res) => {
 
   const citation = extractCitations(content, links, { cleanCitations: true });
 
-  let updatedContent = content;
+  let updatedContent = citation.content;
   if (Object.keys(citation.citedLinks).length > 0) {
     updatedContent +=
       "\n\nSources:\n" +
