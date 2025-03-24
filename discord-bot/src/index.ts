@@ -20,7 +20,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMessageReactions
+    GatewayIntentBits.GuildMessageReactions,
   ],
 });
 
@@ -90,7 +90,7 @@ client.on(Events.MessageCreate, async (message) => {
       await learn(scrapeId, content, createToken(userId));
 
       // message.reply("Added to collection!");
-      message.react("✅");  
+      message.react("✅");
       return;
     }
 
@@ -104,12 +104,22 @@ client.on(Events.MessageCreate, async (message) => {
     let rawQuery = message.content;
     rawQuery = rawQuery.replace(/^<@\d+> /, "").trim();
 
-    const messages = (await fetchAllParentMessages(message, []))
-      .reverse()
-      .map((m) => ({
-        role: m.author.id === process.env.BOT_USER_ID! ? "assistant" : "user",
-        content: cleanContent(m.content),
-      }));
+    const previousMessages = (
+      await message.channel.messages.fetch({
+        limit: 20,
+        before: message.id,
+      })
+    ).map((m) => m);
+    const replyMessages = await fetchAllParentMessages(message, []);
+
+    const contextMessages = [...previousMessages, ...replyMessages].sort(
+      (a, b) => a.createdTimestamp - b.createdTimestamp
+    );
+
+    const messages = contextMessages.map((m) => ({
+      role: m.author.id === process.env.BOT_USER_ID! ? "assistant" : "user",
+      content: cleanContent(m.content),
+    }));
 
     messages.push({
       role: "user",
