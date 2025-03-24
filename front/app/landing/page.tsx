@@ -1052,6 +1052,19 @@ function Features() {
   );
 }
 
+function Testimonials() {
+  return (
+    <Stack w={"full"} px={8} py={12} bg="brand.gray.50" id="features">
+      <Container>
+        <Stack alignItems={"center"} w="full" gap={6}>
+          <LandingHeading>People love CrawlChat</LandingHeading>
+          
+        </Stack>
+      </Container>
+    </Stack>
+  )
+}
+
 const cache = {
   messagesThisWeek: 0,
   messagesDay: 0,
@@ -1118,6 +1131,7 @@ export default function LandingPage({ loaderData }: Route.ComponentProps) {
       <UseCases />
       <Features />
       <Pricing />
+      {/* <Testimonials /> */}
       <CTA />
       <Footer />
       <Toaster />
