@@ -93,7 +93,7 @@ model Message {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   threadId        String   @db.ObjectId
   ownerUserId     String   @db.ObjectId
-  scrapeId        String?  @db.ObjectId
+  scrapeId        String   @db.ObjectId
 
   llmMessage      Json
   links           MessageSourceLink[]
@@ -105,7 +105,7 @@ model Message {
 
   thread          Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   ownerUser       User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
-  scrape          Scrape? @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
+  scrape          Scrape @relation(fields: [scrapeId], references: [id], onDelete: Cascade)
 
   @@index([ownerUserId, scrapeId, createdAt])
 }
