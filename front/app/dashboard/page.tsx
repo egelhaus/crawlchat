@@ -91,20 +91,22 @@ export async function loader({ request }: Route.LoaderArgs) {
   const messagesToday = dailyMessages[todayKey] ?? 0;
 
   // Check and set the scrapeId
-  const scrape = await prisma.scrape.findUnique({
-    where: { id: scrapeId, userId: user!.id },
-  });
-  if (!scrape) {
-    if (scrapes.length > 0) {
-      session.set("scrapeId", scrapes[0].id);
-    } else {
-      session.unset("scrapeId");
-    }
-    throw redirect("/app", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
+  if (scrapeId) {
+    const scrape = await prisma.scrape.findUnique({
+      where: { id: scrapeId, userId: user!.id },
     });
+    if (!scrape) {
+      if (scrapes.length > 0) {
+        session.set("scrapeId", scrapes[0].id);
+      } else {
+        session.unset("scrapeId");
+      }
+      throw redirect("/app", {
+        headers: {
+          "Set-Cookie": await commitSession(session),
+        },
+      });
+    }
   }
   if (!scrapeId && scrapes.length > 0) {
     session.set("scrapeId", scrapes[0].id);
