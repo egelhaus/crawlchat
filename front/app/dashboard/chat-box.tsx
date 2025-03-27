@@ -382,7 +382,7 @@ function MCPSetup({ scrape }: { scrape: Scrape }) {
 
   return (
     <Stack h="full" p={4}>
-      <Center w="full" h="full">
+      <Stack align={"center"} py={4}>
         <Stack w="full" maxW={"400px"} gap={8}>
           <Stack>
             <Heading>
@@ -442,7 +442,7 @@ function MCPSetup({ scrape }: { scrape: Scrape }) {
             </Accordion.Root>
           </Stack>
         </Stack>
-      </Center>
+      </Stack>
     </Stack>
   );
 }
@@ -543,7 +543,7 @@ function Toolbar({
                 {messages
                   .filter((m) => m.pinnedAt)
                   .map((message) => (
-                    <MenuItem value={message.id}>
+                    <MenuItem key={message.id} value={message.id}>
                       {(message.llmMessage as any)?.content}
                     </MenuItem>
                   ))}
