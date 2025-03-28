@@ -131,6 +131,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   for (const message of messages) {
+    if (!message.links || message.links.length === 0) continue;
+    
     const sum = message.links
       .map((l) => l.score ?? 0)
       .reduce((acc, curr) => acc + curr, 0);
