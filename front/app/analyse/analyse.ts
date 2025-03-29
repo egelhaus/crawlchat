@@ -30,7 +30,7 @@ export function analysePairMessages(pairs: MessagePair[]) {
   };
 
   for (const pair of pairs) {
-    const score = pair.averageScore;
+    const score = pair.maxScore;
     if (score <= 0.2) {
       performance[0.2]++;
     } else if (score <= 0.4) {

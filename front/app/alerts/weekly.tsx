@@ -1,14 +1,13 @@
-import type { User } from "@prisma/client";
 import WeeklyEmail from "../../emails/weekly";
 import { analysePairMessages, makeMessagePairs } from "~/analyse/analyse";
 import { sendReactEmail } from "~/email";
 import { prisma } from "~/prisma";
 
-export async function sendWeeklyForUser(user: User) {
+export async function sendWeeklyForUser(userId: string, email: string) {
   const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
   const messages = await prisma.message.findMany({
     where: {
-      ownerUserId: user.id,
+      ownerUserId: userId,
       createdAt: {
         gte: ONE_WEEK_AGO,
       },
@@ -22,7 +21,7 @@ export async function sendWeeklyForUser(user: User) {
   const { performance, defaultPairs } = analysePairMessages(pairs);
 
   await sendReactEmail(
-    user.email,
+    email,
     "Weekly Report",
     <WeeklyEmail
       messages={pairs.length}
@@ -42,6 +41,6 @@ export async function sendWeeklyForAllUsers() {
       continue;
     }
     console.log(`Sending weekly report to ${user.email}`);
-    await sendWeeklyForUser(user);
+    await sendWeeklyForUser(user.id, user.email);
   }
 }

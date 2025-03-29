@@ -136,9 +136,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     const sum = message.links
       .map((l) => l.score ?? 0)
       .reduce((acc, curr) => acc + curr, 0);
-    const averageScore =
-      message.links.length > 0 ? sum / message.links.length : 0;
-    const index = Math.floor(averageScore * points);
+    const max = Math.max(...message.links.map((l) => l.score ?? 0));
+    const index = Math.floor(max * points);
     scoreDestribution[index] = {
       count: (scoreDestribution[index]?.count ?? 0) + 1,
     };

@@ -154,14 +154,14 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
   }, [channels, loaderData.messagePairs]);
   const metrics = useMemo(
     () => ({
-      worst: baseFilteredPairs.filter((p) => p.averageScore < 0.25).length,
+      worst: baseFilteredPairs.filter((p) => p.maxScore < 0.25).length,
       bad: baseFilteredPairs.filter(
-        (p) => p.averageScore >= 0.25 && p.averageScore < 0.5
+        (p) => p.maxScore >= 0.25 && p.maxScore < 0.5
       ).length,
       good: baseFilteredPairs.filter(
-        (p) => p.averageScore >= 0.5 && p.averageScore < 0.75
+        (p) => p.maxScore >= 0.5 && p.maxScore < 0.75
       ).length,
-      best: baseFilteredPairs.filter((p) => p.averageScore >= 0.75).length,
+      best: baseFilteredPairs.filter((p) => p.maxScore >= 0.75).length,
     }),
     [baseFilteredPairs]
   );
@@ -219,7 +219,7 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
 
     let filteredPairs = [];
     for (const pair of pairs) {
-      const score = pair.averageScore;
+      const score = pair.maxScore;
       for (const [min, max] of scores) {
         if (score >= min && score < max) {
           filteredPairs.push(pair);
@@ -292,12 +292,12 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                           </Text>
                           <Text>
                             <Highlight
-                              query={["average"]}
+                              query={["max"]}
                               styles={{ color: "brand.fg", fontWeight: "bold" }}
                             >
                               Each query can have multiple such records fetched
                               to answer the query. The score shown next to the
-                              question is the average of all the scores of the
+                              question is the max of all the scores of the
                               records fetched.
                             </Highlight>
                           </Text>
@@ -395,10 +395,10 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                         <Group>
                           <ChannelIcon channel={pair.queryMessage?.channel} />
                           <Badge
-                            colorPalette={getScoreColor(pair.averageScore)}
+                            colorPalette={getScoreColor(pair.maxScore)}
                             variant={"surface"}
                           >
-                            {pair.averageScore.toFixed(2)}
+                            {pair.maxScore.toFixed(2)}
                           </Badge>
                         </Group>
                       </Group>
