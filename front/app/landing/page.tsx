@@ -727,13 +727,17 @@ export function Footer() {
   return (
     <Stack w={"full"} px={8} py={12}>
       <Container>
-        <Group w="full" alignItems={"flex-start"}>
+        <Flex w="full" alignItems={"flex-start"} gap={[10, 10, 2]} flexDir={["column", "column", "row"]}>
           <Stack flex={2}>
             <LogoText />
             <Text>Turn your content LLM ready!</Text>
             <Text fontSize={"sm"} opacity={0.5}>
               © 2025 CrawlChat
             </Text>
+          </Stack>
+          <Stack flex={2}>
+            <ChakraLink href={"/blog/how-remotion-uses-crawlchat"}>Documentation - Use case</ChakraLink>
+            <ChakraLink href={"/blog/how-to-setup-mcp-for-your-documentation"}>Setup MCP server</ChakraLink>
           </Stack>
           <Stack flex={1}>
             <ChakraLink href={"/"}>Home</ChakraLink>
@@ -760,7 +764,7 @@ export function Footer() {
               </ChakraLink>
             </Group>
           </Stack>
-        </Group>
+        </Flex>
       </Container>
     </Stack>
   );
