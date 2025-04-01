@@ -334,7 +334,7 @@ function Hero() {
             fontSize={["lg", "xl"]}
             textAlign={"center"}
             maxW={"800px"}
-            opacity={0.6}
+            opacity={0.8}
           >
             Add your existing documentation as knowledge base and deliver it
             thourh multiple channels{" "}
@@ -975,7 +975,7 @@ function FeatureCard({ feature }: { feature: FeatureItem }) {
       </Text>
       <Stack gap={2}>
         <Text as="h4">{feature.title}</Text>
-        <Text fontSize={"sm"} opacity={0.4}>
+        <Text fontSize={"sm"} opacity={0.6}>
           {feature.description}
         </Text>
       </Stack>
