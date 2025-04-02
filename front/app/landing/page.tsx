@@ -738,6 +738,7 @@ export function Pricing() {
                 { label: "API not available", excluded: true },
                 { label: "MCP not available", excluded: true },
                 { label: "Discord bot", excluded: true },
+                { label: "Reactive Discord", excluded: true },
               ]}
               href="/login"
             />
@@ -750,7 +751,8 @@ export function Pricing() {
                 { label: "15,000 messages per month" },
                 { label: "API available" },
                 { label: "MCP available" },
-                { label: "Discord bot", new: true },
+                { label: "Discord bot", },
+                { label: "Reactive Discord", excluded: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
               newTab
@@ -764,7 +766,8 @@ export function Pricing() {
                 { label: "50,000 messages per month" },
                 { label: "API available" },
                 { label: "MCP available" },
-                { label: "Discord bot", new: true },
+                { label: "Discord bot" },
+                { label: "Reactive Discord", new: true },
               ]}
               href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
               newTab
