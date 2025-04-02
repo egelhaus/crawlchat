@@ -831,6 +831,9 @@ export function Footer() {
             <ChakraLink href={"/blog/how-to-setup-mcp-for-your-documentation"}>
               Setup MCP server
             </ChakraLink>
+            <ChakraLink href={"/blog/how-discord-bot-helps"}>
+              How Discord Bot helps?
+            </ChakraLink>
           </Stack>
           <Stack flex={1}>
             <ChakraLink href={"/"}>Home</ChakraLink>
@@ -1110,10 +1113,11 @@ function Features() {
       },
       {
         title: "Reactive bot",
-        icon: <TbBrandDiscord/>,
-        description: "The Discord bot checks messages in a channel and reacts to it if it knows the answer.",
+        icon: <TbBrandDiscord />,
+        description:
+          "The Discord bot checks messages in a channel and reacts to it if it knows the answer.",
         new: true,
-      }
+      },
     ],
     []
   );

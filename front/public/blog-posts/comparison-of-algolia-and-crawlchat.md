@@ -13,7 +13,7 @@ description: Understand how Algolia and CrawlChat differs and pick one that suit
   - **Natural Language Understanding (NLU)**: Enhances the ability to understand user intent in search queries.
   - **Extensive Integrations**: Compatible with various e-commerce and content management systems.
 
-[Source](https://www.algolia.com/blog/ai/using-ai-to-deliver-smarter-search) !!0!!
+[Source](https://www.algolia.com/blog/ai/using-ai-to-deliver-smarter-search)
 
 ## CrawlChat
 - **Purpose**: CrawlChat focuses on improving the accessibility of documentation through an AI-driven chat interface, allowing users to interact with content across different platforms.
@@ -24,7 +24,7 @@ description: Understand how Algolia and CrawlChat differs and pick one that suit
   - **Multiple Integration Options**: Can be deployed directly on websites or connected to Discord, enhancing interaction in community environments.
   - **Elimination of AI Hallucinations**: Ensures that responses are strictly based on the provided documentation.
 
-[Source](https://crawlchat.app) !!1!!
+[Source](https://crawlchat.app)
 
 ## Summary of Comparison
 - **Focus**: Algolia offers comprehensive search solutions for various applications, while CrawlChat specializes in documentation accessibility and community interaction through AI chat capabilities.
