@@ -79,13 +79,27 @@ client.once(Events.ClientReady, (readyClient) => {
 client.on(Events.MessageCreate, async (message) => {
   if (message.mentions.users.has(process.env.BOT_USER_ID!)) {
     if (message.content.includes("learn")) {
-      const messages = await fetchAllParentMessages(message, []);
+      let messages: Array<{ author: string; content: string }> = (
+        await fetchAllParentMessages(message, [])
+      ).map((m) => ({ author: m.author.displayName, content: m.content }));
 
-      const content = messages
-        .map((m) => m.content)
+      if (
+        message.channel.type === ChannelType.PublicThread &&
+        message.channel.parent?.id
+      ) {
+        messages = (await message.channel.messages.fetch())
+          .filter((m) => m.id !== message.id)
+          .map((m) => ({
+            author: m.author.displayName,
+            content: m.content,
+          }));
+      }
+
+      let content = messages
+        .map((m) => `${m.author}: ${m.content}`)
         .reverse()
         .map(cleanContent)
-        .join("\n\n");
+        .join("\n---\n");
 
       const { scrapeId, userId } = await getDiscordDetails(message.guildId!);
 
