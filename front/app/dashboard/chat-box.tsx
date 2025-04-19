@@ -51,6 +51,19 @@ import { extractCitations } from "libs/citation";
 import { Button } from "~/components/ui/button";
 import { makeCursorMcpJson, makeMcpCommand, makeMcpName } from "~/mcp/setup";
 
+function getScoreColor(score: number) {
+  if (score < 0.25) {
+    return "red";
+  }
+  if (score < 0.5) {
+    return "orange";
+  }
+  if (score < 0.75) {
+    return "blue";
+  }
+  return "brand";
+}
+
 function ChatInput({
   onAsk,
   stage,
@@ -221,6 +234,8 @@ function AssistantMessage({
   onDelete,
   onRefresh,
   size,
+  disabled,
+  showScore,
 }: {
   content: string;
   links: MessageSourceLink[];
@@ -230,10 +245,16 @@ function AssistantMessage({
   onDelete: () => void;
   onRefresh: () => void;
   size?: WidgetSize;
+  disabled?: boolean;
+  showScore?: boolean;
 }) {
-  const [cleanedLinks, cleanedContent] = useMemo(() => {
+  const [cleanedLinks, cleanedContent, score] = useMemo(() => {
     const citation = extractCitations(content, links);
-    return [citation.citedLinks, citation.content];
+    const score = Math.max(
+      ...Object.values(citation.citedLinks).map((l) => l?.score ?? 0),
+      0
+    );
+    return [citation.citedLinks, citation.content, score];
   }, [links]);
 
   return (
@@ -255,6 +276,7 @@ function AssistantMessage({
               rounded={"full"}
               variant={pinned ? "solid" : "subtle"}
               onClick={pinned ? onUnpin : onPin}
+              disabled={disabled}
             >
               <TbPin />
             </IconButton>
@@ -265,6 +287,7 @@ function AssistantMessage({
               rounded={"full"}
               variant={"subtle"}
               onClick={onDelete}
+              disabled={disabled}
             >
               <TbTrash />
             </IconButton>
@@ -275,10 +298,18 @@ function AssistantMessage({
               rounded={"full"}
               variant={"subtle"}
               onClick={onRefresh}
+              disabled={disabled}
             >
               <TbRefresh />
             </IconButton>
           </Tooltip>
+          {showScore && (
+            <Tooltip content="Score of this message" showArrow>
+              <Badge colorPalette={getScoreColor(score)} variant={"surface"}>
+                {score.toFixed(2)}
+              </Badge>
+            </Tooltip>
+          )}
         </Group>
       </Stack>
       {Object.keys(cleanedLinks).length > 0 && (
@@ -466,6 +497,8 @@ function Toolbar({
   onPinSelect,
   screen,
   onScreenChange,
+  disabled,
+  overallScore,
 }: {
   scrape: Scrape;
   messages: Message[];
@@ -473,6 +506,8 @@ function Toolbar({
   onPinSelect: (id: string) => void;
   screen: "chat" | "mcp";
   onScreenChange: (screen: "chat" | "mcp") => void;
+  disabled: boolean;
+  overallScore?: number;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const pinnedCount = useMemo(() => {
@@ -523,6 +558,16 @@ function Toolbar({
               <RouterLink to="/">CrawlChat</RouterLink>
             </Link>
           </Text>
+          {overallScore !== undefined && (
+            <Tooltip content="Avg score of all messages" showArrow>
+              <Badge
+                colorPalette={getScoreColor(overallScore)}
+                variant={"surface"}
+              >
+                {overallScore.toFixed(2)}
+              </Badge>
+            </Tooltip>
+          )}
         </Group>
       </Group>
       <Group>
@@ -579,13 +624,14 @@ function Toolbar({
               variant={confirmDelete ? "solid" : "subtle"}
               colorPalette={confirmDelete ? "red" : undefined}
               onClick={handleDelete}
+              disabled={disabled}
             >
               <TbEraser />
             </IconButton>
           </Tooltip>
         )}
 
-        {(scrape.widgetConfig?.showMcpSetup ?? true) && (
+        {!disabled && (scrape.widgetConfig?.showMcpSetup ?? true) && (
           <>
             {screen === "chat" && (
               <Button
@@ -624,6 +670,7 @@ export default function ScrapeWidget({
   onUnpin,
   onErase,
   onDelete,
+  showScore,
 }: {
   thread: Thread;
   messages: Message[];
@@ -634,6 +681,7 @@ export default function ScrapeWidget({
   onUnpin: (id: string) => void;
   onErase: () => void;
   onDelete: (ids: string[]) => void;
+  showScore?: boolean;
 }) {
   const chat = useScrapeChat({
     token: userToken,
@@ -642,11 +690,23 @@ export default function ScrapeWidget({
     threadId: thread.id,
   });
   const [screen, setScreen] = useState<"chat" | "mcp">("chat");
+  const readOnly = useMemo(() => userToken === "NA", [userToken]);
+  const overallScore = useMemo(() => {
+    const scores = chat.allMessages.map((m) => {
+      return Math.max(...Object.values(m.links).map((l) => l?.score ?? 0), 0);
+    });
+    return scores.reduce((a, b) => a + b, 0) / scores.length;
+  }, [chat.allMessages]);
 
-  useEffect(function () {
-    chat.connect();
-    return () => chat.disconnect();
-  }, []);
+  useEffect(
+    function () {
+      if (!readOnly) {
+        chat.connect();
+        return () => chat.disconnect();
+      }
+    },
+    [readOnly]
+  );
 
   useEffect(function () {
     scroll();
@@ -762,6 +822,8 @@ export default function ScrapeWidget({
           screen={screen}
           onScreenChange={setScreen}
           scrape={scrape}
+          disabled={readOnly}
+          overallScore={showScore ? overallScore : undefined}
         />
         <Stack flex="1" overflow={"auto"} gap={0}>
           {screen === "chat" && (
@@ -780,6 +842,8 @@ export default function ScrapeWidget({
                       links={message.links}
                       pinned={chat.allMessages[index - 1]?.pinned}
                       onPin={() => handlePin(chat.allMessages[index - 1]?.id)}
+                      disabled={readOnly}
+                      showScore={showScore}
                       onUnpin={() =>
                         handleUnpin(chat.allMessages[index - 1]?.id)
                       }
@@ -814,7 +878,7 @@ export default function ScrapeWidget({
           onAsk={handleAsk}
           stage={chat.askStage}
           searchQuery={chat.searchQuery}
-          disabled={screen !== "chat"}
+          disabled={screen !== "chat" || readOnly}
           scrape={scrape}
         />
       </Stack>
