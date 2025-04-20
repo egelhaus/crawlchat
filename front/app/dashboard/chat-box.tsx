@@ -238,10 +238,7 @@ function AssistantMessage({
 }) {
   const [cleanedLinks, cleanedContent, score] = useMemo(() => {
     const citation = extractCitations(content, links);
-    const score = Math.max(
-      ...Object.values(citation.citedLinks).map((l) => l?.score ?? 0),
-      0
-    );
+    const score = Math.max(...links.map((l) => l.score ?? 0), 0);
     return [citation.citedLinks, citation.content, score];
   }, [links]);
 
