@@ -69,9 +69,9 @@ function ChatInput({
   const [query, setQuery] = useState("");
 
   useEffect(function () {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    // if (inputRef.current) {
+    //   inputRef.current.focus();
+    // }
 
     const handleOnMessage = (event: MessageEvent) => {
       if (event.data === "focus") {
