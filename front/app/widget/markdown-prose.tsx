@@ -61,7 +61,16 @@ export function MarkdownProse({
           },
           img: ({ node, ...props }) => {
             const { src, alt, ...rest } = props;
-            return <Image src={src} alt={alt} boxShadow={"none"} {...rest} />;
+            return (
+              <Image
+                src={src}
+                alt={alt}
+                boxShadow={"none"}
+                border="1px solid"
+                borderColor={"brand.outline"}
+                {...rest}
+              />
+            );
           },
           pre: ({ node, ...props }) => {
             const { children, ...rest } = props;

@@ -832,6 +832,9 @@ export function Footer() {
             </Text>
           </Stack>
           <Stack flex={2}>
+            <ChakraLink href={"/blog/how-to-embed-ai-chatbot"}>
+              How to add AI Chatbot for your docs
+            </ChakraLink>
             <ChakraLink href={"/blog/how-remotion-uses-crawlchat"}>
               Documentation - Use case
             </ChakraLink>
