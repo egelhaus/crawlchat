@@ -109,11 +109,14 @@ export function makeFlow(
       "Don't use the RAG tool once you have the answer.",
       "Output should be very very short and under 200 words.",
 
+      "Quote the sources in the answer using markdown quotes wherever appropriate. Example: > The source text as it is.",
+
       "Once you have the context,",
       `Given above context, answer the query "${query}".`,
       "Cite the sources in the format of !!<fetchUniqueId>!! at the end of the sentance or paragraph. Example: !!123!!",
       "<fetchUniqueId> should be the 'fetchUniqueId' mentioned above context json.",
       "Cite only for the sources that are used to answer the query.",
+      "Cite every fact that is used in the answer.",
       "Pick most relevant sources and cite them.",
       "Don't ask more than 3 questions for the entire answering flow.",
       systemPrompt,
