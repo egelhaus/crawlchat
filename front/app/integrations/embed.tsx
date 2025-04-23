@@ -1,6 +1,5 @@
 import {
   Box,
-  Code,
   createListCollection,
   Group,
   HStack,
@@ -8,6 +7,7 @@ import {
   Input,
   NativeSelect,
   parseColor,
+  SegmentGroup,
   Slider,
   Stack,
   Text,
@@ -26,14 +26,8 @@ import {
 } from "~/components/ui/select";
 import type { WidgetConfig, WidgetQuestion, WidgetSize } from "libs/prisma";
 import { Button } from "~/components/ui/button";
-import { TbPlus, TbSettings, TbSettings2, TbTrash } from "react-icons/tb";
+import { TbCopy, TbPlus, TbTrash } from "react-icons/tb";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  AccordionItem,
-  AccordionItemContent,
-  AccordionItemTrigger,
-  AccordionRoot,
-} from "~/components/ui/accordion";
 import {
   ColorPickerArea,
   ColorPickerContent,
@@ -50,6 +44,7 @@ import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { Route } from "./+types/embed";
 import { getSessionScrapeId } from "../scrapes/util";
 import { Switch } from "~/components/ui/switch";
+import { toaster } from "~/components/ui/toaster";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -191,12 +186,13 @@ function makeScriptCode(props: EmbedProps, scrapeId: string) {
     attributes["data-ask-ai-radius"] = `${radius}px`;
   }
 
-  return `<script src="${origin}/embed.js" 
+  return `<script 
+  src="${origin}/embed.js" 
   id="crawlchat-script" 
   data-id="${scrapeId}" 
   ${Object.entries(attributes)
     .map(([key, value]) => `${key}="${value}"`)
-    .join(" ")}
+    .join("\n  ")}
 ></script>`;
 }
 
@@ -221,9 +217,6 @@ function PreviewEmbed({ scriptCode }: { scriptCode: string }) {
           </style>
         </head>
         <body>
-          <div>
-            Preview
-          </div>
           ${scriptCode}
         </body>
       </html>`);
@@ -233,6 +226,13 @@ function PreviewEmbed({ scriptCode }: { scriptCode: string }) {
     <iframe ref={iframeRef} id="crawlchat-script" style={{ height: "100%" }} />
   );
 }
+
+const widgetConfigTabs = createListCollection({
+  items: [
+    { label: "Preview", value: "preview" },
+    { label: "Code", value: "code" },
+  ],
+});
 
 export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
   const sizeFetcher = useFetcher();
@@ -248,6 +248,7 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
     position: "br",
     radius: 20,
   });
+  const [tab, setTab] = useState<"preview" | "code">("preview");
   const scriptCode = useMemo(
     () => makeScriptCode(embedProps, loaderData.scrape?.id ?? ""),
     [embedProps, loaderData.scrape?.id]
@@ -269,170 +270,197 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
     setQuestions(questions.filter((_, i) => i !== index));
   }
 
+  function copyCode() {
+    navigator.clipboard.writeText(scriptCode);
+    toaster.success({
+      title: "Copied to clipboard",
+    });
+  }
+
   return (
     <Stack gap={6}>
-      <Text>
-        Configure the widget and copy paste the <Code>&lt;script&gt;</Code> tag
-        below to your website.
-      </Text>
+      <SettingsSection
+        title="Customise widget"
+        description="Configure the widget and copy paste the <script> tag below to your website."
+        actionRight={
+          <Button size={"xs"} onClick={copyCode}>
+            Copy code
+            <TbCopy />
+          </Button>
+        }
+      >
+        <Group alignItems={"flex-start"} gap={10}>
+          <Stack flex={1}>
+            <Stack gap={6}>
+              <Group>
+                <ColorPickerRoot
+                  flex={1}
+                  value={parseColor(embedProps.buttonColor ?? "")}
+                  onValueChange={(e) =>
+                    setEmbedProps({
+                      ...embedProps,
+                      buttonColor: e.valueAsString,
+                    })
+                  }
+                >
+                  <ColorPickerLabel>Button color</ColorPickerLabel>
+                  <ColorPickerControl>
+                    <ColorPickerInput />
+                    <ColorPickerTrigger />
+                  </ColorPickerControl>
+                  <ColorPickerContent>
+                    <ColorPickerArea />
+                    <HStack>
+                      <ColorPickerEyeDropper />
+                      <ColorPickerSliders />
+                    </HStack>
+                  </ColorPickerContent>
+                </ColorPickerRoot>
 
-      <Group alignItems={"flex-start"}>
-        <Stack flex={2}>
-          <AccordionRoot defaultValue={["basic"]} variant={"enclosed"}>
-            <AccordionItem value={"basic"}>
-              <AccordionItemTrigger>
-                <TbSettings />
-                Basic
-              </AccordionItemTrigger>
-              <AccordionItemContent>
-                <Stack gap={6}>
-                  <ColorPickerRoot
-                    maxW="200px"
-                    value={parseColor(embedProps.buttonColor ?? "")}
-                    onValueChange={(e) =>
+                <ColorPickerRoot
+                  flex={1}
+                  value={parseColor(embedProps.buttonTextColor ?? "")}
+                  onValueChange={(e) =>
+                    setEmbedProps({
+                      ...embedProps,
+                      buttonTextColor: e.valueAsString,
+                    })
+                  }
+                >
+                  <ColorPickerLabel>Button text color</ColorPickerLabel>
+                  <ColorPickerControl>
+                    <ColorPickerInput />
+                    <ColorPickerTrigger />
+                  </ColorPickerControl>
+                  <ColorPickerContent>
+                    <ColorPickerArea />
+                    <HStack>
+                      <ColorPickerEyeDropper />
+                      <ColorPickerSliders />
+                    </HStack>
+                  </ColorPickerContent>
+                </ColorPickerRoot>
+              </Group>
+
+              <Group>
+                <Field label="Button text">
+                  <Input
+                    placeholder="Button text"
+                    value={embedProps.buttonText}
+                    onChange={(e) =>
                       setEmbedProps({
                         ...embedProps,
-                        buttonColor: e.valueAsString,
+                        buttonText: e.target.value,
                       })
                     }
-                  >
-                    <ColorPickerLabel>Button color</ColorPickerLabel>
-                    <ColorPickerControl>
-                      <ColorPickerInput />
-                      <ColorPickerTrigger />
-                    </ColorPickerControl>
-                    <ColorPickerContent>
-                      <ColorPickerArea />
-                      <HStack>
-                        <ColorPickerEyeDropper />
-                        <ColorPickerSliders />
-                      </HStack>
-                    </ColorPickerContent>
-                  </ColorPickerRoot>
+                  />
+                </Field>
 
-                  <ColorPickerRoot
-                    maxW="200px"
-                    value={parseColor(embedProps.buttonTextColor ?? "")}
-                    onValueChange={(e) =>
-                      setEmbedProps({
-                        ...embedProps,
-                        buttonTextColor: e.valueAsString,
-                      })
-                    }
-                  >
-                    <ColorPickerLabel>Button text color</ColorPickerLabel>
-                    <ColorPickerControl>
-                      <ColorPickerInput />
-                      <ColorPickerTrigger />
-                    </ColorPickerControl>
-                    <ColorPickerContent>
-                      <ColorPickerArea />
-                      <HStack>
-                        <ColorPickerEyeDropper />
-                        <ColorPickerSliders />
-                      </HStack>
-                    </ColorPickerContent>
-                  </ColorPickerRoot>
-                </Stack>
-              </AccordionItemContent>
-            </AccordionItem>
-            <AccordionItem value={"advanced"}>
-              <AccordionItemTrigger>
-                <TbSettings2 />
-                Advanced
-              </AccordionItemTrigger>
-              <AccordionItemContent>
-                <Stack gap={4}>
-                  <Field label="Button text">
-                    <Input
-                      placeholder="Button text"
-                      value={embedProps.buttonText}
+                <Field label="Position">
+                  <NativeSelect.Root width="100%">
+                    <NativeSelect.Field
+                      value={embedProps.position}
                       onChange={(e) =>
                         setEmbedProps({
                           ...embedProps,
-                          buttonText: e.target.value,
+                          position: e.target.value,
                         })
                       }
-                    />
-                  </Field>
+                    >
+                      <option value="br">Bottom right</option>
+                      <option value="bl">Bottom left</option>
+                      <option value="tr">Top right</option>
+                      <option value="tl">Top left</option>
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
+                </Field>
+              </Group>
 
-                  <Field label="Position">
-                    <NativeSelect.Root width="100%">
-                      <NativeSelect.Field
-                        value={embedProps.position}
-                        onChange={(e) =>
-                          setEmbedProps({
-                            ...embedProps,
-                            position: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="br">Bottom right</option>
-                        <option value="bl">Bottom left</option>
-                        <option value="tr">Top right</option>
-                        <option value="tl">Top left</option>
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </Field>
-
-                  <Slider.Root
-                    value={[embedProps.radius]}
-                    min={0}
-                    max={25}
-                    step={1}
-                    onValueChange={(e) =>
-                      setEmbedProps({ ...embedProps, radius: e.value[0] })
-                    }
-                  >
-                    <Slider.Label>Roundness</Slider.Label>
-                    <Slider.Control>
-                      <Slider.Track>
-                        <Slider.Range />
-                      </Slider.Track>
-                      <Slider.Thumb index={0} />
-                    </Slider.Control>
-                  </Slider.Root>
-                </Stack>
-              </AccordionItemContent>
-            </AccordionItem>
-          </AccordionRoot>
-        </Stack>
-
-        <Stack
-          flex={1}
-          bg="brand.outline-subtle"
-          p={4}
-          rounded={"md"}
-          overflow={"hidden"}
-          alignSelf={"stretch"}
-        >
-          <PreviewEmbed
-            key={JSON.stringify(embedProps)}
-            scriptCode={scriptCode}
-          />
-        </Stack>
-
-        <Stack
-          flex={1}
-          border={"1px solid"}
-          borderColor="brand.outline"
-          rounded={"md"}
-          alignSelf={"stretch"}
-        >
-          <Stack p={4} h="full" alignItems={"flex-start"} flexDir={"column"}>
-            <Text fontSize={"sm"} flex={1}>
-              {scriptCode}
-            </Text>
-
-            <Group justifyContent={"flex-end"} w="full">
-              <ClipboardRoot value={scriptCode}>
-                <ClipboardIconButton />
-              </ClipboardRoot>
-            </Group>
+              <Group>
+                <Slider.Root
+                  flex={1}
+                  value={[embedProps.radius]}
+                  min={0}
+                  max={25}
+                  step={1}
+                  onValueChange={(e) =>
+                    setEmbedProps({ ...embedProps, radius: e.value[0] })
+                  }
+                >
+                  <Slider.Label>Roundness</Slider.Label>
+                  <Slider.Control>
+                    <Slider.Track>
+                      <Slider.Range />
+                    </Slider.Track>
+                    <Slider.Thumb index={0} />
+                  </Slider.Control>
+                </Slider.Root>
+                <Box flex={1} />
+              </Group>
+            </Stack>
           </Stack>
-        </Stack>
-      </Group>
+
+          <Stack flex={1}>
+            <Box>
+              <SegmentGroup.Root
+                value={tab}
+                onValueChange={(e) => setTab(e.value as "preview" | "code")}
+              >
+                <SegmentGroup.Indicator />
+                {widgetConfigTabs.items.map((item) => (
+                  <SegmentGroup.Item key={item.value} value={item.value}>
+                    <SegmentGroup.ItemText>{item.label}</SegmentGroup.ItemText>
+                    <SegmentGroup.ItemHiddenInput />
+                  </SegmentGroup.Item>
+                ))}
+              </SegmentGroup.Root>
+            </Box>
+            {tab === "preview" && (
+              <Stack
+                flex={1}
+                bg="brand.outline-subtle"
+                p={2}
+                rounded={"md"}
+                overflow={"hidden"}
+                alignSelf={"stretch"}
+              >
+                <PreviewEmbed
+                  key={JSON.stringify(embedProps)}
+                  scriptCode={scriptCode}
+                />
+              </Stack>
+            )}
+
+            {tab === "code" && (
+              <Stack
+                flex={1}
+                border={"1px solid"}
+                borderColor="brand.outline"
+                rounded={"md"}
+                alignSelf={"stretch"}
+              >
+                <Stack
+                  p={4}
+                  h="full"
+                  alignItems={"flex-start"}
+                  flexDir={"column"}
+                >
+                  <Text fontSize={"sm"} flex={1}>
+                    {scriptCode}
+                  </Text>
+
+                  <Group justifyContent={"flex-end"} w="full">
+                    <ClipboardRoot value={scriptCode}>
+                      <ClipboardIconButton />
+                    </ClipboardRoot>
+                  </Group>
+                </Stack>
+              </Stack>
+            )}
+          </Stack>
+        </Group>
+      </SettingsSection>
 
       <Stack gap={4}>
         <SettingsSection

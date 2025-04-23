@@ -44,14 +44,16 @@ export function SettingsSection({
   fetcher,
   title,
   description,
+  actionRight,
 }: {
   children: React.ReactNode;
-  fetcher: FetcherWithComponents<unknown>;
+  fetcher?: FetcherWithComponents<unknown>;
   title?: React.ReactNode;
   description?: string;
+  actionRight?: React.ReactNode;
 }) {
-  return (
-    <fetcher.Form method="post">
+  function render() {
+    return (
       <Stack
         border={"1px solid"}
         borderColor={"brand.outline"}
@@ -79,14 +81,29 @@ export function SettingsSection({
           justifyContent={"space-between"}
         >
           <Group></Group>
-          <Button type="submit" size={"xs"} loading={fetcher.state !== "idle"}>
-            Save
-            <TbCheck />
-          </Button>
+          <Group>
+            {actionRight}
+            {fetcher && (
+              <Button
+                type="submit"
+                size={"xs"}
+                loading={fetcher.state !== "idle"}
+              >
+                Save
+                <TbCheck />
+              </Button>
+            )}
+          </Group>
         </Group>
       </Stack>
-    </fetcher.Form>
-  );
+    );
+  }
+
+  if (!fetcher) {
+    return render();
+  }
+
+  return <fetcher.Form method="post">{render()}</fetcher.Form>;
 }
 
 export default function SettingsPage({ loaderData }: Route.ComponentProps) {
