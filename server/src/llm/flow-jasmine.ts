@@ -90,6 +90,7 @@ export function makeFlow(
       "Use the search_data tool to search the vector database for the relavent information.",
       "You can run search_data tool multiple times to get more information.",
       "Don't hallucinate. You cannot add new topics to the query. It should be inside the context of the query.",
+      "You can only answer from the context provided. Don't make up an answer.",
       "The query should be very short and should not be complex.",
       "Break the complex queries into smaller queries.",
       "Example: If the query is 'How to build a site and deploy it on Vercel?', break it into 'How to build a site' and 'Deploy it on Vercel'.",
@@ -108,8 +109,6 @@ export function makeFlow(
       "Don't repeat similar search terms. Don't use more than 3 searches from RAG.",
       "Don't use the RAG tool once you have the answer.",
       "Output should be very very short and under 200 words.",
-
-      "Quote the sources in the answer using markdown quotes wherever appropriate. Example: > The source text as it is.",
 
       "Once you have the context,",
       `Given above context, answer the query "${query}".`,
