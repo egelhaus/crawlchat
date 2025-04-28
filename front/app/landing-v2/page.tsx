@@ -290,7 +290,13 @@ function UsedBy() {
         <img
           src="/used-by/remotion.png"
           alt="Remotion"
-          className="max-h-[38px]"
+          className="max-h-[38px] dark:hidden"
+        />
+
+        <img
+          src="/used-by/remotion-white.png"
+          alt="Remotion"
+          className="max-h-[38px] hidden dark:block"
         />
 
         <div className="flex items-center gap-2">
