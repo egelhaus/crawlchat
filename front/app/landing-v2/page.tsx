@@ -382,11 +382,11 @@ function ImportKnowledgePreview({
         <p className="text-2xl font-bold">{title}</p>
         <p className="font-medium opacity-50">{description}</p>
       </div>
-      <div className="w-full flex-1 bg-ash rounded-xl p-4 aspect-video">
+      <div className="w-full flex-1 bg-ash rounded-xl aspect-video">
         <img
           src={img}
           alt={title}
-          className="w-full h-full object-cover rounded-md"
+          className="w-full h-full object-cover rounded-md border border-outline"
         />
       </div>
     </div>
@@ -505,10 +505,12 @@ function IntegrationCard({
   flex,
   title,
   description,
+  img,
 }: {
   flex: number;
   title: string;
   description: string;
+  img: string;
 }) {
   return (
     <div
@@ -517,7 +519,9 @@ function IntegrationCard({
       }
       style={{ flex: flex }}
     >
-      <div className="h-[200px] bg-ash rounded-lg" />
+      <div className="aspect-video bg-ash rounded-lg">
+        <img src={img} alt={title} className="w-full h-full object-cover rounded-md" />
+      </div>
       <div className="flex flex-col gap-2">
         <h3 className="text-2xl font-bold font-radio-grotesk">{title}</h3>
         <p className="opacity-50 font-medium leading-tight">{description}</p>
@@ -541,27 +545,31 @@ function Integrations() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row gap-6">
           <IntegrationCard
-            flex={4}
+            flex={1}
             title="Ask AI button"
             description="A drop in embed code to add the Ask AI button on your docs website. All the visitors to your docs can now quickly ask their question."
+            img="/new-landing/integration-ask-ai.png"
           />
           <IntegrationCard
-            flex={6}
+            flex={1}
             title="Discord bot"
             description="CrawlChat focuses on giving a wholesome integration experience by providing Discord bot that can answer questions from your community by just tagging it."
+            img="/new-landing/integration-discord.png"
           />
         </div>
 
         <div className="flex flex-col md:flex-row gap-6">
           <IntegrationCard
-            flex={6}
+            flex={1}
             title="Slack bot"
             description="CrawlChat focuses on giving a wholesome integration experience by providing Slack bot that can answer questions from your community by just tagging it."
+            img="/new-landing/integration-slack.png"
           />
           <IntegrationCard
-            flex={4}
+            flex={1}
             title="MCP server"
             description="You will not be missed by the next gen developers. CrawlChat provides the MCP server out of the box."
+            img="/new-landing/integration-mcp.png"
           />
         </div>
       </div>
