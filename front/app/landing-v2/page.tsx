@@ -1176,6 +1176,11 @@ function Footer() {
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
               <li>
+                <FooterLink href="https://guides.crawlchat.app/walkthrough/680faa4af1418d1ba47042ca/read">
+                  How to integrate with Docusaurus
+                </FooterLink>
+              </li>
+              <li>
                 <FooterLink href="/blog/how-to-embed-ai-chatbot">
                   How to add AI Chatbot for your docs
                 </FooterLink>
