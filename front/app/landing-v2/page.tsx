@@ -292,7 +292,7 @@ function UsedBy() {
         Already used by awesome companies!
       </h3>
 
-      <div className="flex justify-center items-center gap-8 md:gap-16">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
         <img
           src="/used-by/remotion.png"
           alt="Remotion"
@@ -312,6 +312,15 @@ function UsedBy() {
             className="max-h-[38px]"
           />
           <div className="font-medium text-xl">Konvajs</div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <img
+            src="/used-by/270logo.svg"
+            alt="270Degrees.nl"
+            className="max-h-[38px]"
+          />
+          <div className="font-medium text-xl">270Degrees</div>
         </div>
       </div>
     </div>
@@ -1108,6 +1117,16 @@ function Testimonials() {
               </a>
             </blockquote>{" "}
             <script async src="https://platform.twitter.com/widgets.js" />
+          </div>
+          <div>
+            <iframe
+              src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7323678686812020736"
+              height="879"
+              width="100%"
+              frameBorder="0"
+              allowFullScreen
+              title="Embedded post"
+            ></iframe>
           </div>
         </div>
       </div>
