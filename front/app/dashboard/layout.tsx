@@ -43,6 +43,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const toBeFixedMessages = await prisma.message.count({
     where: {
       ownerUserId: user!.id,
+      scrapeId,
       createdAt: { gte: ONE_WEEK_AGO },
       rating: "down",
       OR: [{ correctionItemId: { isSet: false } }, { correctionItemId: null }],
