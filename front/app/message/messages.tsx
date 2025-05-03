@@ -401,26 +401,28 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                         </Group>
                         <Group>
                           {pair.responseMessage.rating && (
-                            <Badge
-                              colorPalette={
-                                pair.responseMessage.rating === "up"
-                                  ? "green"
-                                  : pair.responseMessage.correctionItemId
-                                  ? "brand"
-                                  : "red"
-                              }
-                            >
-                              {pair.responseMessage.rating === "up" ? (
-                                <TbThumbUp />
-                              ) : (
-                                <>
+                            <Tooltip content="Rating from the user" showArrow>
+                              <Badge
+                                colorPalette={
+                                  pair.responseMessage.rating === "up"
+                                    ? "green"
+                                    : "red"
+                                }
+                              >
+                                {pair.responseMessage.rating === "up" ? (
+                                  <TbThumbUp />
+                                ) : (
                                   <TbThumbDown />
-                                  {pair.responseMessage.correctionItemId && (
-                                    <TbSettingsBolt />
-                                  )}
-                                </>
-                              )}
-                            </Badge>
+                                )}
+                              </Badge>
+                            </Tooltip>
+                          )}
+                          {pair.responseMessage.correctionItemId && (
+                            <Tooltip content="Corrected the answer" showArrow>
+                              <Badge colorPalette={"brand"} variant={"surface"}>
+                                <TbSettingsBolt />
+                              </Badge>
+                            </Tooltip>
                           )}
                           <ChannelIcon channel={pair.queryMessage?.channel} />
                           <Badge
@@ -467,27 +469,27 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                             </List.Root>
                           </Stack>
                         )}
-                        {pair.responseMessage.rating === "down" && (
-                          <Box>
-                            <Button
-                              asChild
-                              variant={
-                                !pair.responseMessage.correctionItemId
-                                  ? "solid"
-                                  : "outline"
-                              }
+
+                        <Box>
+                          <Button
+                            asChild
+                            variant={
+                              pair.responseMessage.rating === "down" &&
+                              !pair.responseMessage.correctionItemId
+                                ? "solid"
+                                : "outline"
+                            }
+                          >
+                            <RouterLink
+                              to={`/messages/${pair.responseMessage?.id}/fix`}
                             >
-                              <RouterLink
-                                to={`/messages/${pair.responseMessage?.id}/fix`}
-                              >
-                                <TbSettingsBolt />
-                                Fix it
-                                {pair.responseMessage.correctionItemId &&
-                                  " again"}
-                              </RouterLink>
-                            </Button>
-                          </Box>
-                        )}
+                              <TbSettingsBolt />
+                              Correct it
+                              {pair.responseMessage.correctionItemId &&
+                                " again"}
+                            </RouterLink>
+                          </Button>
+                        </Box>
                       </Stack>
                     </AccordionItemContent>
                   </AccordionItem>
