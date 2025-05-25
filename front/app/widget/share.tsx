@@ -33,9 +33,29 @@ export function meta({ data }: Route.MetaArgs) {
   }
 
   let title = data.thread.scrape.title ?? data.thread.scrape.url;
+  let description = "Deliver your docs with AI";
+  if (
+    data.thread.messages.length > 0 &&
+    (data.thread.messages[0].llmMessage as any).role === "user"
+  ) {
+    const question = (
+      data.thread.messages[0].llmMessage as any
+    ).content.substring(0, 100);
+    title = `${question} - ${title} - CrawlChat`;
+  }
+  if (
+    data.thread.messages.length > 1 &&
+    (data.thread.messages[1].llmMessage as any).role === "assistant"
+  ) {
+    const question = (
+      data.thread.messages[1].llmMessage as any
+    ).content.substring(0, 200);
+    description = question;
+  }
   return [
     {
       title,
+      description,
     },
   ];
 }
