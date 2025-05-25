@@ -33,10 +33,11 @@ import {
   TbPin,
   TbRefresh,
   TbRobotFace,
-  TbTrash,
   TbPointer,
   TbThumbUp,
   TbThumbDown,
+  TbShare2,
+  TbCheck,
 } from "react-icons/tb";
 import { useScrapeChat, type AskStage } from "~/widget/use-chat";
 import { MarkdownProse } from "~/widget/markdown-prose";
@@ -176,7 +177,7 @@ function ChatInput({
   );
 }
 
-function SourceLink({
+export function SourceLink({
   link,
   index,
 }: {
@@ -545,6 +546,7 @@ function MCPSetup({ scrape }: { scrape: Scrape }) {
 }
 
 function Toolbar({
+  threadId,
   scrape,
   messages,
   onErase,
@@ -554,6 +556,7 @@ function Toolbar({
   disabled,
   overallScore,
 }: {
+  threadId: string;
   scrape: Scrape;
   messages: Message[];
   onErase: () => void;
@@ -564,6 +567,7 @@ function Toolbar({
   overallScore?: number;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
   const pinnedCount = useMemo(() => {
     return messages.filter((message) => message.pinnedAt).length;
   }, [messages]);
@@ -590,6 +594,12 @@ function Toolbar({
 
   function handlePinSelect(id: string) {
     onPinSelect(id);
+  }
+
+  function handleShare() {
+    navigator.clipboard.writeText(`${window.location.origin}/s/${threadId}`);
+    setCopiedShareLink(true);
+    setTimeout(() => setCopiedShareLink(false), 2000);
   }
 
   return (
@@ -667,6 +677,23 @@ function Toolbar({
               </MenuItemGroup>
             </MenuContent>
           </MenuRoot>
+        )}
+
+        {screen === "chat" && (
+          <Tooltip
+            content={"Copied!"}
+            showArrow
+            open={copiedShareLink || undefined}
+          >
+            <IconButton
+              size={"xs"}
+              rounded={"full"}
+              variant={"subtle"}
+              onClick={handleShare}
+            >
+              {copiedShareLink ? <TbCheck /> : <TbShare2 />}
+            </IconButton>
+          </Tooltip>
         )}
 
         {screen === "chat" && (
@@ -956,6 +983,7 @@ export default function ScrapeWidget({
         position={"relative"}
       >
         <Toolbar
+          threadId={thread.id}
           messages={chat.messages}
           onErase={handleErase}
           onPinSelect={handlePinSelect}

@@ -155,6 +155,7 @@ export function useScrapeChat({
         scrapeId,
         channel: null,
         rating: null,
+        correctionItemId: null,
       },
     ]);
     setAskStage("asked");

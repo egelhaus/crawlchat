@@ -57,6 +57,7 @@ export default [
   route("blog", "blog/list.tsx"),
 
   route("w/:id", "widget/scrape.tsx"),
+  route("s/:id", "widget/share.tsx"),
   route("w/not-found", "widget/not-found.tsx"),
   route("embed.js", "embed-script.ts"),
 ] satisfies RouteConfig;
