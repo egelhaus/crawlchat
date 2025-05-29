@@ -330,7 +330,8 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         await retry(async (nTime) => {
           const llmConfig = getConfig(
-            nTime === 0 ? scrape.llmModel : "gpt_4o_mini"
+            // nTime === 0 ? scrape.llmModel : "gpt_4o_mini"
+            "gpt_4o_mini"
           );
 
           const flow = makeFlow(
