@@ -10,9 +10,12 @@ import {
   Spinner,
   Stack,
   Text,
+  Link as ChakraLink,
+  LinkBox,
 } from "@chakra-ui/react";
 import {
   TbBook,
+  TbChevronLeft,
   TbChevronRight,
   TbHome,
   TbLogout,
@@ -25,7 +28,12 @@ import {
   TbTicket,
   TbUser,
 } from "react-icons/tb";
-import { Link, NavLink, type FetcherWithComponents } from "react-router";
+import {
+  Link,
+  NavLink,
+  useFetcher,
+  type FetcherWithComponents,
+} from "react-router";
 import { Avatar } from "~/components/ui/avatar";
 import {
   MenuContent,
@@ -44,7 +52,14 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  getPendingActions,
+  getSkippedActions,
+  setSkippedActions,
+  type SetupProgressInput,
+} from "./setup-progress";
+import { Button } from "~/components/ui/button";
 
 const links = [
   { label: "Home", to: "/app", icon: <TbHome /> },
@@ -153,6 +168,136 @@ function CreditProgress({
           <Progress.Range />
         </Progress.Track>
       </Progress.Root>
+    </Stack>
+  );
+}
+
+function SmallButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <Text
+      fontSize={"xs"}
+      opacity={0.4}
+      onClick={onClick}
+      _hover={{ cursor: "pointer", opacity: 1 }}
+    >
+      {children}
+    </Text>
+  );
+}
+
+function SetupProgress({ scrapeId }: { scrapeId: string }) {
+  const fetcher = useFetcher<{
+    input: SetupProgressInput;
+  }>();
+  const [index, setIndex] = useState(0);
+  const [skipped, setSkipped] = useState<string[] | undefined>(undefined);
+  const actions = useMemo(() => {
+    if (skipped === undefined || fetcher.data === undefined) {
+      return [];
+    }
+    return getPendingActions(fetcher.data.input, skipped);
+  }, [fetcher.data, skipped]);
+  const action = actions[index];
+  const topAction = actions[0];
+
+  useEffect(() => {
+    fetcher.submit(null, {
+      method: "get",
+      action: "/setup-progress",
+    });
+  }, [scrapeId]);
+
+  useEffect(() => {
+    setSkipped(getSkippedActions(scrapeId));
+  }, []);
+
+  useEffect(() => {
+    if (skipped === undefined) {
+      return;
+    }
+    setSkippedActions(scrapeId, skipped);
+  }, [skipped]);
+
+  function handleSkip() {
+    if (skipped === undefined) {
+      return;
+    }
+    setSkipped([...skipped, action.id]);
+  }
+
+  function handleNext() {
+    setIndex(Math.min(index + 1, actions.length - 1));
+  }
+
+  function handlePrevious() {
+    setIndex(Math.max(index - 1, 0));
+  }
+
+  if (!action) {
+    return null;
+  }
+
+  return (
+    <Stack gap={1}>
+      <Group justify={"space-between"}>
+        <Text fontSize={"xs"} opacity={0.4}>
+          {index + 1} / {actions.length}
+        </Text>
+
+        <Group gap={1}>
+          <SmallButton onClick={handlePrevious}>
+            <TbChevronLeft />
+          </SmallButton>
+          <SmallButton onClick={handleNext}>
+            <TbChevronRight />
+          </SmallButton>
+          {topAction.canSkip && index === 0 && (
+            <SmallButton onClick={handleSkip}>Skip</SmallButton>
+          )}
+        </Group>
+      </Group>
+
+      <Group
+        bg="brand.subtle"
+        border="1px solid"
+        borderColor="brand.outline"
+        rounded="md"
+        _hover={{ shadow: "xs" }}
+      >
+        <Link
+          to={action.url!}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            gap: "10px",
+            padding: "10px 14px",
+          }}
+        >
+          <Stack flex={1} gap={0} w="full">
+            <Text
+              fontSize={"sm"}
+              color="brand.fg"
+              fontWeight={"medium"}
+              fontStyle={"italic"}
+            >
+              {action.title}
+            </Text>
+            <Text fontSize={"xs"} opacity={0.5}>
+              {action.description}
+            </Text>
+          </Stack>
+          <Stack>
+            <TbChevronRight />
+          </Stack>
+        </Link>
+      </Group>
     </Stack>
   );
 }
@@ -311,6 +456,7 @@ export function SideMenu({
       </Stack>
 
       <Stack p={4} gap={4}>
+        {scrapeId && <SetupProgress scrapeId={scrapeId} />}
         <Stack bg="brand.gray.100" rounded="md" px={3} py={2}>
           <CreditProgress
             title="Messages"
