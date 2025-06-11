@@ -10,6 +10,7 @@ generator client {
 type UserSettings {
   openaiApiKey String?
   weeklyUpdates Boolean?
+  ticketEmailUpdates Boolean?
 }
 
 model User {

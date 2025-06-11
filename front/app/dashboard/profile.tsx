@@ -7,7 +7,11 @@ import { getAuthUser } from "~/auth/middleware";
 import type { UserSettings } from "libs/prisma";
 import { prisma } from "~/prisma";
 import { Switch } from "~/components/ui/switch";
-import { SettingsSection } from "~/settings-section";
+import {
+  SettingsContainer,
+  SettingsSection,
+  SettingsSectionProvider,
+} from "~/settings-section";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -30,6 +34,9 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "weekly-updates") {
     update.weeklyUpdates = weeklyUpdates === "on";
   }
+  if (intent === "ticket-updates") {
+    update.ticketEmailUpdates = formData.get("ticketUpdates") === "on";
+  }
 
   await prisma.user.update({
     where: { id: user!.id },
@@ -40,26 +47,53 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function SettingsPage({ loaderData }: Route.ComponentProps) {
-  const openaiApiKeyFetcher = useFetcher();
+  const weeklyUpdatesFetcher = useFetcher();
+  const ticketUpdatesFetcher = useFetcher();
 
   return (
     <Page title="Profile" icon={<TbSettings />}>
-      <Stack gap={8}>
-        <SettingsSection
-          fetcher={openaiApiKeyFetcher}
-          title="Weekly Updates"
-          description="Enable weekly updates to be sent to your email."
-        >
-          <Stack>
-            <input type="hidden" name="intent" value="weekly-updates" />
-            <Switch
-              name="weeklyUpdates"
-              defaultChecked={loaderData.user.settings?.weeklyUpdates ?? true}
+      <Stack w="full">
+        <SettingsSectionProvider>
+          <SettingsContainer>
+            <SettingsSection
+              id="weekly-updates"
+              fetcher={weeklyUpdatesFetcher}
+              title="Weekly Updates"
+              description="Enable weekly updates to be sent to your email."
             >
-              Receive weekly email summary
-            </Switch>
-          </Stack>
-        </SettingsSection>
+              <Stack>
+                <input type="hidden" name="intent" value="weekly-updates" />
+                <Switch
+                  name="weeklyUpdates"
+                  defaultChecked={
+                    loaderData.user.settings?.weeklyUpdates ?? true
+                  }
+                >
+                  Receive weekly email summary
+                </Switch>
+              </Stack>
+            </SettingsSection>
+
+            <SettingsSection
+              id="ticket-updates"
+              fetcher={ticketUpdatesFetcher}
+              title="Ticket Updates"
+              description="Enable ticket updates to be sent to your email."
+            >
+              <Stack>
+                <input type="hidden" name="intent" value="ticket-updates" />
+                <Switch
+                  name="ticketUpdates"
+                  defaultChecked={
+                    loaderData.user.settings?.ticketEmailUpdates ?? true
+                  }
+                >
+                  Receive ticket updates
+                </Switch>
+              </Stack>
+            </SettingsSection>
+          </SettingsContainer>
+        </SettingsSectionProvider>
       </Stack>
     </Page>
   );

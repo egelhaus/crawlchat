@@ -28,6 +28,7 @@ import { getAuthUser } from "~/auth/middleware";
 import { MarkdownProse } from "./markdown-prose";
 import { sendReactEmail } from "~/email";
 import TicketUserMessageEmail from "emails/ticket-user-message";
+import TicketAdminMessageEmail from "emails/ticket-admin-message";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -74,7 +75,11 @@ export async function action({ params, request }: Route.ActionArgs) {
       ticketKey: key,
     },
     include: {
-      scrape: true,
+      scrape: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 
@@ -136,6 +141,28 @@ export async function action({ params, request }: Route.ActionArgs) {
           ticketKey={thread.ticketKey}
           title={thread.title}
           message={content}
+        />
+      );
+    }
+
+    if (
+      role === "user" &&
+      thread.ticketUserEmail &&
+      thread.ticketNumber !== null &&
+      thread.ticketNumber !== undefined &&
+      thread.ticketKey &&
+      thread.title &&
+      (thread.scrape.user.settings?.ticketEmailUpdates ?? true)
+    ) {
+      await sendReactEmail(
+        thread.scrape.user.email,
+        `New message on ticket #${thread.ticketNumber}`,
+        <TicketAdminMessageEmail
+          scrapeTitle={thread.scrape.title ?? "CrawlChat"}
+          ticketNumber={thread.ticketNumber}
+          title={thread.title}
+          message={content}
+          email={thread.ticketUserEmail}
         />
       );
     }
@@ -278,6 +305,7 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
       </Stack>
     );
   }
+
   return (
     <Stack alignItems={"center"}>
       <Stack maxW={800} w="full" gap={8} p={4}>

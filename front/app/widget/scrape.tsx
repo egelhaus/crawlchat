@@ -13,6 +13,7 @@ import { getNextNumber } from "libs/mongo-counter";
 import { sendReactEmail } from "~/email";
 import TicketUserCreateEmail from "emails/ticket-user-create";
 import { Toaster, toaster } from "~/components/ui/toaster";
+import TicketAdminCreateEmail from "emails/ticket-admin-create";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
@@ -177,6 +178,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     const scrape = await prisma.scrape.findFirstOrThrow({
       where: { id: scrapeId },
+      include: {
+        user: true,
+      },
     });
 
     await prisma.message.create({
@@ -219,6 +223,20 @@ export async function action({ request, params }: Route.ActionArgs) {
         title={title}
       />
     );
+
+    if (scrape.user.settings?.ticketEmailUpdates ?? true) {
+      await sendReactEmail(
+        scrape.user.email,
+        `New ticket (#${ticketNumber})`,
+        <TicketAdminCreateEmail
+          scrapeTitle={scrape.title ?? "CrawlChat"}
+          ticketNumber={ticketNumber}
+          title={title}
+          message={message}
+          email={email}
+        />
+      );
+    }
 
     const thread = await prisma.thread.create({
       data: {

@@ -2,20 +2,20 @@ import { Text, Markdown } from "@react-email/components";
 import { MailTemplate } from "./template";
 import { emailConfig } from "./config";
 
-export default function TicketUserMessageEmail({
+export default function TicketAdminMessageEmail({
   scrapeTitle,
   ticketNumber,
-  ticketKey,
   title,
   message,
+  email,
 }: {
   scrapeTitle: string;
   ticketNumber: number;
-  ticketKey: string;
   title: string;
   message: string;
+  email: string;
 }) {
-  const url = `${emailConfig.baseUrl}/ticket/${ticketNumber}?key=${ticketKey}`;
+  const url = `${emailConfig.baseUrl}/ticket/${ticketNumber}`;
   return (
     <MailTemplate
       title="CrawlChat Ticket"
@@ -30,14 +30,24 @@ export default function TicketUserMessageEmail({
       }}
     >
       <Text>
-        You have a new message on your ticket. Use the below button or this link
-        to view the ticket. Anyone with this link can view and reply to the
-        ticket.
+        You have a new message on a ticket. Use the below button or this link to
+        view the ticket. Anyone with this link can view and reply to the ticket.
       </Text>
-      <Text style={{ fontWeight: "bold" }}>
+      <Text>
+        <span style={{ opacity: 0.5 }}>Email</span>
+        <br />
+        {email ?? "user@example.com"}
+        <br />
+        <br />
+        <span style={{ opacity: 0.5 }}>Title</span>
+        <br />
         {title ?? "Sample ticket title"}
+        <br />
+        <br />
+        <span style={{ opacity: 0.5 }}>Message</span>
+        <br />
+        {message ?? "Sample message"}
       </Text>
-      <Markdown>{message ?? "Sample message"}</Markdown>
       <Text style={{ opacity: 0.5 }}>{url}</Text>
     </MailTemplate>
   );
