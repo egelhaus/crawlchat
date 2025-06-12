@@ -1,10 +1,10 @@
 import type { Route } from "./+types/weekly";
 import { prisma } from "libs/prisma";
-import { getSetupProgressInput } from "~/dashboard/setup-progress-api";
 import { allSetupProgressActions } from "~/dashboard/setup-progress";
 import type { SetupProgressInput } from "~/dashboard/setup-progress";
 import { sendReactEmail } from "~/email";
 import SetupProgressEmail from "emails/setup-progress";
+import { getSetupProgressInput } from "~/dashboard/setup-progress-make";
 
 let startedAt: Date | null = null;
 const keyStr = "1qTeTl2qlP9e0zgFP0Ur0MWlBno0OGrdbSl5tmxsWXHbJ81qQh";
