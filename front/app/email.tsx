@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import WelcomeEmail from "emails/welcome";
 
 export const sendEmail = async (to: string, subject: string, text: string) => {
   try {
@@ -30,4 +31,12 @@ export const sendReactEmail = async (
   } catch (error) {
     throw new Error(JSON.stringify(error));
   }
+};
+
+export const sendWelcomeEmail = async (to: string) => {
+  await sendReactEmail(
+    to,
+    "Welcome to CrawlChat",
+    <WelcomeEmail />
+  );
 };
