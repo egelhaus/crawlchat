@@ -865,28 +865,12 @@ function Testimonials() {
   );
 }
 
-export function CTA() {
+export function CTA({text}: {text?: string}) {
   return (
     <div className="mt-32">
       <div className="w-full bg-gradient-to-b from-canvas to-ash shadow-md rounded-2xl py-20 px-10 relative">
-        {/* <div className="absolute top-[10%] md:top-[20%] left-[4%] md:left-[8%] rotate-[-24deg] scale-120 opacity-50">
-          <IntegrateChip label="Ask AI" icon="/new-landing/ai.png" />
-        </div>
-
-        <div className="absolute top-[80%] left-[80%] rotate-[24deg] scale-120 opacity-50">
-          <IntegrateChip label="MCP" icon="/new-landing/mcp.png" />
-        </div>
-
-        <div className="absolute top-[20%] left-[90%] rotate-[24deg] scale-150 opacity-50">
-          <IntegrateChip icon="/new-landing/discord.png" />
-        </div>
-
-        <div className="absolute top-[80%] left-[8%] rotate-[-24deg] scale-150 opacity-50">
-          <IntegrateChip icon="/new-landing/slack.png" />
-        </div> */}
-
         <h2 className="font-radio-grotesk text-[42px] md:text-[42px] leading-[1.2] font-bold text-center max-w-[800px] mx-auto">
-          Make your documents and knowledge base be powered by AI now!
+          {text || "Make your documents and knowledge base be powered by AI now!"}
         </h2>
 
         <div className="flex justify-center mt-8">
