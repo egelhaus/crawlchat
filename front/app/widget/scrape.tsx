@@ -268,6 +268,21 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
   const ticketCreateFetcher = useFetcher();
 
   useEffect(() => {
+    if (loaderData.embed && window.parent) {
+      window.parent.postMessage(
+        JSON.stringify({
+          type: "embed-ready",
+          widgetConfig: {
+            ...loaderData.scrape.widgetConfig,
+            logoUrl: loaderData.scrape.logoUrl,
+          },
+        }),
+        "*"
+      );
+    }
+  }, [loaderData.embed]);
+
+  useEffect(() => {
     if (loaderData.embed) {
       document.documentElement.style.background = "transparent";
     }

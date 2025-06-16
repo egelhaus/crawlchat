@@ -6,10 +6,8 @@ import {
   HStack,
   IconButton,
   Input,
-  NativeSelect,
   parseColor,
   SegmentGroup,
-  Slider,
   Stack,
   Text,
   Textarea,
@@ -49,7 +47,6 @@ import { ClipboardIconButton, ClipboardRoot } from "~/components/ui/clipboard";
 import type { Route } from "./+types/embed";
 import { getSessionScrapeId } from "../scrapes/util";
 import { Switch } from "~/components/ui/switch";
-import { toaster } from "~/components/ui/toaster";
 import { SiDocusaurus } from "react-icons/si";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -157,8 +154,7 @@ function makeScriptCode(scrapeId: string) {
   const script = `<script 
   src="${origin}/embed.js" 
   id="crawlchat-script" 
-  data-id="${scrapeId}" 
-  data-ask-ai="true"
+  data-id="${scrapeId}"
 ></script>`;
 
   const docusaurusConfig = `headTags: [
@@ -167,8 +163,7 @@ function makeScriptCode(scrapeId: string) {
       "attributes": {
         "src": "${origin}/embed.js",
         "id": "crawlchat-script",
-        "data-id": "${scrapeId}",
-        "data-ask-ai": "true"
+        "data-id": "${scrapeId}"
       },
     },
 ],`;
@@ -242,17 +237,6 @@ export default function ScrapeEmbed({ loaderData }: Route.ComponentProps) {
 
   function removeQuestion(index: number) {
     setQuestions(questions.filter((_, i) => i !== index));
-  }
-
-  function copyCode() {
-    if (tab === "code") {
-      navigator.clipboard.writeText(scriptCode.script);
-    } else if (tab === "docusaurus") {
-      navigator.clipboard.writeText(scriptCode.docusaurusConfig);
-    }
-    toaster.success({
-      title: "Copied to clipboard",
-    });
   }
 
   return (

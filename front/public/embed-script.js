@@ -9,9 +9,7 @@ class CrawlChatEmbed {
     this.askAIButtonId = "crawlchat-ask-ai-button";
     this.lastScrollTop = 0;
     this.lastBodyStyle = {};
-
-    const script = document.getElementById(this.scriptId);
-    this.askAIEnabled = script.getAttribute("data-ask-ai") === "true";
+    this.widgetConfig = {};
   }
 
   async getWidgetConfig() {
@@ -47,11 +45,7 @@ class CrawlChatEmbed {
 
     div.appendChild(iframe);
     document.body.appendChild(div);
-    window.addEventListener("message", this.handleOnMessage);
-
-    if (this.askAIEnabled) {
-      await this.showAskAIButton();
-    }
+    window.addEventListener("message", (e) => this.handleOnMessage(e));
   }
 
   getScrapeId() {
@@ -89,9 +83,7 @@ class CrawlChatEmbed {
       window.focus();
     }, this.transitionDuration);
 
-    if (this.askAIEnabled) {
-      await this.showAskAIButton();
-    }
+    await this.showAskAIButton();
   }
 
   isWidgetOpen() {
@@ -99,9 +91,22 @@ class CrawlChatEmbed {
     return div.style.width === "100%";
   }
 
-  handleOnMessage(event) {
+  async handleOnMessage(event) {
     if (event.data === "close") {
-      window.crawlchatEmbed.hide();
+      return window.crawlchatEmbed.hide();
+    }
+    if (event.origin !== this.host) {
+      return;
+    }
+    let data;
+    try {
+      data = JSON.parse(event.data);
+    } catch (e) {
+      return;
+    }
+    if (data.type === "embed-ready") {
+      this.widgetConfig = data.widgetConfig;
+      await this.showAskAIButton();
     }
   }
 
@@ -111,9 +116,6 @@ class CrawlChatEmbed {
   }
 
   async showAskAIButton() {
-    // const widgetConfig = await this.getWidgetConfig();
-    const widgetConfig = {}
-
     const script = document.getElementById(this.scriptId);
 
     if (!script) {
@@ -121,15 +123,15 @@ class CrawlChatEmbed {
     }
 
     const text =
-      widgetConfig.buttonText ??
+      this.widgetConfig.buttonText ??
       script.getAttribute("data-ask-ai-text") ??
       "💬 Ask AI";
     const backgroundColor =
-      widgetConfig.primaryColor ??
+      this.widgetConfig.primaryColor ??
       script.getAttribute("data-ask-ai-background-color") ??
       "#7b2cbf";
     const color =
-      widgetConfig.buttonTextColor ??
+      this.widgetConfig.buttonTextColor ??
       script.getAttribute("data-ask-ai-color") ??
       "white";
     const position = script.getAttribute("data-ask-ai-position") ?? "br";
@@ -137,7 +139,7 @@ class CrawlChatEmbed {
     const marginY = script.getAttribute("data-ask-ai-margin-y") ?? "20px";
     const radius = script.getAttribute("data-ask-ai-radius") ?? "20px";
     const fontSize = script.getAttribute("data-ask-ai-font-size");
-    const logoUrl = widgetConfig.logoUrl;
+    const logoUrl = this.widgetConfig.logoUrl;
 
     let bottom = undefined;
     let right = undefined;
@@ -171,12 +173,11 @@ class CrawlChatEmbed {
     div.style.color = color;
     div.style.borderRadius = radius;
     div.style.cursor = "pointer";
-    // div.style.fontWeight = "bold";
     div.style.transition = "scale 0.1s ease, opacity 0.3s ease";
     div.style.fontSize = fontSize;
 
     div.style.scale = "1";
-    div.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.2)";
+    div.style.boxShadow = "rgba(0, 0, 0, 0.1) 0px 10px 50px";
 
     div.style.display = "flex";
     div.style.flexDirection = "column";
@@ -191,7 +192,7 @@ class CrawlChatEmbed {
       div.style.scale = "1";
     });
 
-    if (logoUrl && widgetConfig.showLogo) {
+    if (logoUrl && this.widgetConfig.showLogo) {
       const logo = document.createElement("img");
       logo.src = logoUrl;
       logo.style.width = "40px";
