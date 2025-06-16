@@ -655,7 +655,7 @@ function Pricing() {
           price="$0"
           items={[
             { text: "100 page scrapes" },
-            { text: "100 message credits" },
+            { text: "40 message credits" },
             { text: "API not available", excluded: true },
             { text: "MCP not available", excluded: true },
             { text: "Discord bot", excluded: true },
@@ -670,7 +670,7 @@ function Pricing() {
           price="$29"
           items={[
             { text: "5000 scrapes/month" },
-            { text: "7000 message credits/month" },
+            { text: "2000 message credits/month" },
             { text: "API available" },
             { text: "MCP available" },
             { text: "Discord bot" },
@@ -686,7 +686,7 @@ function Pricing() {
           price="$79"
           items={[
             { text: "14,000 scrapes/month" },
-            { text: "20,000 message credits/month" },
+            { text: "7000 message credits/month" },
             { text: "API available" },
             { text: "MCP available" },
             { text: "Discord bot" },
