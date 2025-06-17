@@ -1099,7 +1099,7 @@ export function Flow() {
           rows={1}
         />
         <FlowCard
-          title="Escalete to human support"
+          title="Escalate to human support"
           description="CrawlChat has a simple yet powerful AI driven support ticket system. The chatbot will create a ticket if query is not resolved by AI."
           img="/new-landing/flow-support-ticket.png"
           cols={1}
