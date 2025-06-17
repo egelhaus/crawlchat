@@ -13,7 +13,6 @@ import {
   TbDatabase,
   TbFile,
   TbMessage,
-  TbPlugConnected,
   TbRobotFace,
   TbScoreboard,
   TbSettings,
@@ -268,24 +267,22 @@ function HeadingDescription({ children }: PropsWithChildren) {
 }
 
 function WorksStep({
-  icon,
+  img,
   title,
   children,
 }: PropsWithChildren<{
-  icon: any;
+  img: string;
   title: string;
 }>) {
-  const ic = { icon };
   return (
     <div className="flex flex-col gap-4 flex-1 items-center max-w-[400px]">
       <div
         className={cn(
-          "aspect-square rounded-2xl flex items-center",
-          "justify-center border border-outline w-[80%] shadow-sm",
-          "text-brand"
+          "max-w-[300px] mx-auto rounded-2xl overflow-hidden",
+          "border border-brand mb-4"
         )}
       >
-        <ic.icon size={124} />
+        <img src={img} alt={title} className="w-full h-full" />
       </div>
 
       <h4 className="text-2xl font-radio-grotesk">{title}</h4>
@@ -312,8 +309,8 @@ function Works() {
         into LLM ready for your community in three simple steps.
       </HeadingDescription>
 
-      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-        <WorksStep icon={TbDatabase} title="Make knowledge base">
+      <div className="flex flex-col md:flex-row gap-16 items-center md:items-start">
+        <WorksStep img="/new-landing/knowledge-base.png" title="Make knowledge base">
           Add your existing documents or web pages as knowledge base. You can{" "}
           <span
             className={cn(
@@ -336,7 +333,7 @@ function Works() {
           </span>{" "}
           directly.
         </WorksStep>
-        <WorksStep icon={TbPlugConnected} title="Integrate chatbot">
+        <WorksStep img="/new-landing/integrate-chatbot.png" title="Integrate chatbot">
           You can connect the AI chatbot to your website, Discord, Slack. You
           can customise the bot UI and{" "}
           <span
@@ -350,7 +347,7 @@ function Works() {
           </span>{" "}
           of the bot
         </WorksStep>
-        <WorksStep icon={TbChartBar} title="Analyse performance">
+        <WorksStep img="/new-landing/analyse-performance.png" title="Analyse performance">
           View all the messages and conversations that the bot has had. You get
           to see the performance,{" "}
           <span
