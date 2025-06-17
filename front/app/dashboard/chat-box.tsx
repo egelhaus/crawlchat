@@ -339,16 +339,7 @@ export function Resolved({
 
 function UserMessage({ content }: { content: string }) {
   return (
-    <Stack
-      borderTop={"1px solid"}
-      borderColor={"brand.outline"}
-      className="user-message"
-      p={4}
-      pb={0}
-      _first={{
-        borderTop: "none",
-      }}
-    >
+    <Stack className="user-message" p={4} pb={0}>
       <Text
         fontSize={"xl"}
         fontWeight={"bolder"}
@@ -1293,7 +1284,15 @@ export default function ScrapeWidget({
                 <NoMessages scrape={scrape} onQuestionClick={handleAsk} />
               )}
               {chat.allMessages.map((message, index) => (
-                <Stack key={index} id={`message-${message.id}`}>
+                <Stack
+                  key={index}
+                  id={`message-${message.id}`}
+                  borderTop={message.role === "user" ? "1px solid" : "none"}
+                  borderColor={"brand.outline"}
+                  _first={{
+                    borderTop: "none",
+                  }}
+                >
                   {message.role === "user" ? (
                     <UserMessage content={message.content} />
                   ) : (
