@@ -39,7 +39,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("cookie"));
   const chatSessionKeys = session.get("chatSessionKeys") ?? {};
 
-  getClientIp(request);
+  const ip = getClientIp(request);
+  console.log(ip);
 
   if (!chatSessionKeys[scrape.id]) {
     const thread = await prisma.thread.create({
