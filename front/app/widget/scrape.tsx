@@ -14,6 +14,7 @@ import { sendReactEmail } from "~/email";
 import TicketUserCreateEmail from "emails/ticket-user-create";
 import { Toaster, toaster } from "~/components/ui/toaster";
 import TicketAdminCreateEmail from "emails/ticket-admin-create";
+import { getClientIp } from "~/client-ip";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
@@ -37,6 +38,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
   const session = await getSession(request.headers.get("cookie"));
   const chatSessionKeys = session.get("chatSessionKeys") ?? {};
+
+  getClientIp(request);
 
   if (!chatSessionKeys[scrape.id]) {
     const thread = await prisma.thread.create({
