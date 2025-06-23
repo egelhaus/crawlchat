@@ -57,6 +57,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const thread = await prisma.thread.upsert({
     where: { id: chatSessionKeys[scrape.id] },
     update: {
+      customTags,
       openedAt: new Date(),
     },
     create: {
