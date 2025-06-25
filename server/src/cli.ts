@@ -12,32 +12,15 @@ import {
 import { SimpleAgent } from "./llm/agentic";
 import { handleStream } from "./llm/stream";
 import { getConfig } from "./llm/config";
+import { loopFlowCli } from "./llm/flow-cli";
+import { Flow } from "./llm/flow";
+import { z } from "zod";
+import { makeRagTool } from "./llm/flow-jasmine";
 
 async function main() {
-  const config = getConfig("gemini_2_5_flash");
-
-  const agent = new SimpleAgent({
-    id: "agent",
-    prompt: "You are a helpful assistant.",
-    ...config,
-  });
-
-  const stream = await agent.stream({
-    messages: [
-      {
-        llmMessage: {
-          role: "user",
-          content: "Hello, how are you?",
-        },
-      },
-    ],
-  });
-
-  const { content, messages } = await handleStream(stream);
-  console.log(content);
-  console.log(messages);
+  const ragTool = makeRagTool("67c1d700cb1ec09c237bab8a", "mars").make();
+  const config = getConfig("gemini_2_5_flash_lite");
 }
 
 console.log("Starting...");
-// main();
-cleanupThreads();
+main();
