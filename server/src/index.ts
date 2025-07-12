@@ -378,6 +378,7 @@ expressWs.app.ws("/", (ws: any, req) => {
           "67bca5b7b57f15a3a6f8eac6",
           "67e312247a822a2303f2b8a7", // Polotno
           "67c1d700cb1ec09c237bab8a", // Remotion dev
+          "67dbfc7258ed87c571a04b83", // CrawlChat
         ];
 
         let answerer = baseAnswerer;
