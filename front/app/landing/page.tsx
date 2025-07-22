@@ -973,7 +973,7 @@ function Hero() {
             NEW
           </span>
           <span className="leading-none">
-            Added support to for support tickets
+            Added support for support tickets
           </span>
           <span>
             <TbChevronRight />
