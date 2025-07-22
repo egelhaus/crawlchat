@@ -827,7 +827,7 @@ export function Footer() {
           <div className="flex-[2]">
             <ul className="flex flex-col gap-4">
               <li>
-                <FooterLink href="/blog/v">
+                <FooterLink href="/blog/how-polotno-uses-crawlchat">
                   How Polotno uses CrawlChat
                 </FooterLink>
               </li>
