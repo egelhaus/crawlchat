@@ -4,7 +4,7 @@ date: 2025-06-19
 description: Polotno uses CrawlChat to power an AI assistant that helps developers instantly find answers from documentation, boosting productivity and support.
 ---
 
-> this is an excerpt from Anton's [tweet](https://x.com/lavrton/status/1935413416497156109)
+This is an excerpt from Anton's [tweet](https://x.com/lavrton/status/1935413416497156109)
 
 Anton from the Polotno team recently shared how they’re using AI to dramatically improve the developer experience.
 
