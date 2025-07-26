@@ -1494,6 +1494,24 @@ function Gallery() {
   ];
 
   const [activeStep, setActiveStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStepChange = (index: number) => {
+    if (index === activeStep) return;
+    
+    setIsLoading(true);
+    setActiveStep(index);
+    
+    // Create a new image element to preload
+    const img = new Image();
+    img.onload = () => {
+      setIsLoading(false);
+    };
+    img.onerror = () => {
+      setIsLoading(false);
+    };
+    img.src = steps[index].img;
+  };
 
   return (
     <div className="mb-16">
@@ -1501,10 +1519,25 @@ function Gallery() {
         className={cn(
           "flex justify-center items-center",
           "bg-canvas aspect-video rounded-xl shadow-xl",
-          "overflow-hidden mb-4"
+          "overflow-hidden mb-4 relative"
         )}
       >
-        <img src={steps[activeStep].img} />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-canvas bg-opacity-50 z-10">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand"></div>
+              <p className="text-lg font-medium opacity-70">Loading...</p>
+            </div>
+          </div>
+        )}
+        <img 
+          src={steps[activeStep].img} 
+          alt={steps[activeStep].title}
+          className={cn(
+            "w-full h-full object-contain",
+            isLoading && "opacity-50"
+          )}
+        />
       </div>
 
       <div
@@ -1519,9 +1552,12 @@ function Gallery() {
             key={index}
             className={cn(
               "flex items-center p-1 rounded-md w-fit px-3 text-sm gap-1",
-              activeStep === index && "bg-brand text-canvas"
+              "transition-all duration-200",
+              activeStep === index && "bg-brand text-canvas",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
-            onClick={() => setActiveStep(index)}
+            onClick={() => handleStepChange(index)}
+            disabled={isLoading}
           >
             {step.icon}
             {step.title}
