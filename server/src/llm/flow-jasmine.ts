@@ -121,6 +121,14 @@ export function makeFlow(
     ),
   ]);
 
+  const citationPrompt = multiLinePrompt([
+    "Cite the sources in the format of !!<fetchUniqueId>!! at the end of the sentance or paragraph. Example: !!123!!",
+    "<fetchUniqueId> should be the 'fetchUniqueId' mentioned above context json.",
+    "Cite only for the sources that are used to answer the query.",
+    "Cite every fact that is used in the answer.",
+    "Pick most relevant sources and cite them.",
+  ]);
+
   const ragAgent = new SimpleAgent<RAGAgentCustomMessage>({
     id: "rag-agent",
     prompt: multiLinePrompt([
@@ -152,6 +160,8 @@ export function makeFlow(
 
       "Once you have the context,",
       `Given above context, answer the query "${query}".`,
+
+      citationPrompt,
 
       enabledRichBlocks.length > 0 ? richBlocksPrompt : "",
 

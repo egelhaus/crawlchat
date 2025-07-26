@@ -617,14 +617,15 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
   }
 
   const { content, sources } = answer;
+  const citation = extractCitations(content, sources, { cleanCitations: true });
 
-  let updatedContent = content;
-  if (sources && sources.length > 0) {
-    const uniqueSources = sources.filter(
-      (s, index, self) => index === self.findIndex((t) => t.url === s.url)
-    );
+  let updatedContent = citation.content;
+  if (Object.keys(citation.citedLinks).length > 0) {
     updatedContent +=
-      "\n\nSources:\n" + uniqueSources.map((s) => s.url).join("\n");
+      "\n\nSources:\n" +
+      Object.values(citation.citedLinks)
+        .map((l) => l.url)
+        .join("\n");
   }
 
   res.json({ content: updatedContent });

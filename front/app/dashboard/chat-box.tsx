@@ -401,7 +401,7 @@ function AssistantMessage({
   customerEmail?: string;
 }) {
   const [cleanedLinks, cleanedContent, score] = useMemo(() => {
-    const citation = extractCitations(content, links, { cleanCitations: true });
+    const citation = extractCitations(content, links);
     const score = Math.max(...links.map((l) => l.score ?? 0), 0);
     const uniqueLinks = links.filter(
       (link, index, self) => index === self.findIndex((t) => t.url === link.url)
