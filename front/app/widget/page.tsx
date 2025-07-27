@@ -78,6 +78,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const embed = searchParams.get("embed") === "true";
   const width = searchParams.get("width");
   const height = searchParams.get("height");
+  const fullscreen = searchParams.get("fullscreen") === "true";
 
   return {
     scrape,
@@ -87,6 +88,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     embed,
     width,
     height,
+    fullscreen,
   };
 }
 
@@ -305,6 +307,7 @@ export default function ScrapeWidget({ loaderData }: Route.ComponentProps) {
       embed={loaderData.embed}
       admin={false}
       token={loaderData.userToken}
+      fullscreen={loaderData.fullscreen}
     >
       <Stack
         h="100dvh"

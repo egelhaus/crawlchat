@@ -33,11 +33,19 @@ class CrawlChatEmbed {
     const iframe = document.createElement("iframe");
     iframe.id = this.iframeId;
 
-    let src = `${this.host}/w/${this.scrapeId}?embed=true`;
+    const params = new URLSearchParams({
+      embed: "true",
+    });
     const customTags = this.getCustomTags();
     if (Object.keys(customTags).length > 0) {
-      src += `&tags=${btoa(JSON.stringify(customTags))}`;
+      params.set("tags", btoa(JSON.stringify(customTags)));
     }
+    if (window.innerWidth < 700) {
+      params.set("width", window.innerWidth.toString() + "px");
+      params.set("height", window.innerHeight.toString() + "px");
+      params.set("fullscreen", "true");
+    }
+    const src = `${this.host}/w/${this.scrapeId}?${params.toString()}`;
 
     iframe.src = src;
     iframe.allowTransparency = "true";

@@ -688,6 +688,8 @@ function Toolbar() {
     scrape,
     readOnly,
     admin,
+    fullscreen,
+    close,
   } = useChatBoxContext();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -735,6 +737,11 @@ function Toolbar() {
     >
       <Group flex="1">
         <Group w="full">
+          {fullscreen && (
+            <IconButton size={"xs"} variant={"subtle"} onClick={() => close()}>
+              <TbX />
+            </IconButton>
+          )}
           {scrape.logoUrl && (
             <img
               src={scrape.logoUrl}

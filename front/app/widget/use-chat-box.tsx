@@ -1,9 +1,4 @@
-import type {
-  Message,
-  MessageRating,
-  Scrape,
-  Thread,
-} from "libs/prisma";
+import type { Message, MessageRating, Scrape, Thread } from "libs/prisma";
 import { useTheme } from "next-themes";
 import {
   createContext,
@@ -25,6 +20,7 @@ export function useChatBox({
   embed,
   admin,
   token: initialToken,
+  fullscreen,
 }: {
   scrape: Scrape;
   thread: Thread | null;
@@ -32,6 +28,7 @@ export function useChatBox({
   embed: boolean;
   admin: boolean;
   token: string | null;
+  fullscreen?: boolean;
 }) {
   const pinFetcher = useFetcher();
   const unpinFetcher = useFetcher();
@@ -57,7 +54,7 @@ export function useChatBox({
     "chat"
   );
   const overallScore = useMemo(() => getMessagesScore(messages), [messages]);
-  
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [pendingQuery, setPendingQuery] = useState<string>();
   const titleSlug = useMemo(() => {
@@ -293,6 +290,7 @@ export function useChatBox({
     admin,
     customerEmail,
     titleSlug,
+    fullscreen,
     close,
     erase,
     deleteMessages,
@@ -325,6 +323,7 @@ export function ChatBoxProvider({
   embed,
   admin,
   token,
+  fullscreen,
 }: {
   children: React.ReactNode;
   scrape: Scrape;
@@ -333,8 +332,17 @@ export function ChatBoxProvider({
   embed: boolean;
   admin: boolean;
   token: string | null;
+  fullscreen?: boolean;
 }) {
-  const chatBox = useChatBox({ scrape, thread, messages, embed, admin, token });
+  const chatBox = useChatBox({
+    scrape,
+    thread,
+    messages,
+    embed,
+    admin,
+    token,
+    fullscreen,
+  });
   return (
     <ChatBoxContext.Provider value={chatBox}>
       {children}
