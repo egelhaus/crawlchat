@@ -1100,6 +1100,9 @@ export default function ScrapeWidget({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const readOnly = useMemo(() => !onTicketCreate, []);
   const [pendingQuery, setPendingQuery] = useState<string>();
+  const titleAsSlug = useMemo(() => {
+    return scrape.title?.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  }, [scrape.title]);
 
   useEffect(() => {
     if (userToken) {
@@ -1374,7 +1377,7 @@ export default function ScrapeWidget({
               Powered by{" "}
             </Text>
             <Link
-              href="https://crawlchat.app?ref=powered-by"
+              href={`https://crawlchat.app?ref=powered-by-${titleAsSlug}`}
               target="_blank"
               color={"brand.fg"}
             >
