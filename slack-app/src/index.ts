@@ -86,10 +86,11 @@ const app = new App({
     "im:read",
     "app_mentions:read",
   ],
-  redirectUri: `${process.env.HOST}/slack/oauth_redirect`,
+  redirectUri: `${process.env.HOST}/oauth_redirect`,
   installationStore,
   installerOptions: {
-    redirectUriPath: "/slack/oauth_redirect",
+    redirectUriPath: "/oauth_redirect",
+    installPath: "/install",
   },
 });
 
