@@ -149,10 +149,12 @@ function Button({
   className,
   variant = "outline",
   href,
+  onClick,
 }: PropsWithChildren & {
   className?: string;
   variant?: "solid" | "outline";
   href?: string;
+  onClick?: () => void;
 }) {
   return (
     <a
@@ -163,6 +165,7 @@ function Button({
         className
       )}
       href={href}
+      onClick={onClick}
     >
       {children}
     </a>
@@ -699,10 +702,12 @@ function Pricing() {
           items={[
             { text: "100 page scrapes" },
             { text: "40 message credits" },
-            { text: "API not available", excluded: true },
-            { text: "MCP not available", excluded: true },
+            { text: "Base AI models", excluded: true },
+            { text: "Upload files", excluded: true },
+            { text: "MCP server", excluded: true },
             { text: "Discord bot", excluded: true },
-            { text: "Discord drafting", excluded: true },
+            { text: "Support tickets", excluded: true },
+            { text: "Basic analytics", excluded: true },
             { text: "GitHub issues", excluded: true },
           ]}
           href="/login"
@@ -710,14 +715,16 @@ function Pricing() {
         <PricingBox
           title="Starter"
           description="Start your journey with CrawlChat"
-          price="$29"
+          price="$45"
           items={[
             { text: "5000 scrapes/month" },
             { text: "2000 message credits/month" },
-            { text: "API available" },
-            { text: "MCP available" },
+            { text: "Smart AI models" },
+            { text: "Upload files" },
+            { text: "MCP server" },
             { text: "Discord bot" },
-            { text: "Discord drafting", excluded: true },
+            { text: "Support tickets" },
+            { text: "Advanced analytics" },
             { text: "GitHub issues", excluded: true },
           ]}
           href="https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
@@ -726,96 +733,20 @@ function Pricing() {
           title="Pro"
           description="For power users and teams"
           popular
-          price="$79"
+          price="$99"
           items={[
             { text: "14,000 scrapes/month" },
             { text: "7000 message credits/month" },
-            { text: "API available" },
-            { text: "MCP available" },
+            { text: "Reasoning AI models" },
+            { text: "Upload files" },
+            { text: "MCP server" },
             { text: "Discord bot" },
-            { text: "Discord drafting" },
+            { text: "Support tickets" },
+            { text: "Advanced analytics" },
             { text: "GitHub issues" },
           ]}
           href="https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
         />
-      </div>
-    </div>
-  );
-}
-
-function Testimonials() {
-  return (
-    <div className="mt-32">
-      <Heading>
-        People <HeadingHighlight>love</HeadingHighlight> CrawlChat
-      </Heading>
-
-      <div className="flex flex-col md:flex-row gap-6 mt-20">
-        <div>
-          <div>
-            <blockquote className="twitter-tweet">
-              <p lang="en" dir="ltr">
-                MCP, llms.txt and{" "}
-                <a href="https://t.co/wvTaGlv99L">https://t.co/wvTaGlv99L</a>{" "}
-                are now live!
-                <br />
-                <br />
-                Thanks to{" "}
-                <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
-                  @pramodk73
-                </a>{" "}
-                and{" "}
-                <a href="https://t.co/dv2PDLzt2V">https://t.co/dv2PDLzt2V</a>{" "}
-                for getting us up to speed with AI integrations.{" "}
-                <a href="https://t.co/Sornu9aIFi">https://t.co/Sornu9aIFi</a>
-              </p>
-              &mdash; Jonny Burger (@JNYBGR){" "}
-              <a href="https://twitter.com/JNYBGR/status/1899786274635927674?ref_src=twsrc%5Etfw">
-                March 12, 2025
-              </a>
-            </blockquote>
-            <script async src="https://platform.twitter.com/widgets.js" />
-          </div>
-        </div>
-        <div>
-          <div>
-            <blockquote className="twitter-tweet">
-              <p lang="en" dir="ltr">
-                Integrated{" "}
-                <a href="https://t.co/uKP4sKdbjV">https://t.co/uKP4sKdbjV</a>{" "}
-                into the new Konva docs – hats off to{" "}
-                <a href="https://twitter.com/pramodk73?ref_src=twsrc%5Etfw">
-                  @pramodk73
-                </a>{" "}
-                for making it insanely useful.
-                <br />
-                <br />
-                It now powers:
-                <br />- &quot;Ask AI&quot; widget on site
-                <br />- MCP server for docs
-                <br />- Discord bot for community
-                <br />
-                <br />
-                Smarter docs. Better support.
-              </p>
-              &mdash; Anton Lavrenov (@lavrton){" "}
-              <a href="https://twitter.com/lavrton/status/1915467775734350149?ref_src=twsrc%5Etfw">
-                April 24, 2025
-              </a>
-            </blockquote>{" "}
-            <script async src="https://platform.twitter.com/widgets.js" />
-          </div>
-          <div>
-            <iframe
-              src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7323678686812020736"
-              height="879"
-              width="100%"
-              frameBorder="0"
-              allowFullScreen
-              title="Embedded post"
-            ></iframe>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -1439,6 +1370,11 @@ function FAQ() {
     }
   }
 
+  function handleAsk() {
+    track("faq-ask", {});
+    (window as any).crawlchatEmbed.show();
+  }
+
   return (
     <div className="flex flex-col mt-32">
       <Heading>Frequently Asked Questions</Heading>
@@ -1466,6 +1402,13 @@ function FAQ() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="flex justify-center mt-16">
+        <Button onClick={handleAsk}>
+          Question not listed? Ask here
+          <TbArrowRight />
+        </Button>
       </div>
     </div>
   );
