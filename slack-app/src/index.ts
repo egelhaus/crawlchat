@@ -107,7 +107,16 @@ app.message(
   `<@${process.env.SLACK_BOT_USER_ID}>`,
   async ({ message, say, client, context }) => {
     console.log("Got message", message, "from", context.teamId);
-    
+    const scrape = await prisma.scrape.findFirst({
+      where: {
+        slackTeamId: context.teamId,
+      },
+    });
+
+    const botUserId = (scrape?.slackConfig?.installation as any)?.bot?.userId;
+
+    console.log(botUserId, context.botUserId);
+
     let messages: Message[] = [];
 
     if ((message as any).thread_ts) {
@@ -132,12 +141,6 @@ app.message(
       role: m.user === process.env.SLACK_BOT_USER_ID ? "assistant" : "user",
       content: cleanText(m.text ?? ""),
     }));
-
-    const scrape = await prisma.scrape.findFirst({
-      where: {
-        slackTeamId: context.teamId,
-      },
-    });
 
     if (!scrape) {
       await say({
