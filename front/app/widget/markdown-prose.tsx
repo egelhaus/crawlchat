@@ -270,7 +270,7 @@ export function MarkdownProse({
 
             const defaultNode = <a {...rest}>{children}</a>;
             if (!sources || typeof children !== "string") {
-              return defaultNode;
+              return children;
             }
 
             const match = children.match(/\!\!([0-9]*)!!/);

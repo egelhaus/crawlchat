@@ -223,12 +223,21 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                                 {pair.uniqueLinks.map((link, index) => (
                                   <Table.Row key={index}>
                                     <Table.Cell>
-                                      <Link
-                                        href={`/knowledge/item/${link.scrapeItemId}`}
-                                        target="_blank"
-                                      >
-                                        {link.title || link.url}
-                                      </Link>
+                                      <Group>
+                                        <Link
+                                          href={`/knowledge/item/${link.scrapeItemId}`}
+                                          target="_blank"
+                                        >
+                                          {link.title || link.url}
+                                        </Link>
+
+                                        <Tooltip
+                                          content="Citation number from above message"
+                                          showArrow
+                                        >
+                                          <Text>[{link.fetchUniqueId}]</Text>
+                                        </Tooltip>
+                                      </Group>
                                     </Table.Cell>
                                     <Table.Cell>
                                       {link.searchQuery ?? "-"}
