@@ -1,4 +1,4 @@
-import { prisma } from "libs/prisma";
+import { Prisma, prisma } from "libs/prisma";
 import { PLAN_FREE } from "libs/user-plan";
 import { sendWelcomeEmail } from "~/email";
 
@@ -50,10 +50,18 @@ export async function signUpNewUser(
     await sendWelcomeEmail(email);
   }
 
+  const update: Prisma.UserUpdateInput = {};
   if (data?.photo) {
+    update.photo = data.photo;
+  }
+  if (!user.name && data?.name) {
+    update.name = data.name;
+  }
+
+  if (Object.keys(update).length > 0) {
     await prisma.user.update({
       where: { id: user.id },
-      data: { photo: data.photo },
+      data: update,
     });
   }
 
