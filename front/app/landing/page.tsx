@@ -35,6 +35,7 @@ import { Badge, Box, Text } from "@chakra-ui/react";
 import { Tooltip } from "~/components/ui/tooltip";
 import { track } from "~/pirsch";
 import { PLAN_FREE, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
+import { useLoaderData } from "react-router";
 
 export function meta() {
   return [
@@ -97,6 +98,9 @@ export async function loader() {
     messagesThisWeek: cache.messagesThisWeek,
     messagesDay: cache.messagesDay,
     messagesMonth: cache.messagesMonth,
+    freePlan: PLAN_FREE,
+    starterPlan: PLAN_STARTER,
+    proPlan: PLAN_PRO,
   };
 }
 
@@ -699,6 +703,8 @@ function PricingBox({
 }
 
 function Pricing() {
+  const { freePlan, starterPlan, proPlan } = useLoaderData<typeof loader>();
+
   return (
     <div className="mt-32" id="pricing">
       <Heading>
@@ -710,12 +716,12 @@ function Pricing() {
           free
           title="Free"
           description="For personal use"
-          price={`$${PLAN_FREE.price}`}
+          price={`$${freePlan.price}`}
           items={[
-            { text: `${PLAN_FREE.credits.scrapes} page scrapes` },
-            { text: `${PLAN_FREE.credits.messages} message credits` },
-            { text: `${PLAN_FREE.limits.scrapes} collection` },
-            { text: `${PLAN_FREE.limits.teamMembers} team member` },
+            { text: `${freePlan.credits.scrapes} page scrapes` },
+            { text: `${freePlan.credits.messages} message credits` },
+            { text: `${freePlan.limits.scrapes} collection` },
+            { text: `${freePlan.limits.teamMembers} team member` },
             { text: "Base AI models", excluded: true },
             { text: "Upload files", excluded: true },
             { text: "MCP server", excluded: true },
@@ -729,12 +735,12 @@ function Pricing() {
         <PricingBox
           title="Starter"
           description="Start your journey with CrawlChat"
-          price={`$${PLAN_STARTER.price}`}
+          price={`$${starterPlan.price}`}
           items={[
-            { text: `${PLAN_STARTER.credits.scrapes} scrapes/month` },
-            { text: `${PLAN_STARTER.credits.messages} message credits/month` },
-            { text: `${PLAN_STARTER.limits.scrapes} collections` },
-            { text: `${PLAN_STARTER.limits.teamMembers} team members` },
+            { text: `${starterPlan.credits.scrapes} scrapes/month` },
+            { text: `${starterPlan.credits.messages} message credits/month` },
+            { text: `${starterPlan.limits.scrapes} collections` },
+            { text: `${starterPlan.limits.teamMembers} team members` },
             { text: "Smart AI models" },
             { text: "Upload files" },
             { text: "MCP server" },
@@ -749,12 +755,12 @@ function Pricing() {
           title="Pro"
           description="For power users and teams"
           popular
-          price={`$${PLAN_PRO.price}`}
+          price={`$${proPlan.price}`}
           items={[
-            { text: `${PLAN_PRO.credits.scrapes} scrapes/month` },
-            { text: `${PLAN_PRO.credits.messages} message credits/month` },
-            { text: `${PLAN_PRO.limits.scrapes} collections` },
-            { text: `${PLAN_PRO.limits.teamMembers} team members` },
+            { text: `${proPlan.credits.scrapes} scrapes/month` },
+            { text: `${proPlan.credits.messages} message credits/month` },
+            { text: `${proPlan.limits.scrapes} collections` },
+            { text: `${proPlan.limits.teamMembers} team members` },
             { text: "Reasoning AI models" },
             { text: "Upload files" },
             { text: "MCP server" },
