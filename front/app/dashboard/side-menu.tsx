@@ -16,7 +16,9 @@ import {
   TbBook,
   TbChevronLeft,
   TbChevronRight,
+  TbCrown,
   TbHome,
+  TbLock,
   TbLogout,
   TbMessage,
   TbPlug,
@@ -26,6 +28,7 @@ import {
   TbTicket,
   TbUser,
   TbUsers,
+  TbWorld,
 } from "react-icons/tb";
 import {
   Link,
@@ -415,8 +418,36 @@ export function SideMenu({
       overflow="hidden"
     >
       <Stack py={4} gap={4}>
-        <Stack px={6}>
-          <LogoChakra />
+        <Stack px={4}>
+          <Group justify="space-between">
+            <LogoChakra />
+            <Group gap={1}>
+              <Tooltip
+                content={
+                  scrape?.widgetConfig?.private
+                    ? "Private collection. Only secured channels such as Discord, Slack can be used."
+                    : "Public collection. Anyone can chat with it."
+                }
+                positioning={{ placement: "right" }}
+                showArrow
+              >
+                <Badge colorPalette={"blue"} variant={"surface"}>
+                  {scrape?.widgetConfig?.private ? <TbLock /> : <TbWorld />}
+                </Badge>
+              </Tooltip>
+              {["pro", "starter"].includes(scrapeOwner.plan?.type ?? "") && (
+                <Tooltip
+                  content={`Collection on ${scrapeOwner.plan!.type} plan`}
+                  positioning={{ placement: "right" }}
+                  showArrow
+                >
+                  <Badge colorPalette={"orange"} variant={"surface"}>
+                    <TbCrown />
+                  </Badge>
+                </Tooltip>
+              )}
+            </Group>
+          </Group>
         </Stack>
 
         <Box px={3}>

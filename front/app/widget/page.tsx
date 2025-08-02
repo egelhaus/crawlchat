@@ -5,7 +5,7 @@ import { createToken } from "~/jwt";
 import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import { commitSession, getSession } from "~/session";
 import { data, redirect, type Session } from "react-router";
-import type { Message, MessageRating, Thread } from "libs/prisma";
+import type { Message, MessageRating, Scrape, Thread } from "libs/prisma";
 import { randomUUID } from "crypto";
 import { getNextNumber } from "libs/mongo-counter";
 import { sendReactEmail } from "~/email";
@@ -16,6 +16,7 @@ import { fetchIpDetails, getClientIp } from "~/client-ip";
 import { ChatBoxProvider } from "~/widget/use-chat-box";
 import { sanitizeScrape } from "~/scrapes/util";
 import "highlight.js/styles/vs.css";
+import { getAuthUser } from "~/auth/middleware";
 
 function isMongoObjectId(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
@@ -43,12 +44,32 @@ async function updateSessionThreadId(
   return session;
 }
 
+async function isAllowed(request: Request, scrape: Scrape) {
+  const loggedInUser = await getAuthUser(request, {
+    dontRedirect: true,
+  });
+
+  if (!scrape.widgetConfig?.private) {
+    return true;
+  }
+
+  if (!loggedInUser) {
+    return false;
+  }
+
+  if (loggedInUser.scrapeUsers.some((su) => su.scrapeId === scrape.id)) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function loader({ params, request }: Route.LoaderArgs) {
   const scrape = await prisma.scrape.findFirst({
     where: isMongoObjectId(params.id) ? { id: params.id } : { slug: params.id },
   });
 
-  if (!scrape || scrape.widgetConfig?.private) {
+  if (!scrape || !(await isAllowed(request, scrape))) {
     return redirect("/w/not-found");
   }
 
@@ -108,7 +129,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     where: isMongoObjectId(params.id) ? { id: params.id } : { slug: params.id },
   });
 
-  if (!scrape || scrape.widgetConfig?.private) {
+  if (!scrape || !(await isAllowed(request, scrape))) {
     return redirect("/w/not-found");
   }
 
