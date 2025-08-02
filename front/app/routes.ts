@@ -59,6 +59,8 @@ export default [
     route("setup-progress", "dashboard/setup-progress-api.ts"),
   ]),
 
+  route("page-tmp", "landing/page-tmp.tsx"),
+
   layout("landing/layout.tsx", [
     index("landing/page.tsx"),
     route("blog/:slug", "blog/page.tsx"),
