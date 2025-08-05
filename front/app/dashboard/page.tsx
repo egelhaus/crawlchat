@@ -150,8 +150,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
-  console.log({ itemCounts });
-
   const topItemIds = Object.entries(itemCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
@@ -168,6 +166,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         knowledgeGroup: true,
       },
     });
+    console.log({ itemId, item });
     if (item) {
       topItems.push({ item, count, knowledgeGroup: item.knowledgeGroup! });
     }
