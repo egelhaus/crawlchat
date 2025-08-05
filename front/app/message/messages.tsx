@@ -65,7 +65,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       thread: true,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: "asc",
     },
   });
 
