@@ -54,7 +54,6 @@ import { EmptyState } from "~/components/ui/empty-state";
 import { Tooltip as ChakraTooltip } from "~/components/ui/tooltip";
 import { getLimits } from "libs/user-plan";
 import { toaster } from "~/components/ui/toaster";
-import type { KnowledgeGroup, ScrapeItem } from "libs/prisma";
 import moment from "moment";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -145,30 +144,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   for (const message of messages) {
     if (!message.links || message.links.length === 0) continue;
     for (const link of message.links) {
-      if (!link.scrapeItemId) continue;
-      itemCounts[link.scrapeItemId] = (itemCounts[link.scrapeItemId] ?? 0) + 1;
+      if (!link.url) continue;
+      itemCounts[link.url] = (itemCounts[link.url] ?? 0) + 1;
     }
   }
 
-  const topItemIds = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
-
-  const topItems: {
-    item: ScrapeItem;
-    count: number;
-    knowledgeGroup: KnowledgeGroup;
-  }[] = [];
-  for (const [itemId, count] of topItemIds) {
-    const item = await prisma.scrapeItem.findUnique({
-      where: { id: itemId },
-      include: {
-        knowledgeGroup: true,
-      },
-    });
-    if (item) {
-      topItems.push({ item, count, knowledgeGroup: item.knowledgeGroup! });
-    }
-    if (topItems.length >= 5) break;
-  }
+  const topItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
 
   const latestQuestions = messages
     .filter((m) => (m.llmMessage as any)?.role === "user")
@@ -529,9 +510,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <Table.Row>
                     <Table.ColumnHeader>Page</Table.ColumnHeader>
                     <Table.ColumnHeader>Count</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end">
-                      Group
-                    </Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -544,14 +522,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   )}
 
                   {loaderData.topItems.map((item) => (
-                    <Table.Row key={item.item.id}>
-                      <Table.Cell>
-                        {item.item.url || item.item.title || "Untitled"}
-                      </Table.Cell>
-                      <Table.Cell>{item.count}</Table.Cell>
-                      <Table.Cell textAlign="end">
-                        {item.knowledgeGroup.title}
-                      </Table.Cell>
+                    <Table.Row key={item[0]}>
+                      <Table.Cell>{item[0] || "Untitled"}</Table.Cell>
+                      <Table.Cell>{item[1]}</Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
