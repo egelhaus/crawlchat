@@ -48,6 +48,10 @@ export function analysePairMessages(pairs: MessagePair[]) {
 }
 
 export function makeMessagePairs(messages: MessageWithThread[]) {
+  messages = messages.sort(
+    (a, b) => a.createdAt?.getTime() ?? 0 - b.createdAt?.getTime() ?? 0
+  );
+
   function findUserMessage(i: number, threadId: string) {
     for (let j = i; j >= 0; j--) {
       if (messages[j].threadId !== threadId) {
