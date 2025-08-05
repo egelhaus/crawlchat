@@ -37,7 +37,7 @@ export function useScrapeChat({
             },
           ]
         : []),
-    ];
+    ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     return allMessages.map((message) => ({
       role: (message.llmMessage as any).role,
       content: (message.llmMessage as any).content,
@@ -158,6 +158,8 @@ export function useScrapeChat({
         rating: null,
         correctionItemId: null,
         ticketMessage: null,
+        slackMessageId: null,
+        discordMessageId: null,
       },
     ]);
     setAskStage("asked");
