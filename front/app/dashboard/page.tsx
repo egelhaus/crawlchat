@@ -546,7 +546,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
                   {loaderData.topItems.map((item) => (
                     <Table.Row key={item.item.id}>
-                      <Table.Cell>{item.item.url}</Table.Cell>
+                      <Table.Cell>
+                        {item.item.url || item.item.title || "Untitled"}
+                      </Table.Cell>
                       <Table.Cell>{item.count}</Table.Cell>
                       <Table.Cell textAlign="end">
                         {item.knowledgeGroup.title}
@@ -568,7 +570,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Question</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="end">
+                    <Table.ColumnHeader textAlign="end" width="120px">
                       Created at
                     </Table.ColumnHeader>
                   </Table.Row>
