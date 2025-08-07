@@ -324,6 +324,18 @@ export function StatCard({
   return render();
 }
 
+function SingleLineCell({ children }: { children: React.ReactNode }) {
+  return (
+    <ChakraTooltip
+      showArrow
+      content={children}
+      positioning={{ placement: "bottom-start" }}
+    >
+      <Text lineClamp={1}>{children}</Text>
+    </ChakraTooltip>
+  );
+}
+
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -524,6 +536,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   type="monotone"
                   dataKey="Messages"
                   fill={"var(--chakra-colors-brand-emphasized)"}
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </Stack>
@@ -548,7 +561,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   </ChakraTooltip>
                 </Group>
               </Heading>
-              <Table.Root size="sm" flex={1} variant={"outline"}>
+              <Table.Root size="sm" flex={1} variant={"outline"} rounded={"sm"}>
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Question</Table.ColumnHeader>
@@ -563,29 +576,14 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.lowRatingQueries.map((item) => (
                     <Table.Row key={item.message.id}>
                       <Table.Cell>
-                        <ChakraTooltip
-                          showArrow
-                          content={
-                            (item.userMessage?.llmMessage as any).content
-                          }
-                        >
-                          <Text>
-                            {truncate(
-                              (item.userMessage?.llmMessage as any).content,
-                              50
-                            )}
-                          </Text>
-                        </ChakraTooltip>
+                        <SingleLineCell>
+                          {(item.userMessage?.llmMessage as any).content}
+                        </SingleLineCell>
                       </Table.Cell>
                       <Table.Cell>
-                        <ChakraTooltip
-                          showArrow
-                          content={item.queries.join(", ")}
-                        >
-                          <Text w="fit">
-                            {truncate(item.queries.slice(0, 3).join(", "), 50)}
-                          </Text>
-                        </ChakraTooltip>
+                        <SingleLineCell>
+                          {item.queries.join(", ")}
+                        </SingleLineCell>
                       </Table.Cell>
                       <Table.Cell>
                         <Badge colorPalette={"red"} variant={"surface"}>
@@ -610,7 +608,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <Text>Top cited pages</Text>
                 </Group>
               </Heading>
-              <Table.Root size="sm" flex={1} variant={"outline"}>
+              <Table.Root size="sm" flex={1} variant={"outline"} rounded={"sm"}>
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Page</Table.ColumnHeader>
@@ -630,7 +628,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
 
                   {loaderData.topItems.map((item) => (
                     <Table.Row key={item[0]}>
-                      <Table.Cell>{item[0] || "Untitled"}</Table.Cell>
+                      <Table.Cell>
+                        <SingleLineCell>{item[0] || "Untitled"}</SingleLineCell>
+                      </Table.Cell>
                       <Table.Cell textAlign="end">
                         <Badge colorPalette={"brand"} variant={"surface"}>
                           {item[1]}
@@ -649,7 +649,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <Text>Latest questions</Text>
                 </Group>
               </Heading>
-              <Table.Root size="sm" flex={1} variant={"outline"}>
+              <Table.Root size="sm" flex={1} variant={"outline"} rounded={"sm"}>
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Question</Table.ColumnHeader>
@@ -669,9 +669,9 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.latestQuestions.map((question) => (
                     <Table.Row key={question.id}>
                       <Table.Cell>
-                        <Text truncate w="300px">
+                        <SingleLineCell>
                           {(question.llmMessage as any).content}
-                        </Text>
+                        </SingleLineCell>
                       </Table.Cell>
                       <Table.Cell textAlign="end">
                         {moment(question.createdAt).fromNow()}
