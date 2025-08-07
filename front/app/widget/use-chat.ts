@@ -129,8 +129,8 @@ export function useScrapeChat({
     }
     setAskStage("answering");
     setContent((prev) => ({
-      ...prev,
       text: prev.text + content,
+      date: new Date(),
     }));
     setSearchQuery(undefined);
   }
