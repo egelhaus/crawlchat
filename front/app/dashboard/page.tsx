@@ -565,7 +565,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                 </Table.Header>
                 <Table.Body>
                   {loaderData.lowRatingQueries
-                    .slice(0, showAllDataGaps ? undefined : 2)
+                    .slice(0, showAllDataGaps ? undefined : 5)
                     .map((item) => (
                       <Table.Row key={item.message.id}>
                         <Table.Cell>
