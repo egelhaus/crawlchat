@@ -11,9 +11,11 @@ import {
   DialogCloseTrigger,
   Center,
   Table,
+  Badge,
 } from "@chakra-ui/react";
 import type { Route } from "./+types/page";
 import {
+  TbAlertCircle,
   TbCheck,
   TbDatabase,
   TbHelp,
@@ -55,6 +57,8 @@ import { Tooltip as ChakraTooltip } from "~/components/ui/tooltip";
 import { getLimits } from "libs/user-plan";
 import { toaster } from "~/components/ui/toaster";
 import moment from "moment";
+import type { Message } from "libs/prisma";
+import { truncate } from "~/util";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -160,6 +164,30 @@ export async function loader({ request }: Route.LoaderArgs) {
     )
     .slice(0, 5);
 
+  let lowRatingQueries = [];
+  let lastUserMessage: Message | null = null;
+  for (const message of messages) {
+    const role = (message.llmMessage as any)?.role;
+    if (role === "user") {
+      lastUserMessage = message;
+    }
+    if (role !== "assistant") continue;
+
+    const links = message.links ?? [];
+    const maxScore = Math.max(...links.map((l) => l.score ?? 0));
+    if (links.length > 0 && maxScore < 0.3 && maxScore > 0) {
+      const queries = links.map((l) => l.searchQuery);
+      lowRatingQueries.push({
+        message,
+        maxScore,
+        queries,
+        userMessage: lastUserMessage,
+      });
+    }
+  }
+
+  lowRatingQueries = lowRatingQueries.sort((a, b) => a.maxScore - b.maxScore);
+
   return {
     user,
     dailyMessages,
@@ -172,6 +200,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     noScrapes: scrapes.length === 0,
     topItems,
     latestQuestions,
+    lowRatingQueries,
   };
 }
 
@@ -444,6 +473,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                     content={
                       "Shows the number of messages in conversations in the last 7 days across all the channels"
                     }
+                    positioning={{ placement: "right" }}
                   >
                     <Icon opacity={0.5}>
                       <TbHelp />
@@ -498,6 +528,71 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             </Stack>
           </Group>
 
+          {loaderData.lowRatingQueries.length > 0 && (
+            <Stack flex={1}>
+              <Heading>
+                <Group>
+                  <TbAlertCircle />
+                  <Text>Data gaps</Text>
+                  <ChakraTooltip
+                    showArrow
+                    content={
+                      "Shows the questions that the AI asked but the search results were not good enough"
+                    }
+                    positioning={{ placement: "right" }}
+                  >
+                    <Icon opacity={0.5}>
+                      <TbHelp />
+                    </Icon>
+                  </ChakraTooltip>
+                </Group>
+              </Heading>
+              <Table.Root size="sm" flex={1} variant={"outline"}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Question</Table.ColumnHeader>
+                    <Table.ColumnHeader>Queries</Table.ColumnHeader>
+                    <Table.ColumnHeader>Max Score</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="end">
+                      Date
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {loaderData.lowRatingQueries.map((item) => (
+                    <Table.Row key={item.message.id}>
+                      <Table.Cell>
+                        {truncate(
+                          (item.userMessage?.llmMessage as any).content,
+                          100
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <ChakraTooltip
+                          showArrow
+                          content={item.queries.join(", ")}
+                        >
+                          <Text w="fit">
+                            {item.queries.slice(0, 3).join(", ")}
+                            {item.queries.length > 3 && ", ..."}
+                          </Text>
+                        </ChakraTooltip>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge colorPalette={"red"} variant={"surface"}>
+                          {item.maxScore.toFixed(2)}
+                        </Badge>
+                      </Table.Cell>
+                      <Table.Cell textAlign="end">
+                        {moment(item.message.createdAt).fromNow()}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Stack>
+          )}
+
           <Group gap={8} align={"start"}>
             <Stack flex={1}>
               <Heading>
@@ -506,7 +601,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <Text>Top cited pages</Text>
                 </Group>
               </Heading>
-              <Table.Root size="sm" flex={1}>
+              <Table.Root size="sm" flex={1} variant={"outline"}>
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Page</Table.ColumnHeader>
@@ -527,7 +622,11 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   {loaderData.topItems.map((item) => (
                     <Table.Row key={item[0]}>
                       <Table.Cell>{item[0] || "Untitled"}</Table.Cell>
-                      <Table.Cell textAlign="end">{item[1]}</Table.Cell>
+                      <Table.Cell textAlign="end">
+                        <Badge colorPalette={"brand"} variant={"surface"}>
+                          {item[1]}
+                        </Badge>
+                      </Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
@@ -541,7 +640,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   <Text>Latest questions</Text>
                 </Group>
               </Heading>
-              <Table.Root size="sm" flex={1}>
+              <Table.Root size="sm" flex={1} variant={"outline"}>
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader>Question</Table.ColumnHeader>

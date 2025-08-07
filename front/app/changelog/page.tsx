@@ -42,7 +42,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-          <div className="prose dark:prose-invert mx-auto mt-10">
+          <div className="prose dark:prose-invert mx-auto mt-10 max-w-full">
             <Markdown remarkPlugins={[remarkGfm]}>
               {loaderData.post.markdown}
             </Markdown>

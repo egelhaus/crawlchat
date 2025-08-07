@@ -39,7 +39,7 @@ export default function ChangelogPage({ loaderData }: Route.ComponentProps) {
                   {moment(post.date).format("MMMM D, YYYY")}
                 </p>
               </div>
-              <p className="prose dark:prose-invert mt-4">
+              <p className="prose dark:prose-invert max-w-full w-full mt-4">
                 <Markdown remarkPlugins={[remarkGfm]}>{post.markdown}</Markdown>
               </p>
               <div className="border-b-2 border-outline my-16 max-w-prose" />

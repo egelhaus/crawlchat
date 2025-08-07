@@ -29,7 +29,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
     <>
       <Container>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 max-w-[760px] mx-auto">
+          <div className="flex flex-col gap-2 max-w-full mx-auto">
             <h1 className="text-5xl font-medium text-center leading-tight">
               {loaderData.post.title}
             </h1>
@@ -42,7 +42,7 @@ export default function BlogPage({ loaderData }: Route.ComponentProps) {
             </div>
           </div>
 
-          <div className="prose-xl mx-auto mt-10">
+          <div className="prose dark:prose-invert mx-auto mt-20 max-w-full">
             <Markdown remarkPlugins={[remarkGfm]}>
               {loaderData.post.markdown}
             </Markdown>
