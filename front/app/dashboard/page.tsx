@@ -482,7 +482,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   </ChakraTooltip>
                 </Group>
               </Heading>
-              <AreaChart width={width / 2 - 10} height={200} data={chartData}>
+              <AreaChart width={width / 2 - 20} height={200} data={chartData}>
                 <XAxis dataKey="name" />
                 <Tooltip />
                 <CartesianGrid strokeDasharray="3 3" />
@@ -513,7 +513,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                 </Group>
               </Heading>
               <BarChart
-                width={width / 2 - 14}
+                width={width / 2 - 20}
                 height={200}
                 data={scoreDistributionData}
               >
@@ -560,7 +560,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {loaderData.lowRatingQueries.map((item) => (
+                  {loaderData.lowRatingQueries.slice(5).map((item) => (
                     <Table.Row key={item.message.id}>
                       <Table.Cell>
                         <ChakraTooltip
