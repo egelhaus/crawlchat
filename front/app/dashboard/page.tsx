@@ -569,10 +569,12 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                             (item.userMessage?.llmMessage as any).content
                           }
                         >
-                          {truncate(
-                            (item.userMessage?.llmMessage as any).content,
-                            50
-                          )}
+                          <Text>
+                            {truncate(
+                              (item.userMessage?.llmMessage as any).content,
+                              50
+                            )}
+                          </Text>
                         </ChakraTooltip>
                       </Table.Cell>
                       <Table.Cell>
