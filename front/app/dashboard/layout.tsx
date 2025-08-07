@@ -10,11 +10,12 @@ import {
   DrawerContent,
   DrawerRoot,
 } from "~/components/ui/drawer";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { PLAN_FREE } from "libs/user-plan";
 import { planMap } from "libs/user-plan";
 import { prisma } from "libs/prisma";
 import { getSession } from "~/session";
+import { vemetric } from "@vemetric/react";
 
 export function meta() {
   return [
@@ -91,6 +92,15 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const app = useApp({ user, scrapeId: loaderData.scrapeId });
   const contentRef = useRef<HTMLDivElement>(null);
   const scrapeIdFetcher = useFetcher();
+
+  useEffect(() => {
+    (async () => {
+      await vemetric.identify({
+        identifier: user.id,
+        displayName: user.name ?? "Unnamed",
+      });
+    })();
+  }, []);
 
   return (
     <AppContext.Provider value={app}>
