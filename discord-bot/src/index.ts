@@ -78,7 +78,7 @@ client.once(Events.ClientReady, (readyClient) => {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.mentions.users.has(process.env.BOT_USER_ID!)) {
-    if (message.content.includes("learn")) {
+    if (message.content === "learn") {
       let messages: Array<{ author: string; content: string }> = (
         await fetchAllParentMessages(message, [])
       ).map((m) => ({ author: m.author.displayName, content: m.content }));
