@@ -59,6 +59,7 @@ import { toaster } from "~/components/ui/toaster";
 import moment from "moment";
 import type { Message } from "libs/prisma";
 import { truncate } from "~/util";
+import { SingleLineCell } from "~/components/single-line-cell";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -322,18 +323,6 @@ export function StatCard({
   }
 
   return render();
-}
-
-function SingleLineCell({ children }: { children: React.ReactNode }) {
-  return (
-    <ChakraTooltip
-      showArrow
-      content={children}
-      positioning={{ placement: "bottom-start" }}
-    >
-      <Text lineClamp={1}>{children}</Text>
-    </ChakraTooltip>
-  );
 }
 
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {

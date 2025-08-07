@@ -5,13 +5,12 @@ import {
   Badge,
   EmptyState,
   VStack,
-  Heading,
   Link,
-  Box,
   Center,
   Icon,
-  Button,
   Table,
+  Drawer,
+  Portal,
 } from "@chakra-ui/react";
 import {
   TbBox,
@@ -28,24 +27,19 @@ import type { Route } from "./+types/messages";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
-import {
-  AccordionItem,
-  AccordionItemContent,
-  AccordionItemTrigger,
-  AccordionRoot,
-} from "~/components/ui/accordion";
 import moment from "moment";
-import { truncate } from "~/util";
 import { useMemo, useState } from "react";
-import { makeMessagePairs } from "./analyse";
+import { makeMessagePairs, type MessagePair } from "./analyse";
 import { Tooltip } from "~/components/ui/tooltip";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
-import type { Message, MessageChannel, MessageSourceLink } from "libs/prisma";
+import type { Message, MessageChannel } from "libs/prisma";
 import { getScoreColor } from "~/score";
 import { Link as RouterLink } from "react-router";
 import { ViewSwitch } from "./view-switch";
 import { CountryFlag } from "./country-flag";
 import { extractCitations } from "libs/citation";
+import { SingleLineCell } from "~/components/single-line-cell";
+import { Button } from "~/components/ui/button";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -79,7 +73,15 @@ export async function loader({ request }: Route.LoaderArgs) {
     );
   }
 
-  return { messagePairs };
+  const queryMessageId = url.searchParams.get("query-message-id");
+  let messagePair = null;
+  if (queryMessageId) {
+    messagePair = messagePairs.find(
+      (pair) => pair.queryMessage?.id === queryMessageId
+    );
+  }
+
+  return { messagePairs, messagePair };
 }
 
 function getMessageContent(message?: Message) {
@@ -186,6 +188,75 @@ function AssistantMessage({ message }: { message: Message }) {
   );
 }
 
+function MessageDrawer({ messagePair }: { messagePair?: MessagePair | null }) {
+  return (
+    <Drawer.Root open={!!messagePair} size={"lg"}>
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content>
+            <Drawer.Header>
+              <Drawer.Title>
+                {(messagePair?.queryMessage?.llmMessage as any)?.content}
+              </Drawer.Title>
+              <Group mt={2}>
+                <Text>
+                  {moment(messagePair?.queryMessage?.createdAt).fromNow()}
+                </Text>
+                <ChannelIcon channel={messagePair?.queryMessage?.channel} />
+                {messagePair?.queryMessage?.thread.location && (
+                  <CountryFlag
+                    location={messagePair?.queryMessage?.thread.location}
+                  />
+                )}
+                {messagePair?.responseMessage.rating && (
+                  <Rating rating={messagePair?.responseMessage.rating} />
+                )}
+              </Group>
+            </Drawer.Header>
+            <Drawer.Body>
+              {messagePair && (
+                <AssistantMessage message={messagePair.responseMessage} />
+              )}
+            </Drawer.Body>
+            <Drawer.Footer>
+              <Button variant="outline" asChild>
+                <RouterLink to={`/messages`} replace>
+                  Close
+                </RouterLink>
+              </Button>
+              <Button asChild>
+                <RouterLink
+                  to={`/messages/${messagePair?.responseMessage?.id}/fix`}
+                >
+                  <TbSettingsBolt />
+                  Correct it
+                  {messagePair?.responseMessage.correctionItemId && " again"}
+                </RouterLink>
+              </Button>
+            </Drawer.Footer>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
+  );
+}
+
+function Rating({ rating }: { rating: Message["rating"] }) {
+  if (!rating) return null;
+
+  return (
+    <Tooltip content="Rating from the user" showArrow>
+      <Badge
+        colorPalette={rating === "up" ? "green" : "red"}
+        variant={"surface"}
+      >
+        {rating === "up" ? <TbThumbUp /> : <TbThumbDown />}
+      </Badge>
+    </Tooltip>
+  );
+}
+
 export default function Messages({ loaderData }: Route.ComponentProps) {
   return (
     <Page title="Messages" icon={<TbMessage />} right={<ViewSwitch />}>
@@ -222,46 +293,40 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
             )}
 
             {loaderData.messagePairs.length > 0 && (
-              <AccordionRoot collapsible variant={"enclosed"}>
-                {loaderData.messagePairs.map((pair, index) => (
-                  <AccordionItem key={index} value={index.toString()}>
-                    <AccordionItemTrigger>
-                      <Group justifyContent={"space-between"} flex={1}>
+              <Table.Root variant={"outline"} rounded={"sm"}>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>Question</Table.ColumnHeader>
+                    <Table.ColumnHeader w={"100px"}></Table.ColumnHeader>
+                    <Table.ColumnHeader w={"100px"}>Channel</Table.ColumnHeader>
+                    <Table.ColumnHeader w={"60px"}>Score</Table.ColumnHeader>
+                    <Table.ColumnHeader w={"140px"} textAlign={"end"}>
+                      Time
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {loaderData.messagePairs.map((pair, index) => (
+                    <Table.Row key={index}>
+                      <Table.Cell>
+                        <Link asChild>
+                          <RouterLink
+                            to={`/messages?query-message-id=${pair.queryMessage?.id}`}
+                          >
+                            <SingleLineCell tooltip={false}>
+                              {getMessageContent(pair.queryMessage)}
+                            </SingleLineCell>
+                          </RouterLink>
+                        </Link>
+                      </Table.Cell>
+                      <Table.Cell>
                         <Group>
                           {pair.queryMessage?.thread.location && (
                             <CountryFlag
                               location={pair.queryMessage.thread.location}
                             />
                           )}
-                          <Text maxW={"50vw"} truncate>
-                            {truncate(
-                              getMessageContent(pair.queryMessage),
-                              10000
-                            )}
-                          </Text>
-                          <Text opacity={0.2} hideBelow={"md"}>
-                            {moment(pair.queryMessage?.createdAt).fromNow()}
-                          </Text>
-                        </Group>
-                        <Group>
-                          {pair.responseMessage.rating && (
-                            <Tooltip content="Rating from the user" showArrow>
-                              <Badge
-                                colorPalette={
-                                  pair.responseMessage.rating === "up"
-                                    ? "green"
-                                    : "red"
-                                }
-                                variant={"surface"}
-                              >
-                                {pair.responseMessage.rating === "up" ? (
-                                  <TbThumbUp />
-                                ) : (
-                                  <TbThumbDown />
-                                )}
-                              </Badge>
-                            </Tooltip>
-                          )}
+                          <Rating rating={pair.responseMessage.rating} />
                           {pair.responseMessage.correctionItemId && (
                             <Tooltip content="Corrected the answer" showArrow>
                               <Badge colorPalette={"brand"} variant={"surface"}>
@@ -269,51 +334,32 @@ export default function Messages({ loaderData }: Route.ComponentProps) {
                               </Badge>
                             </Tooltip>
                           )}
-                          <ChannelIcon channel={pair.queryMessage?.channel} />
-                          <Badge
-                            colorPalette={getScoreColor(pair.maxScore)}
-                            variant={"surface"}
-                          >
-                            {pair.maxScore.toFixed(2)}
-                          </Badge>
                         </Group>
-                      </Group>
-                    </AccordionItemTrigger>
-                    <AccordionItemContent>
-                      <Stack gap={4}>
-                        <Heading>
-                          {getMessageContent(pair.queryMessage)}
-                        </Heading>
-                        <AssistantMessage message={pair.responseMessage} />
-                        <Box>
-                          <Button
-                            asChild
-                            variant={
-                              pair.responseMessage.rating === "down" &&
-                              !pair.responseMessage.correctionItemId
-                                ? "solid"
-                                : "outline"
-                            }
-                          >
-                            <RouterLink
-                              to={`/messages/${pair.responseMessage?.id}/fix`}
-                            >
-                              <TbSettingsBolt />
-                              Correct it
-                              {pair.responseMessage.correctionItemId &&
-                                " again"}
-                            </RouterLink>
-                          </Button>
-                        </Box>
-                      </Stack>
-                    </AccordionItemContent>
-                  </AccordionItem>
-                ))}
-              </AccordionRoot>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <ChannelIcon channel={pair.queryMessage?.channel} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge
+                          colorPalette={getScoreColor(pair.maxScore)}
+                          variant={"surface"}
+                        >
+                          {pair.maxScore.toFixed(2)}
+                        </Badge>
+                      </Table.Cell>
+                      <Table.Cell textAlign={"end"}>
+                        {moment(pair.queryMessage?.createdAt).fromNow()}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
             )}
           </Stack>
         )}
       </Stack>
+
+      <MessageDrawer messagePair={loaderData.messagePair} />
     </Page>
   );
 }
