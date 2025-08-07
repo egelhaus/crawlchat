@@ -15,6 +15,7 @@ import fontsStylesheet from "./fonts.css?url";
 import { Provider } from "./components/ui/provider";
 import { PiArrowBendRightDown } from "react-icons/pi";
 import { useMemo } from "react";
+import { VemetricScript } from "@vemetric/react";
 
 declare global {
   interface Window {
@@ -139,6 +140,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        {shouldTrack && <VemetricScript token="MGxpZaWDYdxwChu5" />}
         {children}
         <ScrollRestoration />
         <Scripts />
