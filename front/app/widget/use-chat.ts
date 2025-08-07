@@ -40,10 +40,7 @@ export function useScrapeChat({
             },
           ]
         : []),
-    ].sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
+    ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     return allMessages.map((message) => ({
       role: (message.llmMessage as any).role,
       content: (message.llmMessage as any).content,
@@ -122,7 +119,7 @@ export function useScrapeChat({
     message: Message;
   }) {
     if (end) {
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => [...prev, { ...message, createdAt: new Date() }]);
       setContent({ text: "", date: new Date() });
       setAskStage("idle");
       return;
