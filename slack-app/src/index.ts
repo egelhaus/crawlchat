@@ -5,7 +5,7 @@ import { App } from "@slack/bolt";
 import { InstallationStore } from "@slack/oauth";
 import { prisma } from "libs/prisma";
 import { createToken } from "./jwt";
-import { query } from "./api";
+import { learn, query } from "./api";
 import slackifyMarkdown from "slackify-markdown";
 
 const LOADING_REACTION = "hourglass";
@@ -89,6 +89,8 @@ const app = new App({
     "app_mentions:read",
     "reactions:write",
     "reactions:read",
+    "groups:history",
+    "groups:read",
   ],
   redirectUri: `${process.env.HOST}/oauth_redirect`,
   installationStore,
@@ -129,15 +131,6 @@ app.message(async ({ message, say, client, context }) => {
 
   console.log("Bot mentioned:", context.botUserId, "in message:", messageText);
 
-  try {
-    await client.reactions.add({
-      token: context.botToken,
-      channel: message.channel,
-      timestamp: message.ts,
-      name: LOADING_REACTION,
-    });
-  } catch {}
-
   let messages: Message[] = [];
 
   if ((message as any).thread_ts) {
@@ -162,6 +155,33 @@ app.message(async ({ message, say, client, context }) => {
     role: m.user === context.botUserId ? "assistant" : "user",
     content: cleanText(m.text ?? ""),
   }));
+
+  if (cleanText(messageText) === "learn") {
+    await learn(
+      scrape.id,
+      llmMessages
+        .slice(0, -1)
+        .map((m) => m.content)
+        .join("\n\n"),
+      createToken(scrape.userId)
+    );
+    await client.reactions.add({
+      token: context.botToken,
+      channel: message.channel,
+      timestamp: message.ts,
+      name: "white_check_mark",
+    });
+    return;
+  }
+
+  try {
+    await client.reactions.add({
+      token: context.botToken,
+      channel: message.channel,
+      timestamp: message.ts,
+      name: LOADING_REACTION,
+    });
+  } catch {}
 
   const {
     answer,
@@ -193,6 +213,7 @@ app.message(async ({ message, say, client, context }) => {
         },
       },
     ],
+    reply_broadcast: scrape.slackConfig?.replyBroadcast ?? false,
   });
   if (!sayResult.message) return;
 
