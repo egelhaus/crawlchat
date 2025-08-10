@@ -21,6 +21,7 @@ import {
   TbLogout,
   TbMessage,
   TbPlug,
+  TbPointer,
   TbSettings,
   TbThumbDown,
   TbTicket,
@@ -275,12 +276,12 @@ export function SideMenu({
         icon: <TbBook />,
         forScrape: true,
       },
-      // {
-      //   label: "Actions",
-      //   to: "/actions",
-      //   icon: <TbPointer />,
-      //   forScrape: true,
-      // },
+      {
+        label: "Actions",
+        to: "/actions",
+        icon: <TbPointer />,
+        forScrape: true,
+      },
       {
         label: "Messages",
         to: "/messages",
@@ -295,8 +296,8 @@ export function SideMenu({
         ticketingEnabled: true,
       },
       {
-        label: "Integrations",
-        to: "/integrations",
+        label: "Connect",
+        to: "/connect",
         icon: <TbPlug />,
         forScrape: true,
       },

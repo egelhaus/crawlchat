@@ -45,7 +45,7 @@ export default [
       ]),
     ]),
 
-    route("integrations", "integrations/page.tsx", [
+    route("connect", "integrations/page.tsx", [
       index("integrations/embed.tsx"),
       route("mcp", "integrations/mcp.tsx"),
       route("discord", "integrations/discord.tsx"),

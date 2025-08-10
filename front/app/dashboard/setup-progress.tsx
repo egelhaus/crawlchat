@@ -45,7 +45,7 @@ export const allSetupProgressActions: SetupProgressAction[] = [
     title: "Embed chatbot",
     description: "Embed the chatbot in your website",
     checker: (input) => input.nChatbotMessages === 0,
-    url: "/integrations#customise-widget",
+    url: "/connect#customise-widget",
   },
   {
     id: "connect-discord",
@@ -53,7 +53,7 @@ export const allSetupProgressActions: SetupProgressAction[] = [
     title: "Connect Discord",
     description: "Connect your Discord server to the chatbot",
     checker: (input) => input.nDiscordMessages === 0,
-    url: "/integrations/discord#discord-server-id",
+    url: "/connect/discord#discord-server-id",
     canSkip: true,
   },
   {
@@ -62,7 +62,7 @@ export const allSetupProgressActions: SetupProgressAction[] = [
     title: "Connect MCP",
     description: "Connect your MCP server to the chatbot",
     checker: (input) => input.nMCPMessages === 0,
-    url: "/integrations/mcp",
+    url: "/connect/mcp",
     canSkip: true,
   },
   {

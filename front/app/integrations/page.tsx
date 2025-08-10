@@ -24,7 +24,7 @@ export default function ScrapePage() {
   }
 
   return (
-    <Page title={"Integrations"} icon={<TbPlug />}>
+    <Page title={"Connect"} icon={<TbPlug />}>
       <Stack>
         <Box>
           <SegmentedControl
@@ -32,7 +32,7 @@ export default function ScrapePage() {
             onValueChange={(e) => handleTabChange(e.value)}
             items={[
               {
-                value: "/integrations",
+                value: "/connect",
                 label: (
                   <HStack>
                     <TbCode />
@@ -41,7 +41,7 @@ export default function ScrapePage() {
                 ),
               },
               {
-                value: "/integrations/mcp",
+                value: "/connect/mcp",
                 label: (
                   <HStack>
                     <TbRobotFace />
@@ -50,7 +50,7 @@ export default function ScrapePage() {
                 ),
               },
               {
-                value: "/integrations/discord",
+                value: "/connect/discord",
                 label: (
                   <HStack>
                     <TbBrandDiscord />
@@ -59,7 +59,7 @@ export default function ScrapePage() {
                 ),
               },
               {
-                value: "/integrations/slack",
+                value: "/connect/slack",
                 label: (
                   <HStack>
                     <TbBrandSlack />
