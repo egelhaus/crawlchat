@@ -11,8 +11,9 @@ import {
   PublicThreadChannel,
   TextChannel,
 } from "discord.js";
-import { getDiscordDetails, learn, query } from "./api";
+import { learn, query } from "./api";
 import { createToken } from "./jwt";
+import { prisma } from "libs/prisma";
 
 type DiscordMessage = Message<boolean>;
 
@@ -72,6 +73,27 @@ const cleanContent = (content: string) => {
   return content.replace(/\n/g, "\n\n");
 };
 
+const getDiscordDetails = async (channelId: string) => {
+  const scrape = await prisma.scrape.findFirst({
+    where: { discordServerId: channelId },
+  });
+
+  if (!scrape) {
+    return {
+      scrapeId: null,
+      userId: null,
+    };
+  }
+
+  return {
+    scrapeId: scrape.id,
+    userId: scrape.userId,
+    draftChannelIds: scrape.discordDraftConfig?.sourceChannelIds ?? [],
+    draftEmoji: scrape.discordDraftConfig?.emoji,
+    draftDestinationChannelId: scrape.discordDraftConfig?.destinationChannelId,
+  };
+};
+
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
@@ -103,6 +125,11 @@ client.on(Events.MessageCreate, async (message) => {
 
       const { scrapeId, userId } = await getDiscordDetails(message.guildId!);
 
+      if (!scrapeId || !userId) {
+        message.reply("‼️ Integrate it on CrawlChat.app to use this bot!");
+        return;
+      }
+
       console.log("Learning", { content, scrapeId, userId });
 
       await learn(scrapeId, content, createToken(userId));
@@ -114,7 +141,6 @@ client.on(Events.MessageCreate, async (message) => {
     const { scrapeId, userId } = await getDiscordDetails(message.guildId!);
 
     if (!scrapeId || !userId) {
-      console.log("Not integrated!");
       message.reply("‼️ Integrate it on CrawlChat.app to use this bot!");
       return;
     }
