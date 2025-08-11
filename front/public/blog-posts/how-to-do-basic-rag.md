@@ -1,7 +1,7 @@
 ---
 title: How to build a basic RAG
 date: 2025-08-11
-description: Learn how to make a basic RAG setup for your documents and files in its simplest form
+description: RAG answers queries from your documents by chunking, embedding, storing in a vector DB, retrieving matches, and feeding them to an LLM for context-aware responses.
 ---
 
 ## Introduction
