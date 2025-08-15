@@ -6,6 +6,7 @@ import {
   Flex,
   Group,
   IconButton,
+  Spinner,
   Stack,
   Text,
   VStack,
@@ -17,6 +18,7 @@ import {
   TbMessage,
   TbMessages,
   TbTicket,
+  TbTrash,
 } from "react-icons/tb";
 import type { Route } from "./+types/conversations";
 import { getAuthUser } from "~/auth/middleware";
@@ -24,11 +26,11 @@ import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import type { Prisma } from "libs/prisma";
 import { prisma } from "~/prisma";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import { getMessagesScore, getScoreColor } from "~/score";
 import { Tooltip } from "~/components/ui/tooltip";
-import { Link, redirect } from "react-router";
+import { Link, redirect, useFetcher } from "react-router";
 import { ViewSwitch } from "./view-switch";
 import { CountryFlag } from "./country-flag";
 import { ChatBoxProvider } from "~/widget/use-chat-box";
@@ -59,6 +61,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const searchParams = new URLSearchParams(url.search);
   const page = parseInt(searchParams.get("page") ?? "1");
   const pageSize = 10;
+  const id = searchParams.get("id");
 
   const where: Prisma.ThreadWhereInput = {
     scrapeId,
@@ -76,6 +79,10 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     ],
   };
+
+  if (id) {
+    where.id = id;
+  }
 
   const totalThreads = await prisma.thread.count({
     where,
@@ -106,10 +113,37 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  const user = await getAuthUser(request);
+  const scrapeId = await getSessionScrapeId(request);
+  authoriseScrapeUser(user!.scrapeUsers, scrapeId);
+
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "delete") {
+    const id = formData.get("id") as string;
+    await prisma.thread.delete({
+      where: { id },
+    });
+
+    return { success: true };
+  }
+
+  return null;
+}
+
 export default function Conversations({ loaderData }: Route.ComponentProps) {
   const [selectedThread, setSelectedThread] = useState<
     ThreadWithMessages | undefined
   >(loaderData.threads[0]);
+  const deleteFetcher = useFetcher();
+
+  useEffect(() => {
+    if (loaderData.threads) {
+      setSelectedThread(loaderData.threads[0]);
+    }
+  }, [loaderData.threads]);
 
   return (
     <Page
@@ -262,7 +296,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
             ))}
           </Stack>
           <Stack h="full" flex={1} bg="brand.gray.100">
-            <Center h="full" w="full">
+            <Center h="full" w="full" position={"relative"}>
               {selectedThread && (
                 <ChatBoxProvider
                   key={selectedThread.id}
@@ -278,6 +312,31 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                   </ChatboxContainer>
                 </ChatBoxProvider>
               )}
+
+              <Group position={"absolute"} top={0} right={0} p={4}>
+                <deleteFetcher.Form method="post">
+                  <input type="hidden" name="id" value={selectedThread?.id} />
+                  <input type="hidden" name="intent" value="delete" />
+                  <Tooltip
+                    content="Delete the conversation. Will be deleted for the user as well."
+                    showArrow
+                    positioning={{ placement: "left" }}
+                  >
+                    <IconButton
+                      colorPalette={"red"}
+                      variant={"subtle"}
+                      type="submit"
+                      size={"sm"}
+                    >
+                      {deleteFetcher.state === "submitting" ? (
+                        <Spinner size={"sm"} />
+                      ) : (
+                        <TbTrash />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </deleteFetcher.Form>
+              </Group>
             </Center>
           </Stack>
         </Flex>

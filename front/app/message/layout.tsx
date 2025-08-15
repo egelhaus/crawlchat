@@ -9,7 +9,13 @@ import {
   Center,
   Table,
 } from "@chakra-ui/react";
-import { TbBox, TbMessage, TbPointer, TbSettingsBolt } from "react-icons/tb";
+import {
+  TbBox,
+  TbMessage,
+  TbMessages,
+  TbPointer,
+  TbSettingsBolt,
+} from "react-icons/tb";
 import { Page } from "~/components/page";
 import type { Route } from "./+types/layout";
 import { getAuthUser } from "~/auth/middleware";
@@ -119,6 +125,21 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                       </Table.Cell>
                       <Table.Cell>
                         <Group>
+                          {!pair.queryMessage?.thread.isDefault && (
+                            <Tooltip
+                              content="View the conversation"
+                              showArrow
+                              positioning={{ placement: "top" }}
+                            >
+                              <Link asChild>
+                                <RouterLink
+                                  to={`/messages/conversations?id=${pair.queryMessage?.threadId}`}
+                                >
+                                  <TbMessages />
+                                </RouterLink>
+                              </Link>
+                            </Tooltip>
+                          )}
                           {pair.queryMessage?.thread.location && (
                             <CountryFlag
                               location={pair.queryMessage.thread.location}
@@ -162,12 +183,7 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
           </Stack>
         )}
       </Stack>
-
       <Outlet />
     </Page>
   );
-}
-
-export function shouldRevalidate() {
-  return false;
 }
