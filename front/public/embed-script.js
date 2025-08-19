@@ -65,14 +65,20 @@ class CrawlChatEmbed {
     return script?.getAttribute("data-id");
   }
 
+  getScrollbarWidth() {
+    return window.innerWidth - document.documentElement.clientWidth;
+  }
+
   show() {
     const div = document.getElementById(this.embedDivId);
     div.classList.add("open");
 
+    const overflowY = this.getScrollbarWidth() > 0 ? "scroll" : "hidden";
+
     this.lastScrollTop = window.scrollY;
     this.lastBodyStyle = document.body.style;
     document.body.style.position = "fixed";
-    document.body.style.overflowY = "scroll";
+    document.body.style.overflowY = overflowY;
     document.body.style.width = "100%";
     document.body.style.top = `-${this.lastScrollTop}px`;
 
