@@ -22,3 +22,49 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Firefox (all scrollbars) */
+* {
+  scrollbar-width: thin;          /* auto | thin | none */
+  scrollbar-color: #666 #111;     /* thumb | track */
+}
+
+/* Chrome, Edge, Safari (WebKit/Blink) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px; /* for horizontal scrollbars */
+}
+
+*::-webkit-scrollbar-track {
+  background: #111;  /* track */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #666; /* thumb */
+  border-radius: 6px;
+  border: 2px solid #111; /* space around thumb */
+}
+
+@media (prefers-color-scheme: dark) {
+  * {
+    scrollbar-color: #666 #111;  /* Firefox */
+  }
+  *::-webkit-scrollbar-track {
+    background: #111;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #666;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  * {
+    scrollbar-color: #aaa #f1f1f1;
+  }
+  *::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #888;
+  }
+}
