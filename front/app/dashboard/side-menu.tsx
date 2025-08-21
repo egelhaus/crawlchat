@@ -65,6 +65,7 @@ import { LogoChakra } from "./logo-chakra";
 import { Tooltip } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
 import { AppContext } from "./context";
+import { track } from "~/pirsch";
 
 function SideMenuItem({
   link,
@@ -233,6 +234,7 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
             <Link
               to={fetcher.data ? action.url(fetcher.data.input) : ""}
               target={action.external ? "_blank" : undefined}
+              onClick={() => track("progress-next", { id: action.id })}
             >
               {action.title}
               {action.icon ?? <TbArrowRight />}

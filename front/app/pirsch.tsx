@@ -7,7 +7,9 @@ export function track(name: string, meta: Record<string, any>) {
     return;
   }
 
-  vemetric.trackEvent(name, meta);
+  vemetric.trackEvent(name, {
+    eventData: meta,
+  });
 
   prisch(name, { meta });
 }
