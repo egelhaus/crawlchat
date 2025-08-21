@@ -197,6 +197,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   lowRatingQueries = lowRatingQueries.sort((a, b) => a.maxScore - b.maxScore);
 
   const dataGapMessages = scrapeId ? await fetchDataGaps(scrapeId) : [];
+  const nScrapeItems = scrapeId
+    ? await prisma.scrapeItem.count({
+        where: {
+          scrapeId,
+        },
+      })
+    : 0;
 
   return {
     user,
@@ -212,6 +219,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     latestQuestions,
     lowRatingQueries,
     dataGapMessages,
+    nScrapeItems,
   };
 }
 
@@ -412,7 +420,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             <TbPlus />
             New collection
           </Button>
-          {loaderData.scrape && (
+          {loaderData.scrape && loaderData.nScrapeItems > 0 && (
             <Button variant={"subtle"} colorPalette={"brand"} asChild>
               <a
                 href={`/w/${loaderData.scrape.slug ?? loaderData.scrapeId}`}

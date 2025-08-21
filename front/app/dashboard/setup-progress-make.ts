@@ -11,6 +11,11 @@ export async function getSetupProgressInput(
         userId,
       },
     }),
+    nScrapeItems: await prisma.scrapeItem.count({
+      where: {
+        scrapeId,
+      },
+    }),
     nMessages: await prisma.message.count({
       where: {
         scrapeId,
@@ -48,6 +53,9 @@ export async function getSetupProgressInput(
     scrape: await prisma.scrape.findFirstOrThrow({
       where: {
         id: scrapeId,
+      },
+      include: {
+        user: true,
       },
     }),
   };

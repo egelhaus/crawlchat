@@ -11,6 +11,7 @@ import {
   Avatar,
 } from "@chakra-ui/react";
 import {
+  TbArrowDown,
   TbArrowRight,
   TbBook,
   TbChartBarOff,
@@ -53,7 +54,7 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "~/components/ui/select";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   getPendingActions,
   getSkippedActions,
@@ -63,6 +64,7 @@ import {
 import { LogoChakra } from "./logo-chakra";
 import { Tooltip } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
+import { AppContext } from "./context";
 
 function SideMenuItem({
   link,
@@ -164,16 +166,16 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
   const fetcher = useFetcher<{
     input: SetupProgressInput;
   }>();
-  const [index, setIndex] = useState(0);
   const [skipped, setSkipped] = useState<string[] | undefined>(undefined);
-  const actions = useMemo(() => {
+  const { progressActions, setProgressActions } = useContext(AppContext);
+  useEffect(() => {
     if (skipped === undefined || fetcher.data === undefined) {
-      return [];
+      return;
     }
-    return getPendingActions(fetcher.data.input, skipped);
+    const actions = getPendingActions(fetcher.data.input, skipped);
+    setProgressActions(actions);
   }, [fetcher.data, skipped]);
-  const action = actions[index];
-  const topAction = actions[0];
+  const action = progressActions[0];
 
   useEffect(() => {
     fetcher.submit(null, {
@@ -200,39 +202,40 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
     setSkipped([...skipped, action.id]);
   }
 
-  function handleNext() {
-    setIndex(Math.min(index + 1, actions.length - 1));
-  }
-
-  function handlePrevious() {
-    setIndex(Math.max(index - 1, 0));
-  }
-
   if (!action) {
     return null;
   }
 
   return (
     <Stack gap={1}>
+      <Group fontSize={"xs"} opacity={0.5} gap={1}>
+        <Text>Next step</Text>
+        <TbArrowDown />
+      </Group>
       <Group>
-        <Tooltip content="Skip" positioning={{ placement: "top" }} showArrow>
-          <IconButton
-            variant={"outline"}
-            onClick={handleSkip}
-            colorPalette={"brand"}
-          >
-            <TbX />
-          </IconButton>
-        </Tooltip>
+        {action.canSkip && (
+          <Tooltip content="Skip" positioning={{ placement: "top" }} showArrow>
+            <IconButton
+              variant={"outline"}
+              onClick={handleSkip}
+              colorPalette={"brand"}
+            >
+              <TbX />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip
           content={action.description}
           positioning={{ placement: "top" }}
           showArrow
         >
           <Button variant={"solid"} flex={1} colorPalette={"brand"} asChild>
-            <Link to={action.url!}>
+            <Link
+              to={fetcher.data ? action.url(fetcher.data.input) : ""}
+              target={action.external ? "_blank" : undefined}
+            >
               {action.title}
-              <TbArrowRight />
+              {action.icon ?? <TbArrowRight />}
             </Link>
           </Button>
         </Tooltip>
