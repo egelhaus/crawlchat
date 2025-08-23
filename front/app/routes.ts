@@ -90,7 +90,7 @@ export default [
     route("pricing", "landing/pricing.tsx"),
   ]),
 
-  ...prefix("admin", [
+  ...prefix("admin-fowl", [
     index("admin/page.tsx"),
   ]),
 
