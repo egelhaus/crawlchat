@@ -132,10 +132,7 @@ export default function LoginPage() {
   }, [mailSent]);
 
   return (
-    <div
-      data-theme="brand"
-      className="flex h-screen w-screen gap-2 items-stretch"
-    >
+    <div className="flex h-screen w-screen gap-2 items-stretch">
       <div
         className={cn(
           "flex-col items-center justify-center bg-base-300 flex-1",

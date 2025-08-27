@@ -1026,7 +1026,7 @@ function Hero() {
 
 export function LandingPage({ children }: PropsWithChildren) {
   return (
-    <div data-theme="brand" className="bg-base-200 font-aeonik">
+    <div className="bg-base-200 font-aeonik">
       <div
         className={cn(
           "hidden md:block aspect-[1440/960] w-full bg-[url('/new-landing/clouds.png')]",
