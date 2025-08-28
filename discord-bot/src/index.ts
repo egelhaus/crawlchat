@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import {
+  ActivityType,
   ChannelType,
   Client,
   Events,
@@ -389,6 +390,17 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
   }
 
   await updateMessageRating(await reaction.message.fetch());
+});
+
+client.on(Events.ClientReady, async () => {
+  console.log("Client ready");
+  if (process.env.BOT_STATUS) {
+    client.user?.setActivity({
+      type: ActivityType.Custom,
+      state: process.env.BOT_STATUS,
+      name: process.env.BOT_STATUS,
+    });
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
