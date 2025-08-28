@@ -549,7 +549,12 @@ function ToolItem({
           <img src={icon} alt={title} className="w-6 h-6" />
         ) : (
           <div>
-            <div className="text-3xl bg-primary-subtle p-4 rounded-full">
+            <div
+              className={cn(
+                "text-3xl bg-primary-content p-4 rounded-full",
+                "text-primary w-fit border border-primary/20"
+              )}
+            >
               {icon}
             </div>
           </div>
@@ -1103,7 +1108,7 @@ export function Flow() {
       </HeadingDescription>
 
       <div
-        className={cn(`grid grid-cols-1 grid-rows-[4] md:grid-cols-3 gap-6`)}
+        className={cn(`grid grid-cols-1 grid-rows-4 md:grid-cols-3 md:grid-rows-2 gap-6`)}
       >
         <FlowCard
           title="Knowledge base with your documentation"
