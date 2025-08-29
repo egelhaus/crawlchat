@@ -11,6 +11,21 @@ import { z } from "zod";
 import { Flow } from "./flow";
 import { makeIndexer } from "../indexer/factory";
 
+const friction = {
+  low: {
+    questionRelevanceScore: 0.1,
+    contextRelevanceScore: 0.5,
+  },
+  medium: {
+    questionRelevanceScore: 0.2,
+    contextRelevanceScore: 0.4,
+  },
+  high: {
+    questionRelevanceScore: 0.3,
+    contextRelevanceScore: 0.3,
+  },
+};
+
 export async function decomposeQuestion(question: string) {
   const agent = new SimpleAgent({
     id: "decomposer",
@@ -85,10 +100,7 @@ export async function getRelevantScore(
   return result;
 }
 
-export async function analyseMessage(
-  question: string,
-  answer: string,
-) {
+export async function analyseMessage(question: string, answer: string) {
   const agent = new SimpleAgent({
     id: "analyser",
     prompt: `
@@ -149,45 +161,24 @@ export async function analyseMessage(
   };
 }
 
-function isDataGap(
-  sources: MessageSourceLink[],
-  questionRelevanceScore: number
-) {
-  const friction = {
-    low: {
-      questionRelevanceScore: 0.1,
-      contextRelevanceScore: 0.6,
-    },
-    medium: {
-      questionRelevanceScore: 0.2,
-      contextRelevanceScore: 0.5,
-    },
-    high: {
-      questionRelevanceScore: 0.3,
-      contextRelevanceScore: 0.4,
-    },
-  };
-
+function shouldCheckForDataGap(sources: MessageSourceLink[]) {
   const frictionLevel = friction["medium"];
-
   const avgScore =
     sources.reduce((acc, s) => acc + (s.score ?? 0), 0) / sources.length;
+  return avgScore <= frictionLevel.contextRelevanceScore;
+}
 
-  return (
-    // it actually searched the knowledge base
-    sources.length > 0 &&
-    // question is relevant to the context
-    questionRelevanceScore >= frictionLevel.questionRelevanceScore &&
-    // poor answer
-    avgScore <= frictionLevel.contextRelevanceScore
-  );
+function isDataGap(questionRelevanceScore: number) {
+  const frictionLevel = friction["medium"];
+
+  return questionRelevanceScore >= frictionLevel.questionRelevanceScore;
 }
 
 export async function fillMessageAnalysis(
   messageId: string,
   question: string,
   answer: string,
-  sources: MessageSourceLink[],
+  sources: MessageSourceLink[]
 ) {
   try {
     const message = await prisma.message.findFirstOrThrow({
@@ -201,21 +192,9 @@ export async function fillMessageAnalysis(
       return;
     }
 
-    const partialAnalysis = await analyseMessage(
-      question,
-      answer,
-    );
-
-    const questionRelevanceScore = await getRelevantScore(
-      await decomposeQuestion(question),
-      message.scrape
-    );
-
-    const dataGap =
-      partialAnalysis && isDataGap(sources, questionRelevanceScore.halfMaxavg);
-
+    const partialAnalysis = await analyseMessage(question, answer);
     const analysis: MessageAnalysis = {
-      questionRelevanceScore: questionRelevanceScore.avg,
+      questionRelevanceScore: null,
       questionSentiment: partialAnalysis?.questionSentiment ?? null,
       dataGapTitle: null,
       dataGapDescription: null,
@@ -223,12 +202,24 @@ export async function fillMessageAnalysis(
       dataGapDone: false,
     };
 
-    if (dataGap) {
-      analysis.dataGapTitle = partialAnalysis?.dataGapTitle ?? null;
-      analysis.dataGapDescription = partialAnalysis?.dataGapDescription ?? null;
-    }
+    const checkForDataGap = shouldCheckForDataGap(sources);
 
-    console.log({ dataGap, analysis });
+    if (checkForDataGap) {
+      const questionRelevanceScore = await getRelevantScore(
+        await decomposeQuestion(question),
+        message.scrape
+      );
+
+      const dataGap = isDataGap(questionRelevanceScore.halfMaxavg);
+
+      if (dataGap) {
+        analysis.dataGapTitle = partialAnalysis?.dataGapTitle ?? null;
+        analysis.dataGapDescription =
+          partialAnalysis?.dataGapDescription ?? null;
+      }
+
+      console.log({ dataGap, analysis });
+    }
 
     await prisma.message.update({
       where: { id: messageId },
