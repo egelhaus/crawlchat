@@ -24,23 +24,25 @@ export default function WelcomeEmail() {
       }}>
         {`Hello 👋
 
-Welcome to **CrawlChat**. You are at the right place to add AI support chatbot for your _website_, _Discord server_, or _Slack_.
+Welcome to **CrawlChat**. You are at the right place to add AI support chatbot for your _website_, _Discord server_, _Slack_ workspace, or as _MCP_ server.
 
 In short here is what you can do with CrawlChat:
 
-- Add your own documentation as knowledge base by **scraping**
-- Upload **PDFs** as knowledge base
-- Embed the AI chatbot on your website, Discord server, or Slack
-- Enable **support tickets** for your users
-- If no documentation available for queries, users create a support ticket
-- Resolve them manually or with **AI**
-- Monitor and analyze queries, data growth, and more
+- Set up the knowledge base from your website, files, Notions pages, etc.
+- Embed the chatbot on your website
+- Add bot to your Discord server or Slack workspace
+- Set up MCP server for your documentation
+- View the reports of queries, data gaps, and more
+
+You can test out the platform for your use case and upgrade to the paid plans to get following benefits:
+
+- Best AI models
+- Show sources for answers
+- Add team members
 
 Here are few links to get you started:
 
 - [Ask any query](https://crawlchat.app/w/crawlchat)
-- [Guides](https://guides.crawlchat.app)
-- [Roadmap](https://crawlchat.features.vote/roadmap)
 - [Discord](https://discord.gg/zW3YmCRJkC)
 
 Looking forward to see you integrate CrawlChat in your products and services 🚀
