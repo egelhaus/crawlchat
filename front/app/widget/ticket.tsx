@@ -85,6 +85,11 @@ export async function action({ params, request }: Route.ActionArgs) {
       scrape: {
         include: {
           user: true,
+          scrapeUsers: {
+            include: {
+              user: true,
+            },
+          },
         },
       },
     },
@@ -159,20 +164,26 @@ export async function action({ params, request }: Route.ActionArgs) {
       thread.ticketNumber !== null &&
       thread.ticketNumber !== undefined &&
       thread.ticketKey &&
-      thread.title &&
-      (thread.scrape.user.settings?.ticketEmailUpdates ?? true)
+      thread.title
     ) {
-      await sendReactEmail(
-        thread.scrape.user.email,
-        `New message on ticket (#${thread.ticketNumber})`,
-        <TicketAdminMessageEmail
-          scrapeTitle={thread.scrape.title ?? "CrawlChat"}
-          ticketNumber={thread.ticketNumber}
-          title={thread.title}
-          message={content}
-          email={thread.ticketUserEmail}
-        />
-      );
+      for (const scrapeUser of thread.scrape.scrapeUsers) {
+        if (
+          scrapeUser.user &&
+          (scrapeUser.user.settings?.ticketEmailUpdates ?? true)
+        ) {
+          await sendReactEmail(
+            thread.scrape.user.email,
+            `New message on ticket (#${thread.ticketNumber})`,
+            <TicketAdminMessageEmail
+              scrapeTitle={thread.scrape.title ?? "CrawlChat"}
+              ticketNumber={thread.ticketNumber}
+              title={thread.title}
+              message={content}
+              email={thread.ticketUserEmail}
+            />
+          );
+        }
+      }
     }
 
     return { message };

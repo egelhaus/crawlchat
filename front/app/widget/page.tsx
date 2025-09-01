@@ -239,6 +239,11 @@ export async function action({ request, params }: Route.ActionArgs) {
       where: { id: scrapeId },
       include: {
         user: true,
+        scrapeUsers: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -283,18 +288,23 @@ export async function action({ request, params }: Route.ActionArgs) {
       />
     );
 
-    if (scrape.user.settings?.ticketEmailUpdates ?? true) {
-      await sendReactEmail(
-        scrape.user.email,
-        `New ticket (#${ticketNumber})`,
-        <TicketAdminCreateEmail
-          scrapeTitle={scrape.title ?? "CrawlChat"}
-          ticketNumber={ticketNumber}
-          title={title}
-          message={message}
-          email={email}
-        />
-      );
+    for (const scrapeUser of scrape.scrapeUsers) {
+      if (
+        scrapeUser.user &&
+        (scrapeUser.user.settings?.ticketEmailUpdates ?? true)
+      ) {
+        await sendReactEmail(
+          scrapeUser.user.email,
+          `New ticket (#${ticketNumber})`,
+          <TicketAdminCreateEmail
+            scrapeTitle={scrape.title ?? "CrawlChat"}
+            ticketNumber={ticketNumber}
+            title={title}
+            message={message}
+            email={email}
+          />
+        );
+      }
     }
 
     const customTags = getCustomTags(new URL(request.url));
