@@ -19,6 +19,7 @@ model User {
   name                String?
   photo               String?
   settings            UserSettings?
+  billingEmail        String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

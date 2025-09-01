@@ -43,7 +43,7 @@ export async function action({ request }: Route.ActionArgs) {
   // Get user and 400 if not found
   const userEmail = payload.data.attributes.user_email;
   const user = await prisma.user.findFirst({
-    where: { email: userEmail },
+    where: { OR: [{ email: userEmail }, { billingEmail: userEmail }] },
   });
   if (!user) {
     return Response.json({ message: "User not found" }, { status: 400 });
