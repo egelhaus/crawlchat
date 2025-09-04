@@ -194,6 +194,7 @@ enum MessageChannel {
   mcp
   discord
   slack
+  widget
 }
 
 enum MessageRating {

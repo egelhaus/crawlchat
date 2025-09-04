@@ -5,6 +5,7 @@ import {
   Prisma,
   prisma,
   RichBlockConfig,
+  MessageChannel,
   Scrape,
 } from "libs/prisma";
 import { getConfig } from "./llm/config";
@@ -58,6 +59,7 @@ export type Answerer = (
     prompt?: string;
     showSources?: boolean;
     actions?: ApiAction[];
+    channel?: MessageChannel;
   }
 ) => Promise<AnswerCompleteEvent | null>;
 
@@ -155,7 +157,7 @@ export const baseAnswerer: Answerer = async (
   const llmConfig = getConfig(scrape.llmModel);
 
   const richBlocks = scrape.richBlocksConfig?.blocks ?? [];
-  if (scrape.ticketingEnabled) {
+  if (scrape.ticketingEnabled && options?.channel === "widget") {
     richBlocks.push(createTicketRichBlock);
   }
 
