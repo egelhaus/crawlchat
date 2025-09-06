@@ -168,7 +168,7 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
           </div>
         )}
         <div
-          className="tooltip tooltip-right w-full"
+          className="tooltip w-full"
           data-tip={action.description}
         >
           <Link
