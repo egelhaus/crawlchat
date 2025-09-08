@@ -1544,7 +1544,8 @@ function Gallery() {
         className={cn(
           "flex justify-center items-center",
           "bg-base-100 aspect-video rounded-xl shadow-xl",
-          "overflow-hidden mb-4 relative"
+          "overflow-hidden mb-4 relative",
+          "border border-base-300"
         )}
       >
         {isLoading && (

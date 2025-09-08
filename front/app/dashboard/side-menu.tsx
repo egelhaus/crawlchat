@@ -374,7 +374,7 @@ export function SideMenu({
       </div>
 
       <div className="p-4 flex flex-col gap-4">
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center items-center gap-1">
           <div className="tooltip" data-tip="Join on Discord">
             <a
               href="https://discord.gg/zW3YmCRJkC"
@@ -387,6 +387,16 @@ export function SideMenu({
           <div className="tooltip" data-tip="Get assistance">
             <Link to="/assistance" className="btn btn-sm btn-square">
               <TbHelp />
+            </Link>
+          </div>
+
+          <div className="tooltip" data-tip="Ask AI">
+            <Link
+              to="/w/crawlchat"
+              className="btn btn-sm btn-square"
+              target="_blank"
+            >
+              <TbMessage />
             </Link>
           </div>
         </div>
@@ -403,7 +413,7 @@ export function SideMenu({
             total={totalMessages}
           />
           <CreditProgress
-            title="Scrapes"
+            title="Pages"
             used={usedScrapes}
             total={totalScrapes}
           />

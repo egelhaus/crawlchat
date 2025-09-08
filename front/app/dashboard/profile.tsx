@@ -186,7 +186,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                         target="_blank"
                       >
                         <TbCrown />
-                        Upgrade to Starter
+                        Upgrade to Starter 🚀
                       </a>
 
                       <a
@@ -197,7 +197,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                         target="_blank"
                       >
                         <TbCrown />
-                        To Starter
+                        To Starter 🚀
                       </a>
 
                       <a
@@ -208,7 +208,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                         target="_blank"
                       >
                         <TbCrown />
-                        Upgrade to Pro
+                        Upgrade to Pro 🚀
                       </a>
 
                       <a
@@ -219,7 +219,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                         target="_blank"
                       >
                         <TbCrown />
-                        To Pro
+                        To Pro 🚀
                       </a>
                     </>
                   )}
