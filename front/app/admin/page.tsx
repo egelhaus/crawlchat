@@ -10,6 +10,7 @@ import { getAuthUser } from "~/auth/middleware";
 import { redirect } from "react-router";
 import { prisma } from "libs/prisma";
 import { MarkdownProse } from "~/widget/markdown-prose";
+import { getQueryString } from "libs/llm-message";
 
 type UserDetail = {
   user: User;
@@ -167,7 +168,7 @@ function MessagesTable({
         <tbody>
           {messageDetails.map((messageDetail) => (
             <tr key={messageDetail.message.id}>
-              <td>{(messageDetail.message.llmMessage as any).content}</td>
+              <td>{getQueryString((messageDetail.message.llmMessage as any).content)}</td>
               <td>{messageDetail.scrape.title}</td>
               <td>{messageDetail.user.email}</td>
               <td>
