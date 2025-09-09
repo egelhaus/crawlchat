@@ -122,7 +122,7 @@ export async function action({ request }: { request: Request }) {
       type = "scrape_web";
     }
 
-    if (formData.has("versionsToSkip")) {
+    if (formData.get("versionsToSkip")) {
       const value = formData.get("versionsToSkip") as string;
       skipPageRegex += `,${value
         .split(",")
