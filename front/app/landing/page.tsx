@@ -22,6 +22,7 @@ import {
   TbClock,
   TbCode,
   TbColorSwatch,
+  TbCrown,
   TbDashboard,
   TbDatabase,
   TbFile,
@@ -818,28 +819,35 @@ function PricingBox({
   items: PricingItem[];
   free?: boolean;
   href?: string;
-  payLabel?: string
+  payLabel?: string;
 }) {
   return (
     <div
       className={cn(
         "flex-1 bg-base-100 shadow-md border border-base-300 rounded-2xl relative",
-        popular && "rounded-tl-none"
+        popular && "bg-primary text-primary-content"
       )}
     >
       {popular && (
         <div
           className={cn(
-            "bg-primary-subtle border border-base-300 absolute top-0 left-[-1px] translate-y-[-100%]",
-            "text-sm text-primary px-2 py-1 rounded-t-lg font-medium flex items-center gap-2"
+            "bg-primary-subtle border border-base-300 absolute",
+            "translate-y-[-40%] top-0 right-0 translate-x-[10%]",
+            "text-sm text-primary px-3 py-2 font-medium flex items-center gap-2 rounded-xl",
+            "bg-base-200 shadow-2xl"
           )}
         >
-          <img src="/new-landing/crown.png" alt="Popular" className="w-4 h-4" />
+          <TbCrown />
           Popular
         </div>
       )}
 
-      <div className={cn("p-6 border-b border-base-300")}>
+      <div
+        className={cn(
+          "p-6 border-b border-base-300",
+          popular && "border-base-100/20"
+        )}
+      >
         <h4 className="text-2xl font-bold font-radio-grotesk">{title}</h4>
         <p className="opacity-50 font-medium">{description}</p>
       </div>
@@ -860,7 +868,12 @@ function PricingBox({
                 </span>
               )}
               {!item.excluded && (
-                <span className="text-success">
+                <span
+                  className={cn(
+                    "text-success",
+                    popular && "text-primary-content"
+                  )}
+                >
                   <TbCircleCheckFilled size={20} />
                 </span>
               )}
@@ -870,11 +883,15 @@ function PricingBox({
         </ul>
         <div className="w-full">
           <Button
-            className="w-full"
-            variant={popular ? "solid" : "outline"}
+            className={cn(
+              "w-full text-xl p-2",
+              popular &&
+                "border-base-100 text-base-100 hover:bg-base-100 hover:text-primary"
+            )}
+            variant={"outline"}
             href={href}
           >
-            {payLabel ?? (free ? "Try it out" : "🚀 Purchase")}
+            {payLabel ?? (free ? "Try it out" : "Purchase")}
             <TbArrowRight />
           </Button>
         </div>
@@ -925,9 +942,9 @@ export function PricingBoxes({
           { text: `${hobbyPlan.limits.scrapes} collections` },
           { text: `${hobbyPlan.limits.teamMembers} team members` },
           { text: "Base AI models" },
+          { text: "Support tickets" },
           { text: "MCP server", excluded: true },
           { text: "Discord bot", excluded: true },
-          { text: "Support tickets" },
           { text: "GitHub issues", excluded: true },
           { text: "Image inputs", excluded: true },
         ]}
@@ -944,9 +961,9 @@ export function PricingBoxes({
           { text: `${starterPlan.limits.scrapes} collections` },
           { text: `${starterPlan.limits.teamMembers} team members` },
           { text: "Smart AI models" },
+          { text: "Support tickets" },
           { text: "MCP server" },
           { text: "Discord bot" },
-          { text: "Support tickets" },
           { text: "GitHub issues", excluded: true },
           { text: "Image inputs", excluded: true },
         ]}
@@ -963,9 +980,9 @@ export function PricingBoxes({
           { text: `${proPlan.limits.scrapes} collections` },
           { text: `${proPlan.limits.teamMembers} team members` },
           { text: "Reasoning AI models" },
+          { text: "Support tickets" },
           { text: "MCP server" },
           { text: "Discord bot" },
-          { text: "Support tickets" },
           { text: "GitHub issues" },
           { text: "Image inputs" },
         ]}
@@ -1170,11 +1187,11 @@ export function Nav({ changeLogDate }: { changeLogDate?: string }) {
 
       <div className="flex items-center gap-8">
         <div className="items-center gap-8 hidden md:flex">
-          <NavLink href="/#how-it-works">How it works</NavLink>
           <NavLink href="/#pricing">Pricing</NavLink>
           <NavLink href="/changelog" tooltip={changeLogDate}>
             Changelog
           </NavLink>
+          <NavLink href="/blog">Blog</NavLink>
           <NavLink href="/public-bots">Public bots</NavLink>
         </div>
 
@@ -1186,7 +1203,9 @@ export function Nav({ changeLogDate }: { changeLogDate?: string }) {
 
 export function ctaClassNames(primary: boolean) {
   return cn(
-    "text-2xl border-2 border-primary px-8 py-4 rounded-xl font-medium flex items-center gap-2 transition-all hover:translate-y-[-2px]",
+    "text-2xl border-2 border-primary px-8 py-4 rounded-xl font-medium",
+    "flex items-center gap-2 transition-all hover:translate-y-[-2px]",
+    "text-center justify-center",
     !primary && "text-primary hover:bg-primary-subtle",
     primary && "bg-primary text-primary-content"
   );
@@ -1249,13 +1268,18 @@ function Hero() {
         <span className="hidden">.</span>
       </h2>
 
-      <div className="flex justify-center gap-4 my-8 flex-wrap">
+      <div
+        className={cn(
+          "flex justify-center gap-4 my-8 flex-wrap",
+          "flex-col sm:flex-row"
+        )}
+      >
         <button className={ctaClassNames(false)} onClick={handleAskCrawlChat}>
           <TbMessage />
           Ask AI
         </button>
         <a className={ctaClassNames(true)} href="/login">
-          Create your chatbot
+          Start 7 days trial
           <TbArrowRight />
         </a>
       </div>
@@ -1852,6 +1876,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
       </Container>
 
       <Container>
+        <CustomTestimonials />
+      </Container>
+
+      <Container>
         <Stats
           messagesThisWeek={loaderData.messagesThisWeek}
           messagesDay={loaderData.messagesDay}
@@ -1861,10 +1889,6 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <Container>
         <Works />
-      </Container>
-
-      <Container>
-        <CustomTestimonials />
       </Container>
 
       <Container>
