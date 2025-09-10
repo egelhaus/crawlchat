@@ -14,9 +14,7 @@ import { Message, MessageChannel } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
-import {
-  RAGAgentCustomMessage,
-} from "./llm/flow-jasmine";
+import { RAGAgentCustomMessage } from "./llm/flow-jasmine";
 import { extractCitations } from "libs/citation";
 import { BaseKbProcesserListener } from "./kb/listener";
 import { makeKbProcesser } from "./kb/factory";
@@ -220,9 +218,19 @@ expressWs.app.ws("/", (ws: any, req) => {
   let userId: string | null = null;
 
   ws.on("message", async (msg: Buffer | string) => {
-    console.log("Socket message", msg.toString());
     try {
       const message = JSON.parse(msg.toString());
+
+      if (
+        message?.data?.query
+          .toLowerCase()
+          .includes(
+            "server side rendering with paremterized videos in a studio"
+          )
+      ) {
+        ws.close();
+        return;
+      }
 
       if (message.type === "join-room") {
         const authHeader = message.data.headers.Authorization;
