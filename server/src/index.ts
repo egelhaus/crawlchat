@@ -228,6 +228,7 @@ expressWs.app.ws("/", (ws: any, req) => {
             "server side rendering with paremterized videos in a studio"
           )
       ) {
+        console.log("Closing spam socket");
         ws.close();
         return;
       }
