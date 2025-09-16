@@ -81,7 +81,7 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-2 h-full justify-center items-center">
-        <div role="alert" className="alert alert-info w-82 mb-2 text-base-100">
+        {/* <div role="alert" className="alert alert-info w-82 mb-2 text-base-100">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -96,7 +96,7 @@ export default function LoginPage() {
             ></path>
           </svg>
           <span>Sign in to start your 7 days trial.</span>
-        </div>
+        </div> */}
         <fetcher.Form method="post">
           <div
             className={cn(

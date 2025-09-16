@@ -918,7 +918,7 @@ export function PricingBoxes({
 }) {
   return (
     <>
-      {/* <PricingBox
+      <PricingBox
           free
           title="Free"
           description="Try it out now"
@@ -929,15 +929,15 @@ export function PricingBoxes({
             { text: `${freePlan.limits.scrapes} collection` },
             { text: `${freePlan.limits.teamMembers} team member` },
             { text: "Base AI models", excluded: true },
+            { text: "Support tickets", excluded: true },
             { text: "MCP server", excluded: true },
             { text: "Discord bot", excluded: true },
-            { text: "Support tickets", excluded: true },
             { text: "GitHub issues", excluded: true },
             { text: "Image inputs", excluded: true },
           ]}
           href="/login"
-        /> */}
-      <PricingBox
+        />
+      {/* <PricingBox
         title="Hobby"
         description="Explore the platform"
         price={`$${hobbyPlan.price}`}
@@ -958,7 +958,7 @@ export function PricingBoxes({
         }
         payLabel="Start 7 days trial"
         onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
-      />
+      /> */}
       <PricingBox
         title="Starter"
         description="Start your journey with CrawlChat"
@@ -1296,7 +1296,7 @@ function Hero() {
           Ask AI
         </button>
         <a className={ctaClassNames(true)} href="/login">
-          Start 7 days trial
+          Try it out now
           <TbArrowRight />
         </a>
       </div>

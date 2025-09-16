@@ -23,13 +23,6 @@ export function UpgradeModal({
   const paymentFetcher = useFetcher();
 
   useEffect(() => {
-    if (scrape) return;
-    if (user.plan?.planId !== "free") return;
-    (document.getElementById("upgrade-modal") as HTMLInputElement).checked =
-      true;
-  }, []);
-
-  useEffect(() => {
     if (paymentFetcher.data) {
       location.href = paymentFetcher.data.url;
     }

@@ -334,7 +334,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   }, [containerRef, loaderData]);
 
   useEffect(() => {
-    if (loaderData.noScrapes && loaderData.user?.plan?.planId !== "free") {
+    if (loaderData.noScrapes) {
       showModal("new-collection-dialog");
     }
   }, [loaderData.noScrapes, loaderData.user]);
@@ -352,8 +352,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     }
   }, [newCollectionFetcher.data]);
 
-  const canCreateCollection = loaderData.user?.plan?.planId !== "free";
-
   return (
     <Page
       title="Home"
@@ -363,7 +361,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           <button
             className="btn btn-soft"
             onClick={() => showModal("new-collection-dialog")}
-            disabled={!canCreateCollection}
           >
             <TbPlus />
             Collection
@@ -400,7 +397,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             <button
               className="btn btn-primary"
               onClick={() => showModal("new-collection-dialog")}
-              disabled={!canCreateCollection}
             >
               <TbPlus />
               New collection
