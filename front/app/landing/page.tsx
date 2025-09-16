@@ -910,15 +910,16 @@ export function PricingBoxes({
   hobbyPlan,
   onClick,
 }: {
-  freePlan: Plan;
+  freePlan?: Plan;
   starterPlan: Plan;
   proPlan: Plan;
-  hobbyPlan: Plan;
+  hobbyPlan?: Plan;
   onClick?: (planId: string) => void;
 }) {
   return (
     <>
-      <PricingBox
+      {freePlan && (
+        <PricingBox
           free
           title="Free"
           description="Try it out now"
@@ -937,6 +938,7 @@ export function PricingBoxes({
           ]}
           href="/login"
         />
+      )}
       {/* <PricingBox
         title="Hobby"
         description="Explore the platform"

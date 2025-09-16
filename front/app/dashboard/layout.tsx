@@ -4,7 +4,7 @@ import { AppContext, useApp } from "./context";
 import { getAuthUser } from "~/auth/middleware";
 import { SideMenu } from "./side-menu";
 import { useEffect } from "react";
-import { PLAN_FREE, PLAN_PRO, PLAN_STARTER, PLAN_HOBBY } from "libs/user-plan";
+import { PLAN_FREE, PLAN_PRO, PLAN_STARTER } from "libs/user-plan";
 import { planMap } from "libs/user-plan";
 import { prisma } from "libs/prisma";
 import { getSession } from "~/session";
@@ -78,10 +78,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     openTickets,
     scrape,
     dataGapMessages,
-    freePlan: PLAN_FREE,
     starterPlan: PLAN_STARTER,
     proPlan: PLAN_PRO,
-    hobbyPlan: PLAN_HOBBY,
   };
 }
 
@@ -145,12 +143,8 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       </div>
       <Toaster position="bottom-right" />
       <UpgradeModal
-        freePlan={loaderData.freePlan}
         starterPlan={loaderData.starterPlan}
         proPlan={loaderData.proPlan}
-        hobbyPlan={loaderData.hobbyPlan}
-        scrape={loaderData.scrape}
-        user={loaderData.user}
       />
     </AppContext.Provider>
   );

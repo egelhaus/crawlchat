@@ -1,4 +1,3 @@
-import type { Scrape, User } from "libs/prisma";
 import type { Plan } from "libs/user-plan";
 import { useEffect } from "react";
 import { TbCrown } from "react-icons/tb";
@@ -6,19 +5,11 @@ import { useFetcher } from "react-router";
 import { PricingBoxes } from "~/landing/page";
 
 export function UpgradeModal({
-  freePlan,
   starterPlan,
   proPlan,
-  hobbyPlan,
-  scrape,
-  user,
 }: {
-  freePlan: Plan;
   starterPlan: Plan;
   proPlan: Plan;
-  hobbyPlan: Plan;
-  scrape?: Scrape;
-  user: User;
 }) {
   const paymentFetcher = useFetcher();
 
@@ -43,35 +34,26 @@ export function UpgradeModal({
   }
 
   return (
-    <>
-      <input type="checkbox" id="upgrade-modal" className="modal-toggle" />
-      <dialog className="modal z-90">
-        <div className="modal-box w-11/12 max-w-5xl">
-          <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
-            <TbCrown />
-            Upgrade
-          </h3>
-          <p className="text-base-content/50 mb-4">
-            Choose the plan that best fits your needs. Start your 7 days free
-            trial using the <span className="font-bold">Hobby plan</span> if you
-            want to explore the platform.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4">
-            <PricingBoxes
-              freePlan={freePlan}
-              starterPlan={starterPlan}
-              proPlan={proPlan}
-              hobbyPlan={hobbyPlan}
-              onClick={handlePayClick}
-            />
-          </div>
-          <div className="mt-2 flex justify-end">
-            <a className="link text-xs link-hover" href="/logout">
-              Logout
-            </a>
-          </div>
+    <dialog id="upgrade-modal" className="modal z-90">
+      <div className="modal-box w-11/12 max-w-4xl">
+        <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+          <TbCrown />
+          Upgrade
+        </h3>
+        <p className="text-base-content/50 mb-4">
+          Choose the plan that best fits your needs
+        </p>
+        <div className="flex flex-col md:flex-row gap-4">
+          <PricingBoxes
+            starterPlan={starterPlan}
+            proPlan={proPlan}
+            onClick={handlePayClick}
+          />
         </div>
-      </dialog>
-    </>
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
   );
 }

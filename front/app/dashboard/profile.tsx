@@ -14,6 +14,7 @@ import { getSubscription } from "~/lemonsqueezy";
 import { planMap } from "libs/user-plan";
 import { makeMeta } from "~/meta";
 import { getPaymentGateway } from "~/payment/factory";
+import { showModal } from "~/components/daisy-utils";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -178,51 +179,13 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
                     </a>
                   )}
                   {!loaderData.subscription && (
-                    <>
-                      <a
-                        className="btn btn-primary btn-soft hidden md:flex"
-                        href={
-                          "https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
-                        }
-                        target="_blank"
-                      >
-                        <TbCrown />
-                        Upgrade to Starter 🚀
-                      </a>
-
-                      <a
-                        className="btn btn-primary btn-soft md:hidden"
-                        href={
-                          "https://beestack.lemonsqueezy.com/buy/a13beb2a-f886-4a9a-a337-bd82e745396a"
-                        }
-                        target="_blank"
-                      >
-                        <TbCrown />
-                        To Starter 🚀
-                      </a>
-
-                      <a
-                        className="btn btn-primary hidden md:flex"
-                        href={
-                          "https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
-                        }
-                        target="_blank"
-                      >
-                        <TbCrown />
-                        Upgrade to Pro 🚀
-                      </a>
-
-                      <a
-                        className="btn btn-primary md:hidden"
-                        href={
-                          "https://beestack.lemonsqueezy.com/buy/3a487266-72de-492d-8884-335c576f89c0"
-                        }
-                        target="_blank"
-                      >
-                        <TbCrown />
-                        To Pro 🚀
-                      </a>
-                    </>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => showModal("upgrade-modal")}
+                    >
+                      Upgrade
+                      <TbCrown />
+                    </button>
                   )}
                 </>
               }
