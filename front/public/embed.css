@@ -78,6 +78,12 @@
   --crawlchat-navbar-height: 60px;
 }
 
+@media (max-width: 768px) {
+  :root {
+    --crawlchat-sidepanel-width: 100vw;
+  }
+}
+
 #crawlchat-sidepanel {
   position: fixed;
   top: 0;
@@ -102,7 +108,7 @@
 }
 
 #crawlchat-sidepanel.hidden {
-  right: -120%;
+  right: -100%;
 }
 
 #__docusaurus.crawlchat-with-sidepanel {
