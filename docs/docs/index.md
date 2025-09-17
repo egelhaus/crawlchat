@@ -6,7 +6,7 @@ sidebar_position: 1
 
 CrawlChat is a platform where you can connect your documentation from different sources and get a AI chatbot that is trained on your documentation that you can connect to your website, or as a Discord, Slack bots where people can use it to get answers for there queries, or even as an MCP server so that your community members can fully integrate your documentation into their AI apps such as Cursor, Claude Code, and more.
 
-# Process
+## Process
 
 The process of CrawlChat workflow consists in 4 major steps at high level.
 
