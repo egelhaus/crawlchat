@@ -167,8 +167,15 @@ function MessagesTable({
         </thead>
         <tbody>
           {messageDetails.map((messageDetail) => (
-            <tr key={messageDetail.message.id}>
-              <td>{getQueryString((messageDetail.message.llmMessage as any).content)}</td>
+            <tr
+              key={messageDetail.message.id}
+              data-message-id={messageDetail.message.id}
+            >
+              <td>
+                {getQueryString(
+                  (messageDetail.message.llmMessage as any).content
+                )}
+              </td>
               <td>{messageDetail.scrape.title}</td>
               <td>{messageDetail.user.email}</td>
               <td>
