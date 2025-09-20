@@ -37,7 +37,14 @@ async function updateKnowledgeGroup(groupId: string) {
   const listener = new BaseKbProcesserListener(
     scrape,
     knowledgeGroup,
-    () => {}
+    () => {
+      hasEnoughCredits(scrape.userId, "scrapes", {
+        alert: {
+          scrapeId: scrape.id,
+          token: createToken(scrape.userId),
+        },
+      });
+    }
   );
 
   const processer = makeKbProcesser(listener, scrape, knowledgeGroup, {
