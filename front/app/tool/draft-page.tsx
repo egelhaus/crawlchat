@@ -124,7 +124,7 @@ export default function DraftPage({ loaderData }: Route.ComponentProps) {
         the context. Use <kbd className="kbd">Tab</kbd> to accept the
         suggestions or <kbd className="kbd">Esc</kbd> to cancel the suggestions.
       </p>
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 flex flex-col gap-2">
           <div
             contentEditable={urls.length > 0}
@@ -151,7 +151,7 @@ export default function DraftPage({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        <div className="w-80 flex flex-col gap-2">
+        <div className="w-full md:w-80 flex flex-col gap-2">
           <p>Add any page as context for the draft.</p>
           <urlFetcher.Form method="post">
             <div className="flex gap-2">
