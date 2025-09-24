@@ -51,7 +51,7 @@ export default function DiscordBotPage() {
             </div>
           </div>
           <h2 className="text-2xl">
-            CrawlChat - AI Chatbot for your documents
+            CrawlChat - AI Chatbot for your tech documentation
           </h2>
           <p>
             Discord bot that can answer your community queries with the

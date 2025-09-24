@@ -55,9 +55,9 @@ import cn from "@meltdownjs/cn";
 
 export function meta() {
   return makeMeta({
-    title: "CrawlChat - AI Chatbot for your documentation and support",
+    title: "CrawlChat - AI Chatbot for your tech documentation",
     description:
-      "Make AI chatbot from your documentation that handles your support queries. Embed it in your website, Discord, or Slack.",
+      "Make AI chatbot from your tech documentation that can answer any question from your community. Embed it in your website, Discord, or Slack.",
   });
 }
 
