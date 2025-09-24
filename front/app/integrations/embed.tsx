@@ -63,7 +63,6 @@ export async function action({ request }: Route.ActionArgs) {
     buttonTextColor: null,
     showLogo: null,
     tooltip: null,
-    private: false,
     logoUrl: null,
     applyColorsToChatbox: null,
   };
