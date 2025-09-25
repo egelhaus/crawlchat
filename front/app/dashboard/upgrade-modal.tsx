@@ -7,9 +7,11 @@ import { PricingBoxes } from "~/landing/page";
 export function UpgradeModal({
   starterPlan,
   proPlan,
+  hobbyPlan,
 }: {
   starterPlan: Plan;
   proPlan: Plan;
+  hobbyPlan: Plan;
 }) {
   const paymentFetcher = useFetcher();
 
@@ -47,6 +49,7 @@ export function UpgradeModal({
           <PricingBoxes
             starterPlan={starterPlan}
             proPlan={proPlan}
+            hobbyPlan={hobbyPlan}
             onClick={handlePayClick}
           />
         </div>
