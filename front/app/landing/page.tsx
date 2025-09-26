@@ -1209,7 +1209,7 @@ export function Footer() {
   );
 }
 
-export function Nav({ changeLogDate }: { changeLogDate?: string }) {
+export function Nav() {
   return (
     <nav className="flex items-center justify-between gap-2 lg:py-6">
       <Logo />
@@ -1218,7 +1218,7 @@ export function Nav({ changeLogDate }: { changeLogDate?: string }) {
         <div className="items-center gap-8 hidden md:flex">
           <NavLink href="/#pricing">Pricing</NavLink>
           <NavLink href="https://docs.crawlchat.app">Docs</NavLink>
-          <NavLink href="/changelog" tooltip={changeLogDate}>
+          <NavLink href="/changelog">
             Changelog
           </NavLink>
           <NavLink href="/blog">Blog</NavLink>
