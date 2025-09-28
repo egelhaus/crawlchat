@@ -80,7 +80,6 @@ export async function getRelevantScore(
     scores,
     hit,
   };
-  console.log("scores", result);
   return result;
 }
 
@@ -146,7 +145,12 @@ async function getDataGap(question: string, context: string[]) {
   };
 }
 
-export async function analyseMessage(question: string, answer: string) {
+export async function analyseMessage(
+  question: string,
+  answer: string,
+  recentQuestions: string[],
+  threadQuestions: string[]
+) {
   const agent = new SimpleAgent({
     id: "analyser",
     prompt: `
@@ -160,6 +164,14 @@ export async function analyseMessage(question: string, answer: string) {
     <answer>
     ${answer}
     </answer>
+
+    <recent-questions>
+    ${recentQuestions.join("\n\n")}
+    </recent-questions>
+
+    <thread-questions>
+    ${threadQuestions.join("\n\n")}
+    </thread-questions>
     `,
     schema: z.object({
       questionSentiment: z.nativeEnum(QuestionSentiment).describe(
@@ -168,6 +180,22 @@ export async function analyseMessage(question: string, answer: string) {
           It should be one of the following: ${Object.values(
             QuestionSentiment
           ).join(", ")}
+        `
+      ),
+      shortQuestion: z.string().describe(
+        `
+          The short verstion for the question.
+          It should be under 10 words.
+          It should be in question format.
+        `
+      ),
+      followUpQuestions: z.array(z.string()).describe(
+        `
+          Use the recent questions to generate follow up questions.
+          Don't use the recent questions as it is.
+          Use the thread questions to generate follow up questions related to the thread.
+          Max it should be 3 questions.
+          It should not be part of thread questions.
         `
       ),
     }),
@@ -189,8 +217,8 @@ export async function analyseMessage(question: string, answer: string) {
 
   return JSON.parse(content as string) as {
     questionSentiment: QuestionSentiment;
-    dataGapTitle: string;
-    dataGapDescription: string;
+    shortQuestion: string;
+    followUpQuestions: string[];
   };
 }
 
@@ -205,13 +233,18 @@ export async function fillMessageAnalysis(
   question: string,
   answer: string,
   sources: MessageSourceLink[],
-  context: string[]
+  context: string[],
+  options?: { onFollowUpQuestion?: (questions: string[]) => void }
 ) {
   try {
     const message = await prisma.message.findFirstOrThrow({
       where: { id: messageId },
       include: {
-        scrape: true,
+        scrape: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -219,10 +252,58 @@ export async function fillMessageAnalysis(
       return;
     }
 
-    const partialAnalysis = await analyseMessage(question, answer);
+    const threadMessages = await prisma.message.findMany({
+      where: {
+        threadId: message.threadId,
+      },
+      take: 50,
+    });
+
+    const recentMessages = await prisma.message.findMany({
+      where: {
+        scrapeId: message.scrapeId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 50,
+    });
+
+    const recentQuestions: string[] = recentMessages
+      .filter((m) => m.analysis?.shortQuestion)
+      .map((m) => m.analysis!.shortQuestion!);
+
+    const threadQuestions: string[] = threadMessages
+      .filter((m) => m.analysis?.shortQuestion)
+      .map((m) => m.analysis!.shortQuestion!);
+
+    const partialAnalysis = await analyseMessage(
+      question,
+      answer,
+      recentQuestions,
+      threadQuestions
+    );
+
+    if (
+      options?.onFollowUpQuestion &&
+      partialAnalysis &&
+      partialAnalysis.followUpQuestions.length > 0 &&
+      message.scrape.user.plan?.planId !== "free"
+    ) {
+      const hardcodedFollowUpQuestions = message.scrape.ticketingEnabled
+        ? ["I want to create a support ticket"]
+        : [];
+      options.onFollowUpQuestion([
+        ...hardcodedFollowUpQuestions,
+        ...partialAnalysis.followUpQuestions,
+      ]);
+    }
+
     const analysis: MessageAnalysis = {
       questionRelevanceScore: null,
       questionSentiment: partialAnalysis?.questionSentiment ?? null,
+      shortQuestion: partialAnalysis?.shortQuestion ?? null,
+      followUpQuestions: partialAnalysis?.followUpQuestions ?? [],
       dataGapTitle: null,
       dataGapDescription: null,
       category: null,
@@ -236,10 +317,10 @@ export async function fillMessageAnalysis(
         await decomposeQuestion(question),
         message.scrape
       );
+      analysis.questionRelevanceScore = questionRelevance.avg;
 
       if (questionRelevance.hit) {
         const dataGap = await getDataGap(question, context);
-        console.log("dataGap", dataGap);
         if (dataGap.title && dataGap.description) {
           analysis.dataGapTitle = dataGap.title;
           analysis.dataGapDescription = dataGap.description;
