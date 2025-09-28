@@ -91,7 +91,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {shouldTrack && (
           <script
             defer
-            data-website-id="68d9179f8d984d2b4523ee5b"
+            data-website-id="68d97a639da288cbda55587a"
             data-domain="crawlchat.app"
             src="https://datafa.st/js/script.js"
           ></script>
