@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { TbCrown } from "react-icons/tb";
 import { useFetcher } from "react-router";
 import { PricingBoxes } from "~/landing/page";
+import { track } from "~/pirsch";
 
 export function UpgradeModal({
   starterPlan,
@@ -22,6 +23,10 @@ export function UpgradeModal({
   }, [paymentFetcher.data]);
 
   function handlePayClick(planId: string) {
+    track("upgrade", {
+      plan_id: planId,
+    });
+
     paymentFetcher.submit(
       {
         intent: "payment-link",
