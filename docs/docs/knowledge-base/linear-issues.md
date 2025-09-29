@@ -4,7 +4,7 @@ sidebar_position: 6
 
 # Linear issues
 
-You can quickly import the issues from **Linear** application directly to CrawlChat as a source. You need to create an API Key on Linear application for it to work. Following is how you can do it.
+You can quickly import the issues from **Linear** application directly to CrawlChat as a source. It also fetches the projects and its summary, description, and updates from the project. You need to create an API Key on Linear application for it to work. Following is how you can do it.
 
 ![Linear Page Group](./images/linear-group.png)
 
