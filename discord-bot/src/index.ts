@@ -277,7 +277,11 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  console.log("Message created", message.content);
+  console.log(
+    "Message created",
+    message.content,
+    message.embeds.map((e) => [e.title, e.description])
+  );
   if (
     message.mentions.users.has(process.env.BOT_USER_ID!) &&
     message.author.id !== process.env.BOT_USER_ID!
