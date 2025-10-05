@@ -1286,7 +1286,7 @@ function Hero() {
         )}
 
         <h1 className="font-radio-grotesk text-[42px] md:text-[64px] leading-[1.1]">
-          Make your technical docs answer queries{" "}
+          Make your technical docs answer the queries{" "}
           <span className="text-primary">instantly!</span>
         </h1>
 
