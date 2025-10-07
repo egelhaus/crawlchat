@@ -799,7 +799,7 @@ export default function ScrapeWidget() {
   return (
     <>
       <Toolbar />
-      <div className="flex flex-col flex-1 overflow-auto">
+      <div className="flex flex-col flex-1 overflow-auto" id="chat-box-scroll">
         {screen === "chat" && (
           <>
             {chat.allMessages.length === 0 && <NoMessages />}

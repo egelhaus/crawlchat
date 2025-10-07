@@ -37,16 +37,15 @@ import {
   TbScoreboard,
   TbSettings,
   TbShare,
-  TbSpider,
   TbThumbUp,
   TbUpload,
   TbUserHeart,
   TbUsers,
-  TbUserStar,
   TbVideo,
   TbWorld,
 } from "react-icons/tb";
 import { prisma } from "libs/prisma";
+import type { User } from "libs/prisma";
 import { track } from "~/pirsch";
 import {
   PLAN_FREE,
@@ -530,6 +529,7 @@ function FeaturesWithImage({
       <div className="flex-1 flex flex-col gap-4">
         {features.map((feature) => (
           <ClickableFeature
+            key={feature.key}
             active={activeTab === feature.key}
             title={feature.title}
             description={feature.description}
@@ -1217,7 +1217,7 @@ export function Footer() {
   );
 }
 
-export function Nav() {
+export function Nav({ user }: { user?: User | null }) {
   return (
     <nav className="flex items-center justify-between gap-2 lg:py-6">
       <Link to="/">
@@ -1280,7 +1280,13 @@ export function Nav() {
           <NavLink href="/public-bots">Public bots</NavLink>
         </div>
 
-        <Button href="/login">Login</Button>
+        {!user && <Button href="/login">Login</Button>}
+        {user && (
+          <Button href="/app">
+            Dashboard
+            <TbArrowRight />
+          </Button>
+        )}
       </div>
     </nav>
   );
