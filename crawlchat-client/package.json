@@ -1,6 +1,6 @@
 {
   "name": "crawlchat-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CrawlChat utility package for Docusaurus integration",
   "main": "dist/index.js",
   "type": "module",
@@ -19,6 +19,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "react": "^19.2.0"
+    "react": "^16.8.0"
   }
 }
