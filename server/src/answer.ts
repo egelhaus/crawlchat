@@ -77,6 +77,7 @@ const createTicketRichBlock: RichBlockConfig = {
   prompt: `Use this whenever you say contact the support team.
 This is the way they can contact the support team. This is mandatory.
 Use this if customer wants to contact the support team.
+If you use this block, you need not to search using the search_data tool.
 Don't tell user to reach out to support team, instead use this block.`,
 };
 

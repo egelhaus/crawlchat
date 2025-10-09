@@ -187,7 +187,7 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
             label: "OpenAI 4o-mini",
             value: "gpt_4o_mini",
 
-            description: "Base model, does the job.",
+            description: "Base model, not for production.",
             summary: "1 credit / message",
             disabled: !isAllowed(["free", "starter", "pro"]),
             content: (
@@ -196,23 +196,23 @@ function AiModelSettings({ scrape, user }: { scrape: Scrape; user: User }) {
               </div>
             ),
           },
-          {
-            label: "Gemini 2.5 Flash",
-            value: "gemini_2_5_flash",
-            description: "Best for most of the use cases.",
-            summary: "1 credit / message",
-            disabled: !isAllowed(["free", "starter", "pro"]),
-            content: (
-              <>
-                <div className="badge badge-accent badge-soft">
-                  <TbBolt /> Fast
-                </div>
-                <div className="badge badge-secondary badge-soft">
-                  <TbPhotoX /> Can't take images
-                </div>
-              </>
-            ),
-          },
+          // {
+          //   label: "Gemini 2.5 Flash",
+          //   value: "gemini_2_5_flash",
+          //   description: "Best for most of the use cases.",
+          //   summary: "1 credit / message",
+          //   disabled: !isAllowed(["free", "starter", "pro"]),
+          //   content: (
+          //     <>
+          //       <div className="badge badge-accent badge-soft">
+          //         <TbBolt /> Fast
+          //       </div>
+          //       <div className="badge badge-secondary badge-soft">
+          //         <TbPhotoX /> Can't take images
+          //       </div>
+          //     </>
+          //   ),
+          // },
           {
             label: "OpenAI GPT 5-nano",
             value: "gpt_5_nano",
