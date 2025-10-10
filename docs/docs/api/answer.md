@@ -16,7 +16,7 @@ You need to pass an `API_KEY` to all the following requests. You can create an `
 POST https://wings.crawlchat.app/answer/{COLLECTION_ID}
 ```
 
-You can find the `COLLECTION_ID` from the [Settings](https://crawlchat.app/settins) page on your dashboard. Paste it in the above URL
+You can find the `COLLECTION_ID` from the [Settings](https://crawlchat.app/settings) page on your dashboard. Paste it in the above URL
 
 ### Headers
 
