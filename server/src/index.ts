@@ -756,7 +756,7 @@ app.post("/answer/:scrapeId", authenticate, async (req, res) => {
 });
 
 app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
-  const scrape = await prisma.scrape.findFirstOrThrow({
+  const scrape = await prisma.scrape.findFirst({
     where: { id: req.params.scrapeId },
     include: {
       user: true,
@@ -767,6 +767,14 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
       },
     },
   });
+  if (!scrape) {
+    res.status(404).json({ message: "Collection not found" });
+    return;
+  }
+  if (!scrape.ticketingEnabled) {
+    res.status(400).json({ message: "Ticketing is not enabled" });
+    return;
+  }
 
   authoriseScrapeUser(req.user!.scrapeUsers, scrape.id);
 
