@@ -10,7 +10,7 @@ import { deleteByIds, deleteScrape, makeRecordId } from "./scrape/pinecone";
 import { authenticate, AuthMode, authoriseScrapeUser } from "./auth";
 import { splitMarkdown } from "./scrape/markdown-splitter";
 import { v4 as uuidv4 } from "uuid";
-import { Message, MessageChannel, Thread } from "libs/prisma";
+import { LlmModel, Message, MessageChannel, Thread } from "libs/prisma";
 import { makeIndexer } from "./indexer/factory";
 import { name } from "libs";
 import { consumeCredits, hasEnoughCredits } from "libs/user-plan";
@@ -853,11 +853,9 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
 });
 
 app.post("/compose/:scrapeId", authenticate, async (req, res) => {
-  console.log("Draft request for", req.params.scrapeId);
+  console.log("Compose request for", req.params.scrapeId);
 
   draftRateLimiter.check();
-
-  const llmConfig = getConfig("gpt_5");
 
   const scrape = await prisma.scrape.findFirstOrThrow({
     where: { id: req.params.scrapeId },
@@ -881,6 +879,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   const oldMessages = JSON.parse((req.body.messages as string) || "[]");
   const format = req.body.format as string;
   const formatText = req.body.formatText as string;
+  const llmModel = req.body.llmModel as LlmModel | undefined;
 
   const message = {
     role: "user",
@@ -893,6 +892,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     ragQueries: [],
   };
 
+  const llmConfig = getConfig(llmModel ?? "sonnet_4_5");
   const agent = new SimpleAgent({
     id: "compose-agent",
     prompt: `
@@ -942,7 +942,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   await consumeCredits(scrape.userId, "messages", 1);
 
   res.json({
-    answer: JSON.parse(content).answer,
+    content: JSON.parse(content).answer,
     messages: [
       ...messages,
       {
