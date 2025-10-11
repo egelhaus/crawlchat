@@ -877,7 +877,6 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
   const prompt = req.body.prompt as string;
   const oldMessages = JSON.parse((req.body.messages as string) || "[]");
-  const format = req.body.format as string;
   const formatText = req.body.formatText as string;
   const llmModel = req.body.llmModel as LlmModel | undefined;
 
@@ -915,7 +914,6 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
     Don't overwrite the answer with delta. Always apply the delta.
 
-    <format-type>${format}</format-type>
     <format-text>${formatText}</format-text>
     `,
     schema: z.object({
@@ -939,7 +937,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
   const content = flow.getLastMessage().llmMessage.content as string;
 
-  await consumeCredits(scrape.userId, "messages", 1);
+  await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
 
   res.json({
     content: JSON.parse(content).answer,
