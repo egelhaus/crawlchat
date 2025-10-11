@@ -69,7 +69,7 @@ export function useChatBox({
       null,
     [thread]
   );
-  const [theme, setTheme] = useState<"light" | "dark">();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [internalLinkHosts, setInternalLinkHosts] = useState<string[]>([]);
 
   useEffect(() => {
