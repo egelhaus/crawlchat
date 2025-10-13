@@ -951,6 +951,25 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
   });
 });
 
+app.get("/collection", authenticate, async (req, res) => {
+  const memberships = await prisma.scrapeUser.findMany({
+    where: {
+      userId: req.user!.id,
+    },
+    include: {
+      scrape: true,
+    },
+  });
+
+  res.json(
+    memberships.map((m) => ({
+      collectionId: m.scrape.id,
+      collectionName: m.scrape.title,
+      createdAt: m.scrape.createdAt,
+    }))
+  );
+});
+
 app.get("/discord/:channelId", async (req, res) => {
   const scrape = await prisma.scrape.findFirst({
     where: { discordServerId: req.params.channelId },
