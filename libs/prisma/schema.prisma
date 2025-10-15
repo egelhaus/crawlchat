@@ -385,6 +385,7 @@ type PlanCredits {
 type PlanLimits {
   scrapes     Float
   teamMembers Float
+  pages       Float?
 }
 
 type UserPlan {

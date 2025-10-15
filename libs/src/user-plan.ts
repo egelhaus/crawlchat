@@ -34,6 +34,7 @@ export const PLAN_FREE: Plan = {
   limits: {
     scrapes: 1,
     teamMembers: 1,
+    pages: 40,
   },
   resetType: "one-time",
   category: "BASE",
@@ -51,6 +52,7 @@ export const PLAN_HOBBY: Plan = {
   limits: {
     scrapes: 1,
     teamMembers: 1,
+    pages: 2000,
   },
   resetType: "monthly",
   category: "BASE",
@@ -68,6 +70,7 @@ export const PLAN_STARTER: Plan = {
   limits: {
     scrapes: 2,
     teamMembers: 2,
+    pages: 5000,
   },
   resetType: "monthly",
   category: "BASE",
@@ -85,6 +88,7 @@ export const PLAN_PRO: Plan = {
   limits: {
     scrapes: 3,
     teamMembers: 5,
+    pages: 14000,
   },
   resetType: "monthly",
   category: "BASE",
