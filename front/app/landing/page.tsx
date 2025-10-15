@@ -1803,7 +1803,8 @@ function FAQ() {
           The message credits are reset every month whenever the subscription is
           renewed. Whereas the pages is the number of unique pages (maxed to a
           set of charecters) you have at any given point of time. Choose the
-          plan that best suits your needs.
+          plan that best suits your needs. You can topup your message credits by
+          sending an email to support.
         </p>
       ),
     },
