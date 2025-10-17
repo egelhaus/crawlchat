@@ -3,6 +3,10 @@ import { TbAlertCircle, TbCheck, TbCopy, TbPencil, TbX } from "react-icons/tb";
 import { Config } from "./config";
 import cn from "@meltdownjs/cn";
 
+function trimContent(content: string) {
+  return content.trim().replace(/^\n/g, "").replace(/\n$/g, "");
+}
+
 const Panel = ({
   config,
   currentValue,
@@ -27,15 +31,15 @@ const Panel = ({
       return {
         content: "",
         messages: [],
-        prompt: currentValue.replace(/^@/, "").trim(),
+        prompt: trimContent(currentValue.replace(/^@/, "")),
       };
     }
     return {
-      content: currentValue,
+      content: trimContent(currentValue),
       messages: [
         {
           role: "assistant",
-          content: currentValue,
+          content: trimContent(currentValue),
         },
       ],
       prompt: "",
@@ -59,6 +63,10 @@ const Panel = ({
     }
     return currentPrompt;
   }, [compose, currentValue, currentPrompt]);
+  const content = useMemo(
+    () => trimContent(compose.content),
+    [compose.content]
+  );
 
   useEffect(() => {
     if (
@@ -143,8 +151,6 @@ const Panel = ({
   function handleUpdate() {
     if (!prompt) return;
 
-    console.log(compose);
-
     updateCompose(
       prompt,
       JSON.stringify(compose?.messages ?? []),
@@ -154,12 +160,12 @@ const Panel = ({
 
   function handleUse() {
     if (!compose) return;
-    onUse?.(compose.content);
+    onUse?.(content);
   }
 
   function handleCopy() {
     if (!compose) return;
-    onCopy(compose.content);
+    onCopy(content);
   }
 
   return (
@@ -258,7 +264,7 @@ const Panel = ({
             <button
               ref={useBtnRef}
               className="btn btn-primary flex-1"
-              disabled={composeLoading || !compose.content}
+              disabled={composeLoading || !content}
               onClick={handleUse}
               tabIndex={0}
               type="button"
@@ -272,7 +278,7 @@ const Panel = ({
             <button
               ref={useBtnRef}
               className="btn btn-primary flex-1"
-              disabled={composeLoading || !compose.content}
+              disabled={composeLoading || !content}
               onClick={handleCopy}
               tabIndex={0}
               type="button"

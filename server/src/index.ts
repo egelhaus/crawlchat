@@ -904,6 +904,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
 
     Just give the answer. Don't give any other text other than the answer.
     Don't include <answer> or any kind of tags in the answer.
+    Don't mention about you searching the context etc., it should be pure answer.
 
     <format-text>${formatText}</format-text>
     `,

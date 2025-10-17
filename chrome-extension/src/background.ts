@@ -80,6 +80,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         prompt,
         messages,
         formatText,
+        llmModel: "haiku_4_5",
       }),
     })
       .then((response) => response.json())
