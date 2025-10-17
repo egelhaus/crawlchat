@@ -13,7 +13,12 @@ function Welcome() {
         if (c) {
           return { ...c, apiKey: apiKeyInput.trim() };
         }
-        return { apiKey: apiKeyInput.trim(), scrapeId: null, chatPrompt: null };
+        return {
+          apiKey: apiKeyInput.trim(),
+          scrapeId: null,
+          chatPrompt: null,
+          stickyButton: null,
+        };
       });
     }
   };
@@ -58,6 +63,10 @@ function Home() {
     setConfig((c) => (c ? { ...c, chatPrompt } : c));
   }
 
+  function handleChangeStickyButton(stickyButton: boolean) {
+    setConfig((c) => (c ? { ...c, stickyButton } : c));
+  }
+
   return (
     <div
       className="space-y-3"
@@ -95,6 +104,21 @@ function Home() {
             value={config?.chatPrompt ?? ""}
             onChange={(e) => handleChangeChatPrompt(e.target.value)}
           />
+        </fieldset>
+      </div>
+
+      <div className="bg-base-200 shadow-sm p-4 rounded-box">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend pt-0">Sticky button</legend>
+          <label className="label">
+            <input
+              type="checkbox"
+              checked={config?.stickyButton ?? true}
+              className="toggle"
+              onChange={(e) => handleChangeStickyButton(e.target.checked)}
+            />
+            Show on all the pages
+          </label>
         </fieldset>
       </div>
 

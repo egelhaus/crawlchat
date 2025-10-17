@@ -4,4 +4,5 @@ export type Config = {
   apiKey: string | null;
   scrapeId: string | null;
   chatPrompt: string | null;
+  stickyButton: boolean | null;
 };

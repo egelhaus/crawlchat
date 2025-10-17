@@ -40,8 +40,13 @@ let latestFocusedElement:
   | null = null;
 let blurTimeoutId: number | null = null;
 
-function createGlobalButton(): void {
+async function createGlobalButton(): Promise<void> {
   if (globalButton) return;
+
+  const config = await getConfig();
+  if (config && config.stickyButton === false) {
+    return;
+  }
 
   injectStickyButtonCSS();
 
@@ -71,6 +76,13 @@ function createGlobalButton(): void {
   });
 
   document.body.appendChild(globalButton);
+}
+
+function removeGlobalButton(): void {
+  if (globalButton) {
+    globalButton.remove();
+    globalButton = null;
+  }
 }
 
 function isPanelOpen(): boolean {
@@ -140,7 +152,7 @@ function watchForInputs(): void {
   });
 }
 
-function addButtonsToExistingInputs(): void {
+function listenExistingInputs(): void {
   const inputs = document.querySelectorAll(
     'input, textarea, [contenteditable="true"]'
   );
@@ -228,16 +240,18 @@ async function openPanel(
     }
   };
 
-  root.render(React.createElement(Panel, {
-    config,
-    currentValue,
-    onClose: handleClose,
-    onUse: latestFocusedElement ? handleUse : undefined,
-    onCopy: handleCopy,
-    onFocus: handleFocusElement,
-    submit: options?.submit,
-    autoUse: options?.autoUse,
-  }));
+  root.render(
+    React.createElement(Panel, {
+      config,
+      currentValue,
+      onClose: handleClose,
+      onUse: latestFocusedElement ? handleUse : undefined,
+      onCopy: handleCopy,
+      onFocus: handleFocusElement,
+      submit: options?.submit,
+      autoUse: options?.autoUse,
+    })
+  );
 }
 
 function closePanel(shadowHost: HTMLElement): void {
@@ -261,11 +275,11 @@ if (document.readyState === "loading") {
 function initializeExtension(): void {
   createGlobalButton();
 
-  addButtonsToExistingInputs();
+  listenExistingInputs();
   watchForInputs();
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === "GET_PAGE_INFO") {
     sendResponse({
       url: window.location.href,
@@ -280,6 +294,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "OPEN_MODAL_AUTO_USE_FROM_SHORTCUT") {
     handleShortcutOpenPanelAutoUse();
+  }
+
+  if (message.type === "CONFIG_UPDATED") {
+    console.log("CONFIG_UPDATED", message);
+    const config = await getConfig();
+    if (config && config.stickyButton === false) {
+      removeGlobalButton();
+    } else {
+      createGlobalButton();
+    }
   }
 });
 

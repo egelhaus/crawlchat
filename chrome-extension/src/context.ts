@@ -20,8 +20,11 @@ export function usePopup() {
   useEffect(() => {
     if (config) {
       chrome.storage.sync.set({ crawlchatConfig: JSON.stringify(config) });
+      chrome.runtime.sendMessage({ type: "CONFIG_UPDATED" });
+      console.log("CONFIG_UPDATED", config);
     } else {
       chrome.storage.sync.remove(["crawlchatConfig"]);
+      chrome.runtime.sendMessage({ type: "CONFIG_UPDATED" });
     }
   }, [config]);
 
