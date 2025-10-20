@@ -2,6 +2,7 @@
 title: How Postiz Uses CrawlChat to Deliver 24×7 AI-Powered Support
 date: 2025-10-20
 description: Postiz uses CrawlChat to power AI-driven support on its docs and Discord, automating 150+ threads and delivering instant, multilingual, 24×7 help for its growing open-source community.
+image: /blog-images/post/postiz-crawlchat.png
 ---
 
 [Postiz](https://postiz.com) is an open-source, all-in-one social media management platform that helps creators, businesses, and agencies schedule, publish, and analyze posts across multiple platforms — including X (Twitter), Mastodon, Bluesky, and more.
