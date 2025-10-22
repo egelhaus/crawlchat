@@ -247,7 +247,7 @@ export async function analyseMessage(
       );
   }
 
-  const llmConfig = getConfig("gpt_5_mini");
+  const llmConfig = getConfig("gpt_5");
 
   const agent = new SimpleAgent({
     id: "analyser",
