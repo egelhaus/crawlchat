@@ -72,6 +72,15 @@ export const getConfig = (model?: LlmModel | null): LlmConfig => {
       supportsImages: true,
     };
   }
+  if (model === LlmModel.gpt_5_mini) {
+    return {
+      model: "gpt-5-mini",
+      apiKey: process.env.OPENAI_API_KEY!,
+      ragTopN: 6,
+      creditsPerMessage: 1,
+      supportsImages: true,
+    };
+  }
   if (model === LlmModel.gpt_5) {
     return {
       model: "gpt-5",

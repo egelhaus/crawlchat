@@ -227,16 +227,26 @@ export async function analyseMessage(
       ${categories.map((c) => `${c.title}: ${c.description}`).join("\n\n")}
       </categories>
     `;
-    schema.category = z.enum(categoryNames as [string, ...string[]]).describe(
-      `
+    schema.category = z
+      .object({
+        title: z.enum(categoryNames as [string, ...string[]]),
+        score: z.number().describe(`
+          The confidence score of the category description for the question.
+          It should be a number between 0 and 1.
+          It should be greater than 0.8.
+        `),
+      })
+      .optional()
+      .describe(
+        `
         The category of the question.
-        It should be one of the following: ${categoryNames.join(", ")}
-        You can leave it null or empty if you don't find any matching category.
+        Give the category only if it is a perfect match for the category description.
+        Don't give the category if it is not a perfect match.
       `
-    );
+      );
   }
 
-  const llmConfig = getConfig("gpt_5");
+  const llmConfig = getConfig("gpt_5_mini");
 
   const agent = new SimpleAgent({
     id: "analyser",
@@ -263,7 +273,7 @@ export async function analyseMessage(
     questionSentiment: QuestionSentiment;
     shortQuestion: string;
     followUpQuestions: string[];
-    category: string | null;
+    category: { title: string; score: number } | null;
     categorySuggestions: { title: string; description: string }[];
   };
 }
@@ -395,9 +405,13 @@ export async function fillMessageAnalysis(
         options?.categories.some(
           (c) =>
             c.title.trim().toLowerCase() ===
-            partialAnalysis.category?.trim().toLowerCase()
+            partialAnalysis.category?.title.trim().toLowerCase()
         )
           ? partialAnalysis.category
+          : null;
+      const category =
+        cleanedCategory && cleanedCategory.score > 0.8
+          ? cleanedCategory.title
           : null;
       await prisma.message.update({
         where: { id: questionMessageId },
@@ -405,11 +419,11 @@ export async function fillMessageAnalysis(
           analysis: {
             upsert: {
               set: {
-                category: cleanedCategory,
+                category,
                 categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
               },
               update: {
-                category: cleanedCategory,
+                category,
                 categorySuggestions: partialAnalysis?.categorySuggestions ?? [],
               },
             },
