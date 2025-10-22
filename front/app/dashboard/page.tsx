@@ -178,6 +178,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     categories[message.analysis.category] =
       (categories[message.analysis.category] ?? 0) + 1;
   }
+  const scrape = scrapes.find((s) => s.id === scrapeId);
+  if (scrape?.messageCategories) {
+    for (const category of scrape.messageCategories) {
+      if (!categories[category.title]) {
+        categories[category.title] = 0;
+      }
+    }
+  }
 
   return {
     user,
@@ -185,7 +193,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     messagesToday,
     scrapeId,
     scoreDestribution,
-    scrape: scrapes.find((s) => s.id === scrapeId),
+    scrape,
     ratingUpCount,
     ratingDownCount,
     noScrapes: scrapes.length === 0,
