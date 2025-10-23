@@ -5,7 +5,7 @@ import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/user";
 import { DataList } from "~/components/data-list";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
 
   if (user?.email !== "pramodkumar.damam73@gmail.com") {
@@ -14,7 +14,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const scrapes = await prisma.scrape.findMany({
     where: {
-      userId: user.id,
+      userId: params.userId,
     },
   });
 
