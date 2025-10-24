@@ -52,13 +52,12 @@ export async function cleanupMessages() {
 
   for (const ids of chunk(messages, 100)) {
     console.log("Deleting chunk", ids.length, "messages");
-    console.log(ids);
-    // await prisma.message.deleteMany({
-    //   where: {
-    //     id: {
-    //       in: ids.map((id) => id.id),
-    //     },
-    //   },
-    // });
+    await prisma.message.deleteMany({
+      where: {
+        id: {
+          in: ids.map((id) => id.id),
+        },
+      },
+    });
   }
 }
