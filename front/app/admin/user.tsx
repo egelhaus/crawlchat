@@ -1,6 +1,6 @@
 import type { Scrape } from "libs/prisma";
 import { prisma } from "libs/prisma";
-import { redirect } from "react-router";
+import { Link, redirect } from "react-router";
 import { getAuthUser } from "~/auth/middleware";
 import type { Route } from "./+types/user";
 import { DataList } from "~/components/data-list";
@@ -50,7 +50,14 @@ function CollectionsTable({ scrapes }: { scrapes: Scrape[] }) {
           {scrapes.map((scrape) => (
             <tr key={scrape.id}>
               <td>{scrape.id}</td>
-              <td>{scrape.title}</td>
+              <td>
+                <Link
+                  to={`/admin-fowl/collection/${scrape.id}`}
+                  className="link link-primary link-hover"
+                >
+                  {scrape.title}
+                </Link>
+              </td>
               <td>{scrape.llmModel}</td>
               <td>{scrape.createdAt.toLocaleString()}</td>
             </tr>

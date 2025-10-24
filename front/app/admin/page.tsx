@@ -251,7 +251,7 @@ function MessagesTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Scrape</th>
+            <th>Collection</th>
             <th>User</th>
             <th>Id</th>
             <th>Category</th>
@@ -268,7 +268,14 @@ function MessagesTable({
               key={messageDetail.message.id}
               data-message-id={messageDetail.message.id}
             >
-              <td>{messageDetail.scrape.title}</td>
+              <td>
+                <Link
+                  to={`/admin-fowl/collection/${messageDetail.scrape.id}`}
+                  className="link link-primary link-hover"
+                >
+                  {messageDetail.scrape.title}
+                </Link>
+              </td>
               <td>
                 <Link
                   to={`/admin-fowl/user/${messageDetail.user.id}`}
