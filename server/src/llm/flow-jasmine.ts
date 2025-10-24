@@ -662,6 +662,7 @@ export function makeFlow(
     model: options?.model,
     baseURL: options?.baseURL,
     apiKey: options?.apiKey,
+    user: thread.scrapeId,
   });
 
   const flow = new Flow([ragAgent], {

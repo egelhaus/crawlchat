@@ -37,10 +37,16 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
   public id: string;
   private openai: OpenAI;
   private model: string;
+  private user?: string;
 
   constructor(
     id: string,
-    options?: { model?: string; baseURL?: string; apiKey?: string }
+    options?: {
+      model?: string;
+      baseURL?: string;
+      apiKey?: string;
+      user?: string;
+    }
   ) {
     this.openai = new OpenAI({
       apiKey: options?.apiKey ?? process.env.OPENAI_API_KEY,
@@ -48,6 +54,7 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
     });
     this.model = options?.model ?? "gpt-4o-mini";
     this.id = id;
+    this.user = options?.user;
 
     console.log("Created agent", this.id, this.model);
   }
@@ -94,6 +101,7 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
         ? zodResponseFormat(this.getResponseSchema()!, "json_object")
         : undefined,
       tools,
+      user: this.user,
     });
   }
 
@@ -125,6 +133,7 @@ export class SimpleAgent<CustomMessage> extends Agent<{}, CustomMessage> {
     model,
     baseURL,
     apiKey,
+    user,
   }: {
     id: string;
     prompt: string;
@@ -133,8 +142,9 @@ export class SimpleAgent<CustomMessage> extends Agent<{}, CustomMessage> {
     model?: string;
     baseURL?: string;
     apiKey?: string;
+    user?: string;
   }) {
-    super(id, { model, baseURL, apiKey });
+    super(id, { model, baseURL, apiKey, user });
     this.prompt = prompt;
     this.schema = schema;
     this.tools = tools;

@@ -16,7 +16,7 @@ import { createToken } from "libs/jwt";
 const MAX_ANSWER_SCORE = 0.2;
 const MIN_QUESTION_SCORE = 0.8;
 
-export async function decomposeQuestion(question: string) {
+export async function decomposeQuestion(question: string, scrapeId: string) {
   const agent = new SimpleAgent({
     id: "decomposer",
     prompt: `
@@ -35,6 +35,7 @@ export async function decomposeQuestion(question: string) {
         The atomic questions decomposed from the question.  
       `),
     }),
+    user: scrapeId,
   });
 
   const flow = new Flow([agent], {
@@ -82,7 +83,7 @@ export async function getRelevantScore(
   return result;
 }
 
-async function getDataGap(question: string, context: string[]) {
+async function getDataGap(question: string, context: string[], scrapeId: string) {
   const llmConfig = getConfig("gpt_5");
 
   const agent = new SimpleAgent({
@@ -111,6 +112,7 @@ async function getDataGap(question: string, context: string[]) {
       }),
     }),
     ...llmConfig,
+    user: scrapeId,
   });
 
   const flow = new Flow([agent], {
@@ -149,7 +151,8 @@ export async function analyseMessage(
   answer: string,
   recentQuestions: string[],
   threadQuestions: string[],
-  categories: ScrapeMessageCategory[]
+  categories: ScrapeMessageCategory[],
+  scrapeId: string
 ) {
   let prompt = `
     You are a helpful assistant that analyses a message and returns a message analysis.
@@ -254,6 +257,7 @@ export async function analyseMessage(
     prompt,
     schema: z.object(schema),
     ...llmConfig,
+    user: scrapeId,
   });
 
   const flow = new Flow([agent], {
@@ -343,7 +347,8 @@ export async function fillMessageAnalysis(
       answer,
       recentQuestions,
       threadQuestions,
-      options?.categories ?? []
+      options?.categories ?? [],
+      message.scrapeId
     );
 
     if (
@@ -393,13 +398,13 @@ export async function fillMessageAnalysis(
 
     if (checkForDataGap) {
       const questionRelevance = await getRelevantScore(
-        await decomposeQuestion(question),
+        await decomposeQuestion(question, message.scrapeId),
         message.scrape
       );
       analysis.questionRelevanceScore = questionRelevance.avg;
 
       if (questionRelevance.hit) {
-        const dataGap = await getDataGap(question, context);
+        const dataGap = await getDataGap(question, context, message.scrapeId);
         if (dataGap.title && dataGap.description) {
           analysis.dataGapTitle = dataGap.title;
           analysis.dataGapDescription = dataGap.description;

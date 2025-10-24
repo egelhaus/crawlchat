@@ -260,7 +260,9 @@ expressWs.app.ws("/", (ws: any, req) => {
 
         if (message.data.query.length > 1000) {
           return ws.send(
-            makeMessage("error", { message: "Question too long. Please shorten it." })
+            makeMessage("error", {
+              message: "Question too long. Please shorten it.",
+            })
           );
         }
 
@@ -942,6 +944,7 @@ app.post("/compose/:scrapeId", authenticate, async (req, res) => {
     <format-text>${formatText}</format-text>
     `,
     tools: [makeRagTool(scrape.id, scrape.indexer, { queryContext }).make()],
+    user: scrape.id,
     ...llmConfig,
   });
 
