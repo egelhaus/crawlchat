@@ -1131,6 +1131,24 @@ app.post("/scrape-url", authenticate, async (req, res) => {
   res.json({ markdown: result.parseOutput.markdown });
 });
 
+app.get("/test-api", authenticate, async (req, res) => {
+  const memberships = await prisma.scrapeUser.findMany({
+    where: {
+      userId: req.user!.id,
+    },
+    include: {
+      scrape: true,
+    },
+  });
+
+  res.json({
+    scrapes: memberships.map((m) => ({
+      id: m.scrape.id,
+      title: m.scrape.title,
+    })),
+  });
+});
+
 // Error handling middleware - must be last
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error("Express Error:", error);
