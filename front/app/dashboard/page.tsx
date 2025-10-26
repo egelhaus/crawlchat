@@ -124,7 +124,9 @@ function getMessagesSummary(messages: Message[]) {
     .filter((m) => m.links.length > 0)
     .map((m) => Math.max(...m.links.map((l) => l.score ?? 0)));
   const avgScore =
-    maxScores.reduce((acc, curr) => acc + curr, 0) / maxScores.length;
+    maxScores.length > 0
+      ? maxScores.reduce((acc, curr) => acc + curr, 0) / maxScores.length
+      : null;
 
   return {
     messagesCount: Object.values(dailyMessages).reduce(
@@ -471,8 +473,8 @@ function CategoryCard({
         <CategoryCardStat label="Today" value={summary.messagesToday} />
         <CategoryCardStat
           label="Avg score"
-          value={summary.avgScore.toFixed(2)}
-          error={summary.avgScore < 0.3}
+          value={summary.avgScore?.toFixed(2) ?? "-"}
+          error={summary.avgScore ? summary.avgScore < 0.3 : undefined}
           tooltip={"Avg of max scores for all queries"}
         />
         <CategoryCardStat label="Not helpful" value={summary.ratingDownCount} />
