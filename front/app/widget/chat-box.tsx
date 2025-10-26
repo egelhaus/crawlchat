@@ -225,6 +225,15 @@ function ChatInput() {
   );
 }
 
+function isValidUrl(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export function SourceLink({
   link,
   index,
@@ -237,9 +246,21 @@ export function SourceLink({
   const { internalLinkHosts, handleInternalLinkClick } = useChatBoxContext();
 
   const internal =
-    link.url && link.url.startsWith("https://")
+    link.url && isValidUrl(link.url)
       ? internalLinkHosts.includes(new URL(link.url).hostname)
       : false;
+  
+  function getHref() {
+    if (internal) {
+      return undefined;
+    }
+    if (link.url && isValidUrl(link.url)) {
+      return link.url;
+    }
+    return undefined;
+  }
+
+  const href = getHref();
 
   return (
     <a
@@ -247,9 +268,10 @@ export function SourceLink({
         "flex items-center gap-1",
         "transition-all decoration-0 opacity-70",
         "hover:opacity-100 text-sm group",
-        link.url && "cursor-pointer"
+        href && "cursor-pointer",
+        !href && "cursor-not-allowed"
       )}
-      href={internal ? undefined : link.url ?? undefined}
+      href={href}
       target={internal ? undefined : "_blank"}
       style={{
         color: color ?? undefined,
