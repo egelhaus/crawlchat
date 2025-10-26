@@ -105,6 +105,10 @@ export async function action({ params, request }: Route.ActionArgs) {
     const content = formData.get("content") as string;
     const role = getRole(thread, loggedInUser?.scrapeUsers);
     const resolve = formData.get("resolve") === "true";
+    const close = formData.get("close") === "true";
+
+    const shouldClose = close || resolve;
+    const shouldSendEmail = resolve;
 
     const message = await prisma.message.create({
       data: {
@@ -126,7 +130,7 @@ export async function action({ params, request }: Route.ActionArgs) {
       lastMessageAt: new Date(),
     };
 
-    if (resolve) {
+    if (shouldClose) {
       threadUpdate.ticketStatus = "closed";
       threadUpdate.ticketClosedAt = new Date();
     }
@@ -137,6 +141,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     });
 
     if (
+      shouldSendEmail &&
       role === "agent" &&
       thread.ticketUserEmail &&
       thread.ticketNumber !== null &&
@@ -159,6 +164,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     }
 
     if (
+      shouldSendEmail &&
       role === "user" &&
       thread.ticketUserEmail &&
       thread.ticketNumber !== null &&
@@ -271,6 +277,7 @@ function Message({
 export default function Ticket({ loaderData }: Route.ComponentProps) {
   const commentFetcher = useFetcher();
   const [resolve, setResolve] = useState(false);
+  const [close, setClose] = useState(false);
   const commentSubmitRef = useRef<HTMLButtonElement>(null);
   const commentRef = useRef<HTMLTextAreaElement>(null);
 
@@ -298,14 +305,25 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
   }, [resolve]);
 
   useEffect(() => {
+    if (close && commentSubmitRef.current) {
+      commentSubmitRef.current.click();
+    }
+  }, [close]);
+
+  useEffect(() => {
     if (commentRef.current) {
       commentRef.current.value = "";
       setResolve(false);
+      setClose(false);
     }
   }, [commentFetcher.data]);
 
   function handleResolve() {
     setResolve(true);
+  }
+
+  function handleClose() {
+    setClose(true);
   }
 
   function copyToClipboard(value: string) {
@@ -415,6 +433,7 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
             <div className="flex flex-col gap-2">
               <input type="hidden" name="intent" value={"comment"} />
               <input type="hidden" name="resolve" value={resolve.toString()} />
+              <input type="hidden" name="close" value={close.toString()} />
               <input
                 type="hidden"
                 name="key"
@@ -430,6 +449,22 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
                 required
               />
               <div className="flex items-center gap-2 justify-end">
+                <div
+                  className="tooltip"
+                  data-tip="No email notifications will be sent"
+                >
+                  <button
+                    className="btn"
+                    onClick={handleClose}
+                    type="button"
+                    disabled={commentFetcher.state !== "idle"}
+                  >
+                    {commentFetcher.state !== "idle" && resolve && (
+                      <span className="loading loading-spinner loading-xs" />
+                    )}
+                    Close
+                  </button>
+                </div>
                 <button
                   className="btn"
                   onClick={handleResolve}
@@ -439,7 +474,7 @@ export default function Ticket({ loaderData }: Route.ComponentProps) {
                   {commentFetcher.state !== "idle" && resolve && (
                     <span className="loading loading-spinner loading-xs" />
                   )}
-                  Resolve & Close
+                  Resolve
                   <TbCheck />
                 </button>
                 <button
