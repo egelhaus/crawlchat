@@ -29,6 +29,7 @@ import {
   TbDashboard,
   TbDatabase,
   TbFile,
+  TbFolder,
   TbLock,
   TbMail,
   TbMessage,
@@ -58,7 +59,7 @@ import { Link, useLoaderData } from "react-router";
 import { cache as changelogCache } from "~/changelog/fetch";
 import { makeMeta } from "~/meta";
 import cn from "@meltdownjs/cn";
-import { SiDocusaurus } from "react-icons/si";
+import { SiDocusaurus, SiN8N } from "react-icons/si";
 import { FaConfluence } from "react-icons/fa";
 import { Logo } from "~/dashboard/logo";
 import { MCPIcon } from "~/mcp-icon";
@@ -135,7 +136,9 @@ export async function loader() {
 export function Container({ children }: PropsWithChildren) {
   return (
     <div className="flex justify-center">
-      <div className="max-w-[1200px] w-full p-8 md:p-10 md:py-4">{children}</div>
+      <div className="max-w-[1200px] w-full p-8 md:p-10 md:py-4">
+        {children}
+      </div>
     </div>
   );
 }
@@ -1645,7 +1648,7 @@ export function MauritsTestimonial() {
         </div>
       }
       author="Maurits Koekoek"
-      authorImage="https://media.licdn.com/dms/image/v2/D4E03AQG-zmBs0zHLvA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1683012930288?e=1759968000&v=beta&t=4Q_NhlyWwWzn48ZqWllrHwonzwjOHr37rDgU4txRacA"
+      authorImage="https://media.licdn.com/dms/image/v2/D4E03AQG-zmBs0zHLvA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1683012930288?e=1762992000&v=beta&t=-WWlQX12NNN2OwenPmyI0FW42zOuScR_4Ei2IcRr18Y"
       authorLink="https://www.linkedin.com/feed/update/urn:li:activity:7353688013584977920?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7353688013584977920%2C7353699420036571137%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287353699420036571137%2Curn%3Ali%3Aactivity%3A7353688013584977920%29"
       icon={<TbBrandLinkedin />}
       authorCompany="270 Degrees"
@@ -2039,16 +2042,19 @@ export function SourceCard({
   icon,
   title,
   tooltip,
+  isNew,
 }: {
   icon: ReactNode;
   title: string;
   tooltip: string;
+  isNew?: boolean;
 }) {
   return (
     <div
-      className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64"
+      className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64 relative"
       data-tip={tooltip}
     >
+      {isNew && <NewBadge />}
       <div
         className={cn(
           "flex flex-col items-center gap-2 bg-primary/5 p-4 rounded-box w-fit",
@@ -2064,21 +2070,37 @@ export function SourceCard({
   );
 }
 
+function NewBadge() {
+  return (
+    <span
+      className={cn(
+        "absolute top-0 right-0 translate-x-1/3 -translate-y-1/2",
+        "badge badge-error badge-sm"
+      )}
+    >
+      New
+    </span>
+  );
+}
+
 export function ChannelCard({
   icon,
   title,
   tooltip,
+  isNew,
 }: {
   icon: ReactNode;
   title: string;
   tooltip: string;
+  isNew?: boolean;
 }) {
   return (
     <div
       key={title}
-      className="tooltip before:max-w-36 md:before:max-w-64"
+      className="tooltip before:max-w-36 md:before:max-w-64 relative"
       data-tip={tooltip}
     >
+      {isNew && <NewBadge />}
       <div
         className={cn(
           "flex flex-col items-center gap-2 bg-secondary/5 p-4 rounded-box w-fit",
@@ -2149,6 +2171,18 @@ function SourcesChannels() {
       title: "MCP",
       tooltip: "Distribute your docs as an MCP server",
     },
+    {
+      icon: <TbCode />,
+      title: "API",
+      tooltip: "Use the API to integrate with your own applications",
+      isNew: true,
+    },
+    {
+      icon: <SiN8N />,
+      title: "n8n",
+      tooltip: "Integrate with n8n by using CrawlChat node into your workflows",
+      isNew: true,
+    },
   ];
 
   const tools = [
@@ -2161,6 +2195,12 @@ function SourcesChannels() {
       icon: <TbChartBarOff />,
       title: "Data Gaps",
       tooltip: "View data gaps and fix them",
+    },
+    {
+      icon: <TbFolder />,
+      title: "Categories",
+      tooltip: "Tag questions with categories and analyze them better",
+      isNew: true,
     },
   ];
 
@@ -2197,19 +2237,21 @@ function SourcesChannels() {
       <div className="flex flex-col items-center gap-2">
         <p className="text-base-content/20">CrawlChat</p>
         <div
-          className={cn("bg-primary rounded-box text-primary-content", "flex")}
+          className={cn(
+            "bg-primary rounded-box text-primary-content",
+            "flex p-4 px-6 gap-6 flex-wrap justify-center"
+          )}
         >
           {tools.map((tool) => (
             <div
               key={tool.title}
-              className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64"
+              className="tooltip tooltip-bottom before:max-w-36 md:before:max-w-64 relative"
               data-tip={tool.tooltip}
             >
-              <div
-                className={cn("flex flex-col items-center gap-2", "p-4 w-36")}
-              >
-                <div className="text-4xl">{tool.icon}</div>
-                <div className="font-radio-grotesk text-lg text-center">
+              {tool.isNew && <NewBadge />}
+              <div className={cn("flex flex-col items-center")}>
+                <div className="text-2xl">{tool.icon}</div>
+                <div className="font-radio-grotesk text-md text-center shrink-0">
                   {tool.title}
                 </div>
               </div>
@@ -2230,6 +2272,7 @@ function SourcesChannels() {
               icon={channel.icon}
               title={channel.title}
               tooltip={channel.tooltip}
+              isNew={channel.isNew}
             />
           ))}
         </div>
