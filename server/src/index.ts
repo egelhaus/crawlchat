@@ -573,8 +573,13 @@ app.post(
 
     if (knowledgeGroupId) {
       knowledgeGroup = await prisma.knowledgeGroup.findFirstOrThrow({
-        where: { id: knowledgeGroupId },
+        where: { id: knowledgeGroupId, scrapeId },
       });
+    }
+
+    if (knowledgeGroupId && !knowledgeGroup) {
+      res.status(400).json({ message: "Knowledge group not found" });
+      return;
     }
 
     const chunks = await splitMarkdown(markdown);
