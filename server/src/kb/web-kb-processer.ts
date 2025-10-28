@@ -64,6 +64,7 @@ export class WebKbProcesser extends BaseKbProcesser {
     const limit = this.options.limit ?? 5000;
 
     const options: ScrapeWithLinksOptions = {
+      removeHtmlTags: this.options.removeHtmlTags,
       dynamicFallbackContentLength: this.options.dynamicFallbackContentLength,
       skipRegex: this.options.skipRegex,
       allowOnlyRegex: this.options.allowOnlyRegex,

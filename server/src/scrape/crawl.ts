@@ -90,6 +90,7 @@ export async function scrape(
 }
 
 export type ScrapeWithLinksOptions = {
+  removeHtmlTags?: string;
   skipRegex?: RegExp[];
   onPreScrape?: (url: string, store: ScrapeStore) => Promise<void>;
   dynamicFallbackContentLength?: number;
