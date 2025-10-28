@@ -85,13 +85,7 @@ function getCliArg(argName: string): string | null {
 }
 
 async function weeklyUpdate() {
-  const scrapes = await prisma.scrape.findMany({
-    where: {
-      user: {
-        email: "pramodkumar.damam73@gmail.com",
-      },
-    },
-  });
+  const scrapes = await prisma.scrape.findMany({});
 
   for (const scrape of scrapes) {
     console.log(`Sending weekly update for scrape ${scrape.id}`);
