@@ -941,7 +941,7 @@ export function PricingBoxes({
           href="/login"
         />
       )}
-      <PricingBox
+      {/* <PricingBox
         title="Hobby"
         description="Explore the platform"
         price={`$${hobbyPlan.price}`}
@@ -964,7 +964,7 @@ export function PricingBoxes({
         }
         payLabel="Purchase"
         onClick={onClick ? () => onClick?.(hobbyPlan.id) : undefined}
-      />
+      /> */}
       <PricingBox
         title="Starter"
         description="Start your journey with CrawlChat"
