@@ -249,7 +249,7 @@ export function SourceLink({
     link.url && isValidUrl(link.url)
       ? internalLinkHosts.includes(new URL(link.url).hostname)
       : false;
-  
+
   function getHref() {
     if (internal) {
       return undefined;
@@ -268,7 +268,7 @@ export function SourceLink({
         "flex items-center gap-1",
         "transition-all decoration-0 opacity-70",
         "hover:opacity-100 text-sm group",
-        href && "cursor-pointer",
+        (href || internal) && "cursor-pointer",
         !href && !internal && "cursor-not-allowed"
       )}
       href={href}
