@@ -135,6 +135,40 @@ function Pagination() {
   );
 }
 
+function CategoriesBadge({
+  categories,
+}: {
+  categories: Record<string, number>;
+}) {
+  if (Object.keys(categories).length === 0) {
+    return null;
+  }
+
+  const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0];
+
+  return (
+    <div
+      className="tooltip"
+      data-tip={
+        Object.keys(categories).length > 1
+          ? Object.keys(categories).join(", ")
+          : undefined
+      }
+    >
+      <div className="badge badge-accent badge-soft whitespace-nowrap">
+        <TbFolder />
+        {topCategory[0]}
+
+        {Object.keys(categories).length > 1 && (
+          <span className="opacity-40">
+            + {Object.keys(categories).length - 1}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Conversations({ loaderData }: Route.ComponentProps) {
   const getThreadCategories = (messages: Message[]) => {
     const categories: Record<string, number> = {};
@@ -221,20 +255,9 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                       </span>
                     </div>
                   )}
-                  {Object.keys(getThreadCategories(thread.messages)).map(
-                    (category) => (
-                      <div
-                        key={category}
-                        className="tooltip"
-                        data-tip={category}
-                      >
-                        <span className="badge badge-accent badge-soft">
-                          <TbFolder />
-                          {category}
-                        </span>
-                      </div>
-                    )
-                  )}
+                  <CategoriesBadge
+                    categories={getThreadCategories(thread.messages)}
+                  />
                   <div className="tooltip tooltip-left" data-tip="Avg score">
                     <ScoreBadge score={getMessagesScore(thread.messages)} />
                   </div>
