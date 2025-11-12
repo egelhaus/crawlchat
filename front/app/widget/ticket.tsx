@@ -239,7 +239,7 @@ type TicketMessage = {
   createdAt: Date;
 };
 
-function Message({
+export function Message({
   scrape,
   message,
   role,

@@ -194,11 +194,11 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                             {!pair.queryMessage?.thread.isDefault && (
                               <div
                                 className="tooltip"
-                                data-tip="View the conversation"
+                                data-tip="View in conversation"
                               >
                                 <RouterLink
                                   className="btn btn-xs btn-square"
-                                  to={`/messages/conversations?id=${pair.queryMessage?.threadId}`}
+                                  to={`/messages/conversations/${pair.queryMessage?.threadId}#message-${pair.queryMessage?.id}`}
                                 >
                                   <TbMessages />
                                 </RouterLink>

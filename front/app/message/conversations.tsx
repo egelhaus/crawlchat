@@ -1,34 +1,28 @@
 import type { Route } from "./+types/conversations";
-import type { Prisma } from "libs/prisma";
+import type { Message, Prisma, Thread } from "libs/prisma";
 import { Page } from "~/components/page";
 import {
   TbChevronLeft,
   TbChevronRight,
+  TbConfetti,
+  TbFolder,
   TbMessage,
   TbMessages,
   TbTicket,
-  TbTrash,
 } from "react-icons/tb";
 import { getAuthUser } from "~/auth/middleware";
 import { authoriseScrapeUser, getSessionScrapeId } from "~/scrapes/util";
 import { prisma } from "~/prisma";
-import { useEffect, useState } from "react";
 import { getMessagesScore } from "~/score";
-import { Link, redirect, useFetcher } from "react-router";
+import { Link, redirect } from "react-router";
 import { ViewSwitch } from "./view-switch";
 import { CountryFlag } from "./country-flag";
-import { ChatBoxProvider } from "~/widget/use-chat-box";
 import { EmptyState } from "~/components/empty-state";
 import moment from "moment";
-import ChatBox, { ChatboxContainer } from "~/widget/chat-box";
 import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
-
-type ThreadWithMessages = Prisma.ThreadGetPayload<{
-  include: {
-    messages: true;
-  };
-}>;
+import { ScoreBadge } from "~/components/score-badge";
+import { ChannelBadge } from "~/components/channel-badge";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -108,37 +102,21 @@ export function meta() {
   });
 }
 
-export async function action({ request }: Route.ActionArgs) {
-  const user = await getAuthUser(request);
-  const scrapeId = await getSessionScrapeId(request);
-  authoriseScrapeUser(user!.scrapeUsers, scrapeId);
-
-  const formData = await request.formData();
-  const intent = formData.get("intent");
-
-  if (intent === "delete") {
-    const id = formData.get("id") as string;
-    await prisma.thread.delete({
-      where: { id },
-    });
-
-    return { success: true };
-  }
-
-  return null;
-}
-
 export default function Conversations({ loaderData }: Route.ComponentProps) {
-  const [selectedThread, setSelectedThread] = useState<
-    ThreadWithMessages | undefined
-  >(loaderData.threads[0]);
-  const deleteFetcher = useFetcher();
-
-  useEffect(() => {
-    if (loaderData.threads) {
-      setSelectedThread(loaderData.threads[0]);
+  const getThreadCategories = (messages: Message[]) => {
+    const categories: Record<string, number> = {};
+    for (const message of messages) {
+      if (message.analysis?.category) {
+        categories[message.analysis.category] =
+          (categories[message.analysis.category] || 0) + 1;
+      }
     }
-  }, [loaderData.threads]);
+    return categories;
+  };
+
+  const isResolved = (messages: Message[]) => {
+    return messages.some((message) => message.analysis?.resolved);
+  };
 
   return (
     <Page title="Conversations" icon={<TbMessages />} right={<ViewSwitch />}>
@@ -160,12 +138,110 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
               "h-full overflow-y-auto flex-1"
             )}
           >
-            <div className="text-base-content/50">
-              Here are the conversations made by your customers or community on
-              your website
+            <div
+              className={cn(
+                "bg-base-200 rounded-box border border-base-300",
+                "overflow-hidden"
+              )}
+            >
+              <div>
+                {loaderData.threads.map((thread) => (
+                  <div
+                    key={thread.id}
+                    className={cn(
+                      "flex flex-col gap-1 px-4 py-2",
+                      "border-b border-base-300",
+                      "last:border-0"
+                    )}
+                  >
+                    <div className="flex flex-col md:flex-row gap-2 md:items-center justify-between">
+                      <div className="flex gap-2 items-center">
+                        {thread.location?.country && (
+                          <CountryFlag location={thread.location} />
+                        )}
+                        <Link
+                          to={`/messages/conversations/${thread.id}`}
+                          className="link link-primary link-hover line-clamp-1"
+                        >
+                          {thread.messages[0]?.llmMessage
+                            ? (thread.messages[0]?.llmMessage as any).content
+                            : thread.id.substring(thread.id.length - 4)}
+                        </Link>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        {thread.ticketStatus && (
+                          <div
+                            className="tooltip tooltip-left"
+                            data-tip="Ticket created"
+                          >
+                            <span className="badge badge-primary badge-soft px-1">
+                              <TbTicket />
+                            </span>
+                          </div>
+                        )}
+                        <ChannelBadge channel={thread.messages[0]?.channel} />
+                        {isResolved(thread.messages) && (
+                          <div
+                            className="tooltip tooltip-left"
+                            data-tip="Resolved"
+                          >
+                            <span className="badge badge-primary badge-soft">
+                              <TbConfetti />
+                            </span>
+                          </div>
+                        )}
+                        {Object.keys(getThreadCategories(thread.messages)).map(
+                          (category) => (
+                            <div
+                              key={category}
+                              className="tooltip"
+                              data-tip={category}
+                            >
+                              <span className="badge badge-accent badge-soft">
+                                <TbFolder />
+                                {category}
+                              </span>
+                            </div>
+                          )
+                        )}
+                        <div
+                          className="tooltip tooltip-left"
+                          data-tip="Avg score"
+                        >
+                          <ScoreBadge
+                            score={getMessagesScore(thread.messages)}
+                          />
+                        </div>
+                        <div
+                          className="tooltip tooltip-left"
+                          data-tip="Number of messages"
+                        >
+                          <span className="badge badge-primary badge-soft">
+                            <TbMessage />
+                            {thread.messages.length}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-base-content/50 text-sm">
+                      {moment(thread.createdAt).fromNow()}
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {thread.customTags &&
+                        Object.keys(thread.customTags).map((key) => (
+                          <div key={key} className="tooltip" data-tip={key}>
+                            <span className="badge badge-soft">
+                              {(thread.customTags as Record<string, any>)[key]}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center justify-end">
               <Link
                 className="btn btn-square"
                 to={
@@ -177,7 +253,7 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
                 <TbChevronLeft />
               </Link>
 
-              <div className="flex items-center flex-1 justify-center gap-4 text-sm">
+              <div className="flex items-center justify-center gap-4 text-sm">
                 <span>
                   {loaderData.from} - {loaderData.to}
                 </span>
@@ -196,129 +272,6 @@ export default function Conversations({ loaderData }: Route.ComponentProps) {
               >
                 <TbChevronRight />
               </Link>
-            </div>
-
-            <div
-              className={cn(
-                "bg-base-200 p-2 rounded-box border border-base-300",
-                "shadow-sm"
-              )}
-            >
-              <div
-                className={cn(
-                  "rounded-box overflow-hidden border",
-                  "border-base-300",
-                  "bg-base-100 shadow"
-                )}
-              >
-                {loaderData.threads.map((thread) => (
-                  <div
-                    key={thread.id}
-                    className={cn(
-                      "flex flex-col gap-1 px-4 py-2",
-                      "border-b border-base-300",
-                      "cursor-pointer last:border-0",
-                      "hover:bg-base-200",
-                      selectedThread?.id === thread.id && "bg-base-200"
-                    )}
-                    onClick={() => setSelectedThread(thread)}
-                  >
-                    <div className="flex gap-2 items-center justify-between">
-                      <div className="flex gap-2 items-center">
-                        {thread.location?.country && (
-                          <CountryFlag location={thread.location} />
-                        )}
-                        <span className="text-base-content/80 line-clamp-1">
-                          {thread.messages[0]?.llmMessage
-                            ? (thread.messages[0]?.llmMessage as any).content
-                            : thread.id.substring(thread.id.length - 4)}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 items-center">
-                        {thread.ticketStatus && (
-                          <div
-                            className="tooltip tooltip-left"
-                            data-tip="Ticket created"
-                          >
-                            <span className="badge badge-primary px-1">
-                              <TbTicket />
-                            </span>
-                          </div>
-                        )}
-                        <div
-                          className="tooltip tooltip-left"
-                          data-tip="Avg score"
-                        >
-                          <span className="badge badge-primary badge-soft">
-                            {getMessagesScore(thread.messages).toFixed(2)}
-                          </span>
-                        </div>
-                        <div
-                          className="tooltip tooltip-left"
-                          data-tip="Number of messages"
-                        >
-                          <span className="badge badge-primary badge-soft">
-                            <TbMessage />
-                            {thread.messages.length}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-base-content/50 text-sm">
-                      {moment(thread.createdAt).fromNow()}
-                    </span>
-                    <div className="flex flex-col gap-0.5">
-                      {thread.customTags &&
-                        Object.keys(thread.customTags).map((key) => (
-                          <div key={key}>
-                            <span className="badge badge-primary px-1">
-                              {key}:{" "}
-                              {(thread.customTags as Record<string, any>)[key]}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="w-[600px] relative">
-            {selectedThread && (
-              <ChatBoxProvider
-                key={selectedThread.id}
-                scrape={loaderData.scrape!}
-                thread={selectedThread}
-                messages={selectedThread.messages}
-                embed={false}
-                admin={true}
-                token={null}
-                readonly={true}
-              >
-                <ChatboxContainer>
-                  <ChatBox />
-                </ChatboxContainer>
-              </ChatBoxProvider>
-            )}
-
-            <div className="absolute top-0 right-0">
-              <deleteFetcher.Form method="post">
-                <input type="hidden" name="id" value={selectedThread?.id} />
-                <input type="hidden" name="intent" value="delete" />
-                <div
-                  className="tooltip tooltip-left"
-                  data-tip="Delete the conversation"
-                >
-                  <button className="btn btn-error btn-square" type="submit">
-                    {deleteFetcher.state === "submitting" ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      <TbTrash />
-                    )}
-                  </button>
-                </div>
-              </deleteFetcher.Form>
             </div>
           </div>
         </div>
