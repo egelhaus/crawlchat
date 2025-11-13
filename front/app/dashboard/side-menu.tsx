@@ -307,7 +307,7 @@ export function SideMenu({
         </span>
       );
     }
-    if (label === "Messages" && toBeFixedMessages > 0) {
+    if (label === "Questions" && toBeFixedMessages > 0) {
       return (
         <span className="badge badge-error px-2 badge-soft">
           {toBeFixedMessages}
