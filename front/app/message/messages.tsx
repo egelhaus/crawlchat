@@ -31,6 +31,7 @@ import cn from "@meltdownjs/cn";
 import { makeMeta } from "~/meta";
 import { useEffect, useMemo, useState } from "react";
 import { CreditsUsedBadge } from "./credits-used-badge";
+import { SentimentBadge } from "./sentiment-badge";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -221,6 +222,12 @@ export default function MessagesLayout({ loaderData }: Route.ComponentProps) {
                                 location={pair.queryMessage.thread.location}
                               />
                             )}
+
+                            <SentimentBadge
+                              sentiment={
+                                pair.responseMessage?.analysis?.questionSentiment
+                              }
+                            />
 
                             {pair.queryMessage?.attachments &&
                               pair.queryMessage.attachments.length > 0 && (

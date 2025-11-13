@@ -11,6 +11,8 @@ import {
   TbFolderPlus,
   TbHome,
   TbMessage,
+  TbMoodCry,
+  TbMoodHappy,
   TbPlus,
   TbThumbDown,
   TbThumbUp,
@@ -240,17 +242,22 @@ export function StatCard({
   label,
   value,
   icon,
+  suffix,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
+  suffix?: string;
 }) {
   return (
     <div className="stats shadow flex-1 bg-base-200 w-full">
       <div className="stat">
         <div className="stat-figure text-4xl">{icon}</div>
         <div className="stat-title">{label}</div>
-        <div className="stat-value">{numberToKMB(value)}</div>
+        <div className="stat-value">
+          {numberToKMB(value)}
+          {suffix}
+        </div>
       </div>
     </div>
   );
@@ -514,15 +521,42 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               value={loaderData.messagesSummary.messagesCount}
               icon={<TbMessage />}
             />
-            <StatCard
-              label="Resolved"
-              value={loaderData.messagesSummary.resolvedCount}
-              icon={<TbConfetti />}
-            />
+
             <StatCard
               label="Not helpful"
               value={loaderData.messagesSummary.ratingDownCount}
               icon={<TbThumbDown />}
+            />
+          </div>
+          <div className="flex flex-col justify-stretch md:flex-row gap-4 items-center">
+            <StatCard
+              label="Resolved"
+              value={loaderData.messagesSummary.resolvedCount}
+              icon={
+                <span className="text-primary">
+                  <TbConfetti />
+                </span>
+              }
+            />
+            <StatCard
+              label="Happy"
+              value={Math.round(loaderData.messagesSummary.happyPct * 100)}
+              icon={
+                <span className="text-success">
+                  <TbMoodHappy />
+                </span>
+              }
+              suffix="%"
+            />
+            <StatCard
+              label="Sad"
+              value={Math.round(loaderData.messagesSummary.sadPct * 100)}
+              icon={
+                <span className="text-error">
+                  <TbMoodCry />
+                </span>
+              }
+              suffix="%"
             />
           </div>
 

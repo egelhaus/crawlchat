@@ -18,6 +18,7 @@ import { CreditsUsedBadge } from "./credits-used-badge";
 import { useEffect, useMemo } from "react";
 import { extractCitations } from "libs/citation";
 import { MarkdownProse } from "~/widget/markdown-prose";
+import { SentimentBadge } from "./sentiment-badge";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -92,7 +93,6 @@ export default function Conversation({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     const messageId = new URL(window.location.href).hash.substring(1);
-    console.log(messageId);
     if (messageId) {
       const messageElement = document.getElementById(messageId);
       const rect = messageElement?.getBoundingClientRect();
@@ -152,6 +152,9 @@ export default function Conversation({ loaderData }: Route.ComponentProps) {
               <div className="border-b border-base-300 p-4 pt-0">
                 <div className="flex gap-2 items-center mb-1">
                   <ScoreBadge score={getMessageScore(message)} />
+                  <SentimentBadge
+                    sentiment={message.analysis?.questionSentiment}
+                  />
                   <CreditsUsedBadge
                     creditsUsed={message.creditsUsed ?? 0}
                     llmModel={message.llmModel}

@@ -32,6 +32,7 @@ import moment from "moment";
 import { ScoreBadge } from "~/components/score-badge";
 import { makeMeta } from "~/meta";
 import { getImagesCount, getQueryString } from "libs/llm-message";
+import { SentimentBadge } from "./sentiment-badge";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await getAuthUser(request);
@@ -394,6 +395,9 @@ export default function Message({ loaderData }: Route.ComponentProps) {
                 {messagePair?.queryMessage?.analysis?.category}
               </span>
             )}
+            <SentimentBadge
+              sentiment={messagePair?.responseMessage?.analysis?.questionSentiment}
+            />
             <ChannelBadge channel={messagePair?.queryMessage?.channel} />
             {messagePair?.responseMessage.rating && (
               <Rating rating={messagePair?.responseMessage.rating} />

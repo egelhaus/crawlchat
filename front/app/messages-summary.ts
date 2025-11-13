@@ -100,6 +100,16 @@ export function getMessagesSummary(messages: Message[]) {
 
   const resolvedCount = messages.filter((m) => m.analysis?.resolved).length;
 
+  const happyPct =
+    messages.filter((m) => m.analysis?.questionSentiment === "happy").length /
+    questions;
+  const sadPct =
+    messages.filter((m) => m.analysis?.questionSentiment === "sad").length /
+    questions;
+  const neutralPct =
+    messages.filter((m) => m.analysis?.questionSentiment === "neutral").length /
+    questions;
+
   return {
     messagesCount: Object.values(dailyMessages).reduce(
       (acc, curr) => acc + curr,
@@ -116,6 +126,9 @@ export function getMessagesSummary(messages: Message[]) {
     avgScore,
     questions,
     resolvedCount,
+    happyPct,
+    sadPct,
+    neutralPct,
   };
 }
 
