@@ -36,6 +36,8 @@ import { CreditsUsedBadge } from "./credits-used-badge";
 import { SentimentBadge } from "./sentiment-badge";
 
 function isLowRating(message: Message) {
+  if (message.analysis?.questionSentiment === "sad") return true;
+
   if (message.links.length === 0) return false;
 
   if (message.rating === "down") return true;
