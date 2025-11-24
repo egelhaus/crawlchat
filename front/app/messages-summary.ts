@@ -6,6 +6,7 @@ export function getMessagesSummary(messages: Message[]) {
     {
       count: number;
       unhappy: number;
+      categories: Record<string, number>;
     }
   > = {};
 
@@ -18,6 +19,7 @@ export function getMessagesSummary(messages: Message[]) {
       dailyMessages[key] = {
         count: 0,
         unhappy: 0,
+        categories: {},
       };
     }
 
@@ -29,6 +31,14 @@ export function getMessagesSummary(messages: Message[]) {
         message.analysis?.questionSentiment === "sad"
       ) {
         dailyMessages[key].unhappy++;
+      }
+
+      if (message.analysis?.category) {
+        dailyMessages[key].categories[message.analysis.category] =
+          (dailyMessages[key].categories[message.analysis.category] ?? 0) + 1;
+      } else {
+        dailyMessages[key].categories["Other"] =
+          (dailyMessages[key].categories["Other"] ?? 0) + 1;
       }
     }
   }

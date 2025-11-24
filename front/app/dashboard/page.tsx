@@ -21,11 +21,11 @@ import {
   XAxis,
   CartesianGrid,
   Tooltip,
-  Area,
   LineChart,
   Line,
   ComposedChart,
   Bar,
+  Cell,
 } from "recharts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { numberToKMB } from "~/number-util";
@@ -235,6 +235,17 @@ export async function action({ request }: Route.ActionArgs) {
   }
 }
 
+export const BRIGHT_COLORS = [
+  "#4E7B67",
+  "#9A1558",
+  "#3769B8",
+  "#FC3B81",
+  "#84555F",
+  "#F2F6A6",
+  "#DA8D0C",
+  "#00B768",
+];
+
 export function StatCard({
   label,
   value,
@@ -300,13 +311,13 @@ function CategoryCard({
     const today = new Date();
     const DAY_MS = 1000 * 60 * 60 * 24;
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 14; i++) {
       const date = new Date(today.getTime() - i * DAY_MS);
       const key = date.toISOString().split("T")[0];
       const name = moment(date).format("MMM D");
       data.push({
         name,
-        Messages: summary.dailyMessages[key] ?? 0,
+        Messages: summary.dailyMessages[key]?.count ?? 0,
       });
     }
     return data.reverse();
@@ -374,6 +385,16 @@ function CategoryCard({
   );
 }
 
+function findLastBarIndex<T>(values: T[], predicate: (value: T) => boolean) {
+  let index = -1;
+  for (let i = 0; i < values.length; i++) {
+    if (predicate(values[i])) {
+      index = i;
+    }
+  }
+  return index;
+}
+
 export default function DashboardPage({ loaderData }: Route.ComponentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -384,7 +405,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     }
   }, [loaderData.user]);
 
-  const chartData = useMemo(() => {
+  const [chartData, categories] = useMemo(() => {
     const data = [];
     const today = new Date();
     const DAY_MS = 1000 * 60 * 60 * 24;
@@ -393,13 +414,29 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       const date = new Date(today.getTime() - i * DAY_MS);
       const key = date.toISOString().split("T")[0];
       const name = moment(date).format("MMM D");
-      data.push({
+
+      const item = loaderData.messagesSummary.dailyMessages[key];
+
+      const record: Record<string, number | string> = {
         name,
-        Questions: loaderData.messagesSummary.dailyMessages[key]?.count ?? 0,
-        Unhappy: loaderData.messagesSummary.dailyMessages[key]?.unhappy ?? 0,
-      });
+        Questions: item?.count ?? 0,
+        Unhappy: item?.unhappy ?? 0,
+        Other: item?.categories["Other"] ?? 0,
+      };
+
+      for (const category of loaderData.scrape?.messageCategories ?? []) {
+        record[category.title] = item?.categories[category.title] ?? 0;
+      }
+
+      data.push(record);
     }
-    return data.reverse();
+
+    const categories = new Set<string>(["Other"]);
+    for (const category of loaderData.scrape?.messageCategories ?? []) {
+      categories.add(category.title);
+    }
+
+    return [data.reverse(), categories];
   }, [loaderData.messagesSummary.dailyMessages]);
 
   useEffect(() => {
@@ -460,24 +497,36 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
           {props.label}
         </div>
         <ul className="flex flex-col gap-1 p-2">
-          {props.payload?.map((item) => (
-            <li
-              key={item.name}
-              className="flex items-center gap-6 justify-between"
-            >
-              <span className="text-sm">{item.name}</span>
-              <span
-                className={cn(
-                  "min-w-5 h-5 px-1 text-sm flex items-center justify-center rounded-full",
-                  item.name === "Unhappy"
-                    ? "bg-error text-error-content"
-                    : "bg-primary text-primary-content"
-                )}
+          {props.payload?.map((item) => {
+            const index = Array.from(categories).indexOf(item.name ?? "");
+            const color = BRIGHT_COLORS[index % BRIGHT_COLORS.length];
+            return (
+              <li
+                key={item.name}
+                className="flex items-center gap-6 justify-between"
               >
-                {item.value}
-              </span>
-            </li>
-          ))}
+                <div className="flex items-center gap-1">
+                  <div
+                    className="w-3 h-3 rounded"
+                    style={{
+                      backgroundColor: color ?? "red",
+                    }}
+                  />
+                  <span className="text-sm">{item.name}</span>
+                </div>
+                <span
+                  className={cn(
+                    "min-w-5 h-5 px-1 text-sm flex items-center justify-center rounded-full",
+                    item.name === "Unhappy"
+                      ? "bg-error text-error-content"
+                      : "bg-primary text-primary-content"
+                  )}
+                >
+                  {item.value}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
     );
@@ -487,6 +536,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     <Page
       title="Summary"
       icon={<TbChartLine />}
+      description="For last 14 days"
       right={
         <div className="flex gap-2">
           {canCreateCollection && (
@@ -558,7 +608,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
               icon={<TbMessage />}
             />
             <StatCard
-              label="This week"
+              label="Total"
               value={loaderData.messagesSummary.messagesCount}
               icon={<TbMessage />}
             />
@@ -617,18 +667,45 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   />
                   <Tooltip content={renderTooltip} />
                   <CartesianGrid strokeDasharray="6 6" vertical={false} />
-                  <Area
-                    type="monotone"
-                    dataKey="Questions"
-                    stroke={"var(--color-primary)"}
-                    fill={"var(--color-primary-content)"}
-                  />
-                  <Bar
+                  {Array.from(categories).map((category, i) => (
+                    <Bar
+                      key={category}
+                      type="monotone"
+                      dataKey={category}
+                      fill={BRIGHT_COLORS[i % BRIGHT_COLORS.length]}
+                      barSize={30}
+                      stackId="a"
+                      radius={[6, 6, 0, 0]}
+                    >
+                      {chartData.map((entry, index) => {
+                        const _entry = { ...entry };
+                        delete _entry.name;
+                        delete _entry.Questions;
+                        delete _entry.Unhappy;
+                        const keys = Object.keys(_entry);
+                        const values = Object.values(_entry);
+
+                        const categoryNameIndex = keys.findIndex(
+                          (key) => key === category
+                        );
+                        const lastBarIndex = findLastBarIndex(
+                          values,
+                          (value) => value !== 0
+                        );
+
+                        if (categoryNameIndex === lastBarIndex) {
+                          return <Cell key={`cell-${index}`} />;
+                        }
+
+                        return <Cell key={`cell-${index}`} radius={0} />;
+                      })}
+                    </Bar>
+                  ))}
+                  <Line
                     type="monotone"
                     dataKey="Unhappy"
-                    fill={"var(--color-error)"}
-                    radius={[10, 10, 0, 0]}
-                    barSize={30}
+                    stroke={"var(--color-error)"}
+                    dot={false}
                   />
                 </ComposedChart>
               </div>
