@@ -1,7 +1,5 @@
 import type { Route } from "./+types/page";
-import type { Message } from "libs/prisma";
 import {
-  TbChartBar,
   TbChartLine,
   TbCheck,
   TbCircleXFilled,
@@ -10,13 +8,11 @@ import {
   TbDatabase,
   TbFolder,
   TbFolderPlus,
-  TbHome,
   TbMessage,
   TbMoodCry,
   TbMoodHappy,
   TbPlus,
   TbThumbDown,
-  TbThumbUp,
 } from "react-icons/tb";
 import { getAuthUser } from "~/auth/middleware";
 import { prisma } from "~/prisma";
@@ -25,10 +21,11 @@ import {
   XAxis,
   CartesianGrid,
   Tooltip,
-  AreaChart,
   Area,
   LineChart,
   Line,
+  ComposedChart,
+  Bar,
 } from "recharts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { numberToKMB } from "~/number-util";
@@ -38,15 +35,14 @@ import { Link, redirect, useFetcher } from "react-router";
 import { getLimits } from "libs/user-plan";
 import { hideModal, showModal } from "~/components/daisy-utils";
 import { EmptyState } from "~/components/empty-state";
-import { ChannelBadge } from "~/components/channel-badge";
 import moment from "moment";
 import cn from "@meltdownjs/cn";
 import toast from "react-hot-toast";
 import { makeMeta } from "~/meta";
-import { getQueryString } from "libs/llm-message";
 import { dodoGateway } from "~/payment/gateway-dodo";
 import { track } from "~/track";
 import { getMessagesSummary, type MessagesSummary } from "~/messages-summary";
+import type { Payload } from "recharts/types/component/DefaultTooltipContent";
 
 function monoString(str: string) {
   return str.trim().toLowerCase().replace(/^\n+/, "").replace(/\n+$/, "");
@@ -99,7 +95,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     where: {
       scrapeId,
       createdAt: {
-        gte: new Date(Date.now() - ONE_WEEK),
+        gte: new Date(Date.now() - ONE_WEEK * 2),
       },
     },
   });
@@ -351,18 +347,6 @@ function CategoryCard({
           <TbFolder />
           <span className="font-bold">{title}</span>
         </Link>
-        {/* <div className="flex items-center gap-2">
-          {lowRatingQuery && (
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip={"Latest low rating query"}
-            >
-              <div className="text-xs text-base-content/50 line-clamp-1 truncate flex-1">
-                [{lowRatingQuery.score.toFixed(2)}] {lowRatingQuery.content}
-              </div>
-            </div>
-          )}
-        </div> */}
       </div>
 
       <div className="flex gap-4 flex-wrap">
@@ -405,32 +389,18 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
     const today = new Date();
     const DAY_MS = 1000 * 60 * 60 * 24;
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 14; i++) {
       const date = new Date(today.getTime() - i * DAY_MS);
       const key = date.toISOString().split("T")[0];
       const name = moment(date).format("MMM D");
       data.push({
         name,
-        Messages: loaderData.messagesSummary.dailyMessages[key] ?? 0,
+        Messages: loaderData.messagesSummary.dailyMessages[key]?.count ?? 0,
+        Unhappy: loaderData.messagesSummary.dailyMessages[key]?.unhappy ?? 0,
       });
     }
     return data.reverse();
   }, [loaderData.messagesSummary.dailyMessages]);
-
-  const scoreDistributionData = useMemo(() => {
-    const data = [];
-    const points = Object.keys(
-      loaderData.messagesSummary.scoreDestribution
-    ).length;
-    for (let i = 0; i < points; i++) {
-      data.push({
-        name: i,
-        Messages: loaderData.messagesSummary.scoreDestribution[i]?.count ?? 0,
-        score: i / points,
-      });
-    }
-    return data;
-  }, [loaderData.messagesSummary.scoreDestribution]);
 
   useEffect(() => {
     track("dashboard", {});
@@ -460,6 +430,58 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
       toast.error(newCollectionFetcher.data.error);
     }
   }, [newCollectionFetcher.data]);
+
+  function renderTick(props: {
+    x: number;
+    y: number;
+    payload: { value: string };
+  }) {
+    return (
+      <text
+        x={props.x}
+        y={props.y + 4}
+        dy={16}
+        textAnchor="middle"
+        fill="var(--color-primary)"
+        fontSize={12}
+      >
+        {props.payload.value}
+      </text>
+    );
+  }
+
+  function renderTooltip(props: {
+    label?: string;
+    payload?: Payload<number, string>[] | undefined;
+  }) {
+    return (
+      <div className="bg-base-200 border border-base-300 rounded-box">
+        <div className="p-2 px-3 border-b border-base-300 font-medium opacity-80">
+          {props.label}
+        </div>
+        <ul className="flex flex-col gap-1 p-2">
+          {props.payload?.map((item) => (
+            <li
+              key={item.name}
+              className="flex items-center gap-6 justify-between"
+            >
+              <span className="text-sm">{item.name}</span>
+              <span
+                className={cn(
+                  "min-w-5 h-5 px-1 text-sm flex items-center justify-center rounded-full",
+                  item.name === "Messages"
+                    ? "bg-primary text-primary-content"
+                    : "bg-error text-error-content"
+                )}
+              >
+                {item.value}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <Page
@@ -579,6 +601,40 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
             />
           </div>
 
+          <div className="flex gap-4 flex-col md:flex-row">
+            <div className="flex flex-col gap-2">
+              <div
+                className={cn(
+                  "rounded-box overflow-hidden border",
+                  "border-base-300 p-4 bg-base-200/50 shadow"
+                )}
+              >
+                <ComposedChart width={width - 24} height={200} data={chartData}>
+                  <XAxis
+                    dataKey="name"
+                    interval={"preserveStartEnd"}
+                    tick={renderTick}
+                  />
+                  <Tooltip content={renderTooltip} />
+                  <CartesianGrid strokeDasharray="6 6" vertical={false} />
+                  <Area
+                    type="monotone"
+                    dataKey="Messages"
+                    stroke={"var(--color-primary)"}
+                    fill={"var(--color-primary-content)"}
+                  />
+                  <Bar
+                    type="monotone"
+                    dataKey="Unhappy"
+                    fill={"var(--color-error)"}
+                    radius={[10, 10, 0, 0]}
+                    barSize={30}
+                  />
+                </ComposedChart>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2">
             {loaderData.categoriesSummary &&
               loaderData.categoriesSummary.map((category) => (
@@ -619,138 +675,6 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   Add category
                 </Link>
               </div>
-            </div>
-          </div>
-
-          <div className="flex gap-4 flex-col md:flex-row">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <TbMessage />
-                <span className="text-lg font-medium">Messages</span>
-              </div>
-              <div
-                className={cn(
-                  "rounded-box overflow-hidden border",
-                  "border-base-300 p-1 bg-base-200/50 shadow"
-                )}
-              >
-                <AreaChart
-                  width={width < 500 ? width : width / 2 - 20}
-                  height={200}
-                  data={chartData}
-                >
-                  <XAxis dataKey="name" hide />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "var(--radius-box)",
-                      backgroundColor: "var(--color-primary)",
-                      color: "var(--color-primary-content)",
-                      gap: "0",
-                    }}
-                    itemStyle={{
-                      color: "var(--color-primary-content)",
-                    }}
-                  />
-                  <CartesianGrid strokeDasharray="6 6" vertical={false} />
-                  <Area
-                    type="monotone"
-                    dataKey="Messages"
-                    stroke={"var(--color-primary)"}
-                    fill={"var(--color-primary-content)"}
-                  />
-                </AreaChart>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <TbChartBar />
-                <span className="text-lg font-medium">Score distribution</span>
-              </div>
-              <div
-                className={cn(
-                  "rounded-box overflow-hidden border",
-                  "border-base-300 p-1 bg-base-200/50 shadow"
-                )}
-              >
-                <AreaChart
-                  width={width < 500 ? width : width / 2 - 20}
-                  height={200}
-                  data={scoreDistributionData}
-                >
-                  <XAxis dataKey="score" hide />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "var(--radius-box)",
-                      backgroundColor: "var(--color-primary)",
-                      color: "var(--color-primary-content)",
-                      gap: "0",
-                    }}
-                    itemStyle={{
-                      color: "var(--color-primary-content)",
-                    }}
-                  />
-                  <CartesianGrid strokeDasharray="6 6" vertical={false} />
-                  <Area
-                    type="monotone"
-                    dataKey="Messages"
-                    fill={"var(--color-primary-content)"}
-                    stroke={"var(--color-primary)"}
-                  />
-                </AreaChart>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <TbMessage />
-              <span className="text-lg font-medium">Latest questions</span>
-            </div>
-            <div
-              className={cn(
-                "overflow-x-auto border border-base-300",
-                "rounded-box bg-base-200/50 shadow",
-                "shadow"
-              )}
-            >
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Question</th>
-                    <th className="w-10">Channel</th>
-                    <th className="min-w-34 text-right">Created at</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loaderData.messagesSummary.latestQuestions.map(
-                    (question) => (
-                      <tr key={question.id}>
-                        <td>
-                          <span className="line-clamp-1">
-                            {getQueryString(
-                              (question.llmMessage as any).content
-                            )}
-                          </span>
-                        </td>
-                        <td>
-                          <ChannelBadge channel={question.channel} />
-                        </td>
-                        <td className="text-right">
-                          {moment(question.createdAt).fromNow()}
-                        </td>
-                      </tr>
-                    )
-                  )}
-                  {loaderData.messagesSummary.latestQuestions.length === 0 && (
-                    <tr>
-                      <td colSpan={999} className="text-center">
-                        No data
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>

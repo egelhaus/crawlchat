@@ -1,19 +1,41 @@
 import type { Message, QuestionSentiment } from "libs/prisma";
 
 export function getMessagesSummary(messages: Message[]) {
-  const dailyMessages: Record<string, number> = {};
+  const dailyMessages: Record<
+    string,
+    {
+      count: number;
+      unhappy: number;
+    }
+  > = {};
 
   for (const message of messages) {
     if (!message.createdAt) continue;
-    if (message.llmMessage?.role === "user") continue;
     const date = new Date(message.createdAt);
     const key = date.toISOString().split("T")[0];
-    dailyMessages[key] = (dailyMessages[key] ?? 0) + 1;
+
+    if (!dailyMessages[key]) {
+      dailyMessages[key] = {
+        count: 0,
+        unhappy: 0,
+      };
+    }
+
+    if (message.llmMessage?.role === "assistant") {
+      dailyMessages[key].count++;
+
+      if (
+        message.rating === "down" ||
+        message.analysis?.questionSentiment === "sad"
+      ) {
+        dailyMessages[key].unhappy++;
+      }
+    }
   }
 
   const today = new Date();
   const todayKey = today.toISOString().split("T")[0];
-  const messagesToday = dailyMessages[todayKey] ?? 0;
+  const messagesToday = dailyMessages[todayKey]?.count ?? 0;
 
   const scoreDestribution: Record<number, { count: number }> = {};
   const points = 10;
@@ -115,7 +137,7 @@ export function getMessagesSummary(messages: Message[]) {
 
   return {
     messagesCount: Object.values(dailyMessages).reduce(
-      (acc, curr) => acc + curr,
+      (acc, curr) => acc + curr.count,
       0
     ),
     dailyMessages,
