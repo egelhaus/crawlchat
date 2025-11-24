@@ -659,7 +659,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                   "border-base-300 p-4 bg-base-200/50 shadow"
                 )}
               >
-                <ComposedChart width={width - 24} height={200} data={chartData}>
+                <ComposedChart width={width - 24} height={260} data={chartData}>
                   <XAxis
                     dataKey="name"
                     interval={"preserveStartEnd"}
