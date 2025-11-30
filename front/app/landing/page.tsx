@@ -857,11 +857,11 @@ export function PricingBoxes({
   );
 }
 
-export function Pricing() {
+export function Pricing({ noMarginTop }: { noMarginTop?: boolean }) {
   const { starterPlan, proPlan } = useLoaderData<typeof loader>();
 
   return (
-    <div className="mt-32" id="pricing">
+    <div className={cn("mt-32", noMarginTop && "mt-10")} id="pricing">
       <Heading>
         <HeadingHighlight>Pricing</HeadingHighlight> for everyone
       </Heading>

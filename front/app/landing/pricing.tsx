@@ -23,7 +23,7 @@ export default function Landing() {
   return (
     <>
       <Container>
-        <Pricing />
+        <Pricing noMarginTop />
       </Container>
 
       <Container>
