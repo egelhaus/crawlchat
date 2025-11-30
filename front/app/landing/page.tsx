@@ -28,6 +28,7 @@ import {
   TbDatabase,
   TbFile,
   TbFolder,
+  TbHelpCircleFilled,
   TbInfoCircleFilled,
   TbLock,
   TbMail,
@@ -2448,6 +2449,10 @@ export function PricingFeatures() {
       title: "Email reports",
       tooltip:
         "Get weekly reports on your email about the questions asked and analytics",
+    },
+    {
+      icon: <TbHelpCircleFilled />,
+      title: "Follow up questions",
     },
   ];
 
