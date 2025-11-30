@@ -25,7 +25,6 @@ import {
   Line,
   ComposedChart,
   Bar,
-  Cell,
 } from "recharts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { numberToKMB } from "~/number-util";
@@ -679,31 +678,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
                       fill={BRIGHT_COLORS[i % BRIGHT_COLORS.length]}
                       barSize={30}
                       stackId="a"
-                      radius={[6, 6, 0, 0]}
-                    >
-                      {chartData.map((entry, index) => {
-                        const _entry = { ...entry };
-                        delete _entry.name;
-                        delete _entry.Questions;
-                        delete _entry.Unhappy;
-                        const keys = Object.keys(_entry);
-                        const values = Object.values(_entry);
-
-                        const categoryNameIndex = keys.findIndex(
-                          (key) => key === category
-                        );
-                        const lastBarIndex = findLastBarIndex(
-                          values,
-                          (value) => value !== 0
-                        );
-
-                        if (categoryNameIndex === lastBarIndex) {
-                          return <Cell key={`cell-${index}`} />;
-                        }
-
-                        return <Cell key={`cell-${index}`} radius={0} />;
-                      })}
-                    </Bar>
+                    />
                   ))}
                   <Line
                     type="monotone"

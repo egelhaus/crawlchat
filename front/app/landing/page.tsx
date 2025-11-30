@@ -1298,15 +1298,15 @@ function Hero() {
 
   const features = [
     {
-      text: "Embed on Discord, Slack, MCP and API",
+      text: "Works on your website, Discord, and Slack",
       icon: <TbCode />,
     },
     {
-      text: "Fallback to human support with support tickets",
+      text: "Automatically creates support tickets when AI can't help",
       icon: <TbRobotFace />,
     },
     {
-      text: "Analytics and observability to improve your docs",
+      text: "Shows you what questions users ask to improve your docs",
       icon: <TbChartBar />,
     },
   ];
@@ -1336,7 +1336,7 @@ function Hero() {
 
   return (
     <div
-      className={cn("flex gap-10 md:gap-14 mb-10 flex-col md:flex-row py-2")}
+      className={cn("flex gap-10 md:gap-14 mb-10 flex-col md:flex-row py-2 md:mt-8")}
     >
       <div className={cn("flex flex-col flex-[1.4]")}>
         {focusChangelog && (
@@ -1356,25 +1356,26 @@ function Hero() {
           </a>
         )}
 
-        <h1 className="font-radio-grotesk text-[42px] md:text-[58px] leading-[1.1]">
-          Power up your tech documentation with{" "}
-          <span className="text-accent whitespace-nowrap">AI assistant!</span>
+        <h1 className="font-radio-grotesk text-[42px] md:text-[42px] leading-[1.2]">
+          Turn your documentation into an{" "}
+          <span className="text-accent whitespace-nowrap">AI assistant</span>{" "}
+          that answers questions instantly
         </h1>
 
-        <p className="text-xl mt-6 text-base-content/60">
-          Add CrawlChat to your documentation and let users find instant answers
-          right where they need them.
-          <ul className="mt-4 flex flex-col gap-2">
-            {features.map((feature, index) => (
-              <li key={index} className="flex gap-2">
-                <div className="text-primary rounded-box p-1 text">
-                  <TbCheck />
-                </div>
-                <span>{feature.text}</span>
-              </li>
-            ))}
-          </ul>
+        <p className="text-xl mt-6">
+          Add an AI chatbot to your documentation website. Users can ask questions and get instant answers from your docs, without searching through pages.
         </p>
+
+        <ul className="mt-6 flex flex-col gap-3">
+          {features.map((feature, index) => (
+            <li key={index} className="flex gap-3 items-start">
+              <div className="text-primary rounded-box p-1 mt-0.5">
+                <TbCheck size={20} />
+              </div>
+              <span className="text-lg">{feature.text}</span>
+            </li>
+          ))}
+        </ul>
 
         <div
           className={cn(
@@ -1383,26 +1384,9 @@ function Hero() {
           )}
         >
           <Link to="/login" className="btn btn-primary btn-xl">
-            Integrate now
+            Get started
             <TbArrowRight />
           </Link>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="text-sm text-base-content/50 italic max-w-md">
-            CrawlChat powers the "Ask AI" widget on sites, MCP servers for docs,
-            and Discord bots for communities. Smarter docs. Better support.
-          </div>
-
-          <div className="flex items-center gap-2">
-            <img
-              src="https://pbs.twimg.com/profile_images/1561788279313383424/RcRFiKnE_400x400.png"
-              className="w-6 h-6 rounded-box"
-            />
-            <span className="text-sm text-base-content/50">
-              Anton Lavrenov, Konvajs
-            </span>
-          </div>
         </div>
       </div>
       <div className="flex-1 flex-col">
@@ -2084,11 +2068,6 @@ function Gallery() {
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/messages.png",
       icon: <TbMessage />,
     },
-    // {
-    //   title: "Performance",
-    //   img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/performance.png",
-    //   icon: <TbChartLine />,
-    // },
     {
       title: "Data gaps",
       img: "https://slickwid-public.s3.us-east-1.amazonaws.com/crawlchat/gallery/data-gaps.png",
@@ -2149,7 +2128,7 @@ function Gallery() {
                 className={cn(
                   "badge badge-error badge-xs",
                   "absolute top-0 right-0 z-10",
-                  "translate-x-1/2 -translate-y-1/2"
+                  "translate-x-1/2 -translate-y-3/4"
                 )}
               >
                 New
