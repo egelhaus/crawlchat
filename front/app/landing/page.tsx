@@ -2645,7 +2645,7 @@ function Why() {
       icon: <TbSearch />,
       title: "vs. RAG",
       description:
-        "Just the RAG workflow stops at finding the relevant documents. CrawlChat goes further by reranking them, supporting multiple sources, multiple platforms to deploy the chat assistant, categorizing the questions, finding data gaps, giving ability to add custom actions, and so on.",
+        "The RAG workflow just stops at finding the relevant documents. CrawlChat goes further by reranking them, supporting multiple sources, multiple platforms to deploy the chat assistant, categorizing the questions, finding data gaps, giving you the ability to add custom actions, and so on.",
     },
     {
       icon: <SiOpenai />,
@@ -2657,13 +2657,13 @@ function Why() {
       icon: <TbUserHeart />,
       title: "vs. Human Support",
       description:
-        "The queries you get are repeated and answered 80% of the times in your docs. CrawlChat respects humans and saves their time!",
+        "The queries you get are repeated and answered 80% of the time in your docs. CrawlChat respects humans and saves their time!",
     },
     {
       icon: <TbMessage />,
       title: "vs. Other AI Chatbots",
       description:
-        "CrawlChat is tailored for technical documentation and developer workflows. Other platforms don't provide tools such as Discord bot, MCP server, integrated Support Tickets, Data gaps, etc. If you are software and have a help docs, CrawlChat is the best choice.",
+        "CrawlChat is tailored for technical documentation and developer workflows. Other platforms don't provide tools such as Discord bot, MCP server, integrated Support Tickets, Data gaps, etc. If you have software and help docs, CrawlChat is the best choice.",
     },
   ];
 
