@@ -790,7 +790,7 @@ function PricingBox({
 
 function CreditsPopover() {
   return (
-    <div className="dropdown dropdown-top dropdown-center">
+    <div className="dropdown dropdown-top dropdown-center inline-flex ml-2">
       <div
         tabIndex={0}
         role="button"
@@ -844,7 +844,7 @@ export function PricingBoxes({
             { text: `${starterYearlyPlan.limits.pages} pages` },
             {
               text: (
-                <div className="flex items-center gap-2">
+                <div>
                   {starterYearlyPlan.credits.messages / 12} message
                   credits/month
                   <CreditsPopover />
@@ -880,7 +880,7 @@ export function PricingBoxes({
             { text: `${proYearlyPlan.limits.pages} pages` },
             {
               text: (
-                <div className="flex items-center gap-2">
+                <div>
                   {proYearlyPlan.credits.messages / 12} message credits/month
                   <CreditsPopover />
                 </div>
@@ -918,7 +918,7 @@ export function PricingBoxes({
           { text: `${starterPlan.limits.pages} pages` },
           {
             text: (
-              <div className="flex items-center gap-2">
+              <div>
                 {starterPlan.credits.messages} message credits/month
                 <CreditsPopover />
               </div>
@@ -952,7 +952,7 @@ export function PricingBoxes({
           { text: `${proPlan.limits.pages} pages` },
           {
             text: (
-              <div className="flex items-center gap-2">
+              <div>
                 {proPlan.credits.messages} message credits/month
                 <CreditsPopover />
               </div>
