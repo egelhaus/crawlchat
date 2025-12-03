@@ -28,7 +28,12 @@ import {
 import { extractCitations } from "libs/citation";
 import { assertLimit, makeKbProcesserListener } from "./kb/listener";
 import { makeKbProcesser } from "./kb/factory";
-import { FlowMessage, multiLinePrompt, SimpleAgent } from "./llm/agentic";
+import {
+  FlowMessage,
+  multiLinePrompt,
+  SimpleAgent,
+  SimpleTool,
+} from "./llm/agentic";
 import { chunk } from "libs/chunk";
 import { retry } from "./retry";
 import { Flow } from "./llm/flow";
@@ -40,12 +45,14 @@ import { MultimodalContent, getQueryString } from "libs/llm-message";
 import {
   draftRateLimiter,
   mcpRateLimiter,
+  siteUseCaseRateLimiter,
   wsRateLimiter,
 } from "./rate-limiter";
 import { scrape } from "./scrape/crawl";
 import { getConfig } from "./llm/config";
 import { getNextNumber } from "libs/mongo-counter";
 import { randomUUID } from "crypto";
+import { extractSiteUseCase } from "./site-use-case";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -375,7 +382,7 @@ expressWs.app.ws("/", (ws: any, req) => {
                   questionId: questionMessage?.id ?? null,
                   llmModel: scrape.llmModel,
                   creditsUsed: event.creditsUsed,
-                  channel: "widget"
+                  channel: "widget",
                 },
               });
               await updateLastMessageAt(threadId);
@@ -891,11 +898,9 @@ app.post("/ticket/:scrapeId", authenticate, async (req, res) => {
   if (customTags) {
     for (const [key, value] of Object.entries(customTags)) {
       if (!["string", "number", "boolean"].includes(typeof value)) {
-        res
-          .status(400)
-          .json({
-            message: "Custom tags must be strings, numbers, or booleans",
-          });
+        res.status(400).json({
+          message: "Custom tags must be strings, numbers, or booleans",
+        });
         return;
       }
     }
@@ -1252,6 +1257,17 @@ app.get("/test-api", authenticate, async (req, res) => {
       title: m.scrape.title,
     })),
   });
+});
+
+app.post("/site-use-case", async (req, res) => {
+  siteUseCaseRateLimiter.check();
+  try {
+    const result = await extractSiteUseCase(req.body.url as string);
+    res.json(result);
+  } catch (error) {
+    console.error("Error extracting site use case:", error);
+    res.status(400).json({ message: "Internal server error" });
+  }
 });
 
 // Error handling middleware - must be last
