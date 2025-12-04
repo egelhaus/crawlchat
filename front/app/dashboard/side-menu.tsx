@@ -193,8 +193,6 @@ function SetupProgress({ scrapeId }: { scrapeId: string }) {
   );
 }
 
-
-
 export function SideMenu({
   scrapeOwner,
   loggedInUser,
@@ -401,42 +399,13 @@ export function SideMenu({
           >
             <TbRobotFace />
             <span>Chat</span>
-            <span className="badge badge-primary badge-sm badge-soft">
-              New
-            </span>
+            <span className="badge badge-primary badge-sm badge-soft">New</span>
           </div>
         </div>
       </div>
 
       <div className="p-4 flex flex-col gap-2">
-        {/* <div className="flex justify-center items-center gap-1">
-          <div className="tooltip" data-tip="Join on Discord">
-            <a
-              href="https://discord.gg/zW3YmCRJkC"
-              className="btn btn-sm btn-square"
-            >
-              <TbBrandDiscord />
-            </a>
-          </div>
-
-          <div className="tooltip" data-tip="Get assistance">
-            <Link to="/assistance" className="btn btn-sm btn-square">
-              <TbHelp />
-            </Link>
-          </div>
-
-          <div className="tooltip" data-tip="Ask AI">
-            <Link
-              to="/w/crawlchat"
-              className="btn btn-sm btn-square"
-              target="_blank"
-            >
-              <TbMessage />
-            </Link>
-          </div>
-        </div> */}
-
-        {scrapeId && <SetupProgress scrapeId={scrapeId} />}
+        {/* {scrapeId && <SetupProgress scrapeId={scrapeId} />} */}
         <div
           className={cn(
             "flex flex-col gap-2 bg-base-200 rounded-box",
@@ -483,14 +452,24 @@ export function SideMenu({
           <div className="dropdown dropdown-top dropdown-end">
             <button
               tabIndex={0}
-              className="btn btn-sm mt-1 btn-square bg-base-200"
+              className="btn btn-sm mt-1 btn-square"
+              style={{ background: "white" }}
             >
               <TbChevronUp />
             </button>
             <ul
               tabIndex={0}
-              className="menu dropdown-content bg-base-100 rounded-box z-1 p-2 shadow-sm"
+              className="menu dropdown-content bg-base-200 rounded-box z-1 p-2 shadow-sm"
             >
+              <li>
+                <Link
+                  to="/profile"
+                  onClick={() => (document.activeElement as any).blur()}
+                >
+                  <TbUser />
+                  Profile
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/profile#billing"
