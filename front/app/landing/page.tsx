@@ -1625,19 +1625,7 @@ export function LandingPage({ children }: PropsWithChildren) {
 
   return (
     <div data-theme="brand" className="bg-base-200 font-aeonik">
-      <div className="text-center bg-accent text-accent-content py-2 px-6">
-        Get 50% 💰 discount now. Use{" "}
-        <strong
-          onClick={handleCopyCoupon}
-          className="cursor-pointer inline-block hover:underline"
-        >
-          BLACKFRIDAY2025
-        </strong>{" "}
-        coupon code at checkout.
-      </div>
-
       <div className="relative">{children}</div>
-
       <Toaster position="bottom-center" />
     </div>
   );
