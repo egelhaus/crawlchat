@@ -126,8 +126,8 @@ export function SiteUseCase() {
         {!report && fetcher.state === "idle" && (
           <>
             <div className="flex-1">
-              Still not sure how it can help you? Enter your product URL and
-              find out the reasons why you should use CrawlChat.
+              Enter your product URL and find out the reasons why you should use
+              CrawlChat.
             </div>
             <fetcher.Form
               method="post"

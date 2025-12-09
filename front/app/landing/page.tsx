@@ -2808,6 +2808,10 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
         <UsedBy />
       </Container>
 
+      <Container>
+        <SiteUseCase />
+      </Container>
+
       <CustomTestimonials />
 
       <Container>
@@ -2854,10 +2858,6 @@ export default function Landing({ loaderData }: Route.ComponentProps) {
 
       <Container>
         <FAQ />
-      </Container>
-
-      <Container>
-        <SiteUseCase />
       </Container>
     </>
   );
