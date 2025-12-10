@@ -2621,11 +2621,11 @@ function SecondaryCTAs() {
       />
 
       <SecondaryCTA
-        title="Automate with n8n"
-        description="Use the CrawlChat n8n node in your workflows to get answers from your docs and add content to your knowledge base."
-        icon={<SiN8N />}
-        href="https://docs.crawlchat.app/n8n-node"
-        ctaLabel="Read more"
+        title="Chrome extension"
+        description="Generate text content from your documentation directly in any text field across the web. Write support emails or product descriptions instantly."
+        icon={<TbBrandChrome />}
+        href="https://chromewebstore.google.com/detail/crawlchat/icimflpdiioobolkjdbldmmomflainie"
+        ctaLabel="Install now"
       />
     </div>
   );
