@@ -183,7 +183,7 @@ export default function DashboardPage({ loaderData }: Route.ComponentProps) {
         hobbyPlan={loaderData.hobbyPlan}
         hobbyYearlyPlan={loaderData.hobbyYearlyPlan}
       />
-      <ChatModal token={loaderData.token} />
+      {/* <ChatModal token={loaderData.token} /> */}
     </AppContext.Provider>
   );
 }

@@ -389,7 +389,7 @@ export function SideMenu({
               badge={getMenuBadge(link.label)}
             />
           ))}
-          <div
+          {/* <div
             className={cn(
               "flex pl-3 pr-2 py-1 w-full items-center gap-2 rounded-box",
               "transition-all hover:bg-accent hover:text-accent-content",
@@ -400,7 +400,7 @@ export function SideMenu({
             <TbRobotFace />
             <span>Chat</span>
             <span className="badge badge-primary badge-sm badge-soft">New</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
