@@ -14,6 +14,7 @@ import {
   TbArrowBack,
   TbArrowForward,
   TbRefresh,
+  TbLink,
 } from "react-icons/tb";
 import { Page } from "./components/page";
 import { getAuthUser } from "./auth/middleware";
@@ -33,6 +34,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import {
   $getRoot,
   type EditorState,
@@ -60,7 +62,12 @@ import {
   $isListNode,
 } from "@lexical/list";
 import { CodeNode, CodeHighlightNode, $createCodeNode } from "@lexical/code";
-import { LinkNode } from "@lexical/link";
+import {
+  LinkNode,
+  $createLinkNode,
+  $isLinkNode,
+  TOGGLE_LINK_COMMAND,
+} from "@lexical/link";
 import { $setBlocksType } from "@lexical/selection";
 import { $getSelection, $isRangeSelection } from "lexical";
 import { $findMatchingParent } from "@lexical/utils";
@@ -304,6 +311,9 @@ function ToolbarPlugin() {
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [blockType, setBlockType] = useState<string>("paragraph");
+  const [isLink, setIsLink] = useState(false);
+  const [linkUrl, setLinkUrl] = useState<string>("");
+  const linkInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
@@ -314,6 +324,17 @@ function ToolbarPlugin() {
           setIsItalic(selection.hasFormat("italic"));
           setIsUnderline(selection.hasFormat("underline"));
           setIsStrikethrough(selection.hasFormat("strikethrough"));
+
+          const node = $findMatchingParent(selection.anchor.getNode(), (node) =>
+            $isLinkNode(node)
+          );
+          if (node && $isLinkNode(node)) {
+            setIsLink(true);
+            setLinkUrl(node.getURL());
+          } else {
+            setIsLink(false);
+            setLinkUrl("");
+          }
 
           const anchorNode = selection.anchor.getNode();
           let element = anchorNode.getTopLevelElementOrThrow();
@@ -414,6 +435,47 @@ function ToolbarPlugin() {
 
   const redo = () => {
     editor.dispatchCommand(REDO_COMMAND, undefined);
+  };
+
+  const formatLink = () => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const node = $findMatchingParent(selection.anchor.getNode(), (node) =>
+          $isLinkNode(node)
+        );
+        if (node && $isLinkNode(node)) {
+          setLinkUrl(node.getURL());
+        } else {
+          setLinkUrl("");
+        }
+      }
+    });
+    setTimeout(() => {
+      linkInputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleLinkSubmit = () => {
+    if (linkUrl.trim()) {
+      let url = linkUrl.trim();
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://" + url;
+      }
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, url);
+      setLinkUrl("");
+      if (linkInputRef.current) {
+        linkInputRef.current.blur();
+      }
+    }
+  };
+
+  const handleRemoveLink = () => {
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+    setLinkUrl("");
+    if (linkInputRef.current) {
+      linkInputRef.current.blur();
+    }
   };
 
   return (
@@ -549,6 +611,68 @@ function ToolbarPlugin() {
         >
           <TbCode />
         </button>
+        <div className="dropdown dropdown-center">
+          <div
+            tabIndex={0}
+            role="button"
+            className={cn(
+              "btn btn-sm btn-ghost btn-square",
+              isLink && "btn-active"
+            )}
+            onClick={formatLink}
+            aria-label="Link"
+          >
+            <TbLink />
+          </div>
+          <div
+            tabIndex={-1}
+            className={cn(
+              "dropdown-content menu bg-base-200 rounded-box z-[1]",
+              "w-80 p-4 shadow-lg border border-base-300"
+            )}
+          >
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">
+                {isLink ? "Edit Link" : "Add Link"}
+              </label>
+              <input
+                ref={linkInputRef}
+                type="text"
+                className="input input-sm w-full"
+                placeholder="https://example.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleLinkSubmit();
+                  } else if (e.key === "Escape") {
+                    if (linkInputRef.current) {
+                      linkInputRef.current.blur();
+                    }
+                  }
+                }}
+              />
+              <div className="flex gap-2 justify-end">
+                {isLink && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-error"
+                    onClick={handleRemoveLink}
+                  >
+                    Remove
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary"
+                  onClick={handleLinkSubmit}
+                >
+                  {isLink ? "Update" : "Add Link"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="divider divider-horizontal mx-0" />
       <div className="flex gap-1">
@@ -612,7 +736,7 @@ function LexicalEditor({
         strikethrough: "line-through",
       },
       quote: "border-l-4 border-base-300 pl-4 my-4 italic text-base-content/70",
-      code: "bg-base-200 px-1 py-0.5 rounded text-sm font-mono",
+      code: "block bg-base-200 p-4 rounded my-4 text-sm font-mono whitespace-pre overflow-x-auto w-fit",
       codeHighlight: {
         javascript: "bg-base-200",
         typescript: "bg-base-200",
@@ -673,6 +797,7 @@ function LexicalEditor({
           <HistoryPlugin />
           <ListPlugin />
           <TabIndentationPlugin />
+          <LinkPlugin />
           <MarkdownSyncPlugin
             markdown={markdown}
             onMarkdownChange={onMarkdownChange}

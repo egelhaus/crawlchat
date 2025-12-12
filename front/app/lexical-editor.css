@@ -43,3 +43,19 @@
 .lexical-editor-content li:has(> ol) {
   list-style: none;
 }
+
+.lexical-editor-content [contenteditable="true"] p code,
+.lexical-editor-content [contenteditable="true"] span code,
+.lexical-editor-content [contenteditable="true"] h1 code,
+.lexical-editor-content [contenteditable="true"] h2 code,
+.lexical-editor-content [contenteditable="true"] h3 code,
+.lexical-editor-content [contenteditable="true"] h4 code,
+.lexical-editor-content [contenteditable="true"] h5 code,
+.lexical-editor-content [contenteditable="true"] h6 code {
+  display: inline;
+  padding: 0.125rem 0.25rem;
+  margin: 0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background-color: hsl(var(--b2));
+}
