@@ -27,8 +27,6 @@ export function extractCitations(
       const link = links[getLinkIndex(keys[i])];
       if (link) {
         citedLinks[i] = link;
-      } else {
-        console.error(`Link not found for ${keys[i]}. Should not happen!`);
       }
     }
   }
