@@ -21,17 +21,20 @@ const LlmNameMap: Record<LlmModel, string> = {
 };
 
 const release = {
-  key: "avatars",
-  title: "Avatars",
+  key: "current-page-context",
+  title: "Current page context",
   description: (
     <p>
-      Have added <strong>avatars</strong> to the Conversations and Threads tables to help you identify and track questions asked by users across time. This feature makes it easier to see who asked what questions and follow user interactions throughout your conversations.
+      You can now enable <strong>Current page context</strong> for your widget.
+      When enabled, the widget includes the current page (URL, content and title)
+      as part of the conversation context so answers can be more relevant to what
+      the user is looking at.
     </p>
   ),
-  date: "2025-12-13T17:14:04.947Z",
+  date: "2025-12-17T00:00:00.000Z",
   cta: {
     label: "Read more",
-    href: "/changelog/28-avatars",
+    href: "/changelog/29-current-page-context",
     icon: <TbArrowRight />,
     target: "_blank",
   },
