@@ -48,6 +48,7 @@ import { getNextNumber } from "libs/mongo-counter";
 import { randomUUID } from "crypto";
 import { extractSiteUseCase } from "./site-use-case";
 import { handleWs } from "./routes/socket";
+import apiRouter from "./routes/api";
 
 const app: Express = express();
 const expressWs = ws(app);
@@ -63,6 +64,8 @@ process.on("unhandledRejection", (reason, promise) => {
 
 app.use(/\/((?!sse).)*/, express.json({ limit: "50mb" }));
 app.use(cors());
+
+app.use("/api", apiRouter);
 
 function cleanUrl(url: string) {
   if (!url.startsWith("http")) {
@@ -1514,210 +1517,6 @@ Fact to check: ${fact}`,
   await consumeCredits(scrape.userId, "messages", llmConfig.creditsPerMessage);
 
   res.json({ fact, score, reason });
-});
-
-app.get("/api/user", authenticate, async (req, res) => {
-  res.json({ user: req.user });
-});
-
-app.get("/api/collections", authenticate, async (req, res) => {
-  const memberships = await prisma.scrapeUser.findMany({
-    where: {
-      userId: req.user!.id,
-    },
-    include: {
-      scrape: true,
-    },
-  });
-  res.json(
-    memberships.map((m) => ({
-      title: m.scrape.title,
-      id: m.scrape.id,
-      createdAt: m.scrape.createdAt,
-      llmModel: m.scrape.llmModel,
-      slug: m.scrape.slug,
-      logoUrl: m.scrape.logoUrl,
-      ticketingEnabled: m.scrape.ticketingEnabled,
-      discordServerId: m.scrape.discordServerId,
-      discordDraftConfig: m.scrape.discordDraftConfig,
-      slackTeamId: m.scrape.slackTeamId,
-      private: m.scrape.private,
-      categories: m.scrape.messageCategories,
-      chatPrompt: m.scrape.chatPrompt,
-      showSources: m.scrape.showSources,
-    }))
-  );
-});
-
-app.get("/api/groups", authenticate, async (req, res) => {
-  const scrapeId = req.query.scrapeId as string;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  const groups = await prisma.knowledgeGroup.findMany({
-    where: { scrapeId },
-    include: {
-      scrapeItems: true,
-    },
-  });
-  res.json(
-    groups.map((g) => ({
-      id: g.id,
-      title: g.title,
-      type: g.type,
-      createdAt: g.createdAt,
-      status: g.status,
-      items: g.scrapeItems.length,
-    }))
-  );
-});
-
-app.get("/api/data-gaps", authenticate, async (req, res) => {
-  const scrapeId = req.query.scrapeId as string;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
-
-  const messages = await prisma.message.findMany({
-    where: {
-      scrapeId,
-      AND: [
-        {
-          analysis: {
-            isNot: {
-              dataGapTitle: null,
-            },
-          },
-        },
-        {
-          analysis: {
-            isNot: {
-              dataGapDone: true,
-            },
-          },
-        },
-      ],
-      createdAt: {
-        gte: ONE_WEEK_AGO,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  res.json(messages);
-});
-
-app.get("/api/messages", authenticate, async (req, res) => {
-  const scrapeId = req.query.scrapeId as string;
-  const page = parseInt(req.query.page as string) || 1;
-  const pageSize = 50;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  const ONE_WEEK_AGO = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7);
-
-  const totalMessages = await prisma.message.count({
-    where: {
-      scrapeId,
-      createdAt: {
-        gte: ONE_WEEK_AGO,
-      },
-    },
-  });
-
-  const messages = await prisma.message.findMany({
-    where: {
-      scrapeId,
-      createdAt: {
-        gte: ONE_WEEK_AGO,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-  });
-
-  res.json({
-    messages: messages.map((m) => ({
-      id: m.id,
-      createdAt: m.createdAt,
-      content: m.llmMessage?.content,
-      role: m.llmMessage?.role,
-      channel: m.channel,
-      attachments: m.attachments,
-      links: m.links,
-    })),
-    total: totalMessages,
-    page,
-    pageSize,
-    totalPages: Math.ceil(totalMessages / pageSize),
-  });
-});
-
-app.post("/api/collection/ai-model", authenticate, async (req, res) => {
-  const scrapeId = req.body.scrapeId as string;
-  const aiModel = req.body.aiModel as string;
-
-  if (!aiModel) {
-    res.status(400).json({ message: "AI model is required" });
-    return;
-  }
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  await prisma.scrape.update({
-    where: { id: scrapeId },
-    data: { llmModel: aiModel as LlmModel },
-  });
-
-  res.json({ success: true });
-});
-
-app.post("/api/collection/visibility", authenticate, async (req, res) => {
-  const scrapeId = req.body.scrapeId as string;
-  const isPrivate = req.body.private as boolean;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  await prisma.scrape.update({
-    where: { id: scrapeId },
-    data: { private: isPrivate },
-  });
-
-  res.json({ success: true });
-});
-
-app.post("/api/collection/prompt", authenticate, async (req, res) => {
-  const scrapeId = req.body.scrapeId as string;
-  const prompt = req.body.prompt as string;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  await prisma.scrape.update({
-    where: { id: scrapeId },
-    data: { chatPrompt: prompt },
-  });
-
-  res.json({ success: true });
-});
-
-app.post("/api/collection/show-sources", authenticate, async (req, res) => {
-  const scrapeId = req.body.scrapeId as string;
-  const showSources = req.body.showSources as boolean;
-
-  authoriseScrapeUser(req.user!.scrapeUsers, scrapeId, res);
-
-  await prisma.scrape.update({
-    where: { id: scrapeId },
-    data: { showSources },
-  });
-
-  res.json({ success: true });
 });
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
