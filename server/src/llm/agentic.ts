@@ -57,7 +57,7 @@ export class Agent<CustomState = {}, CustomMessage = {}> {
     this.model = options?.model ?? "gpt-4o-mini";
     this.id = id;
     this.user = options?.user;
-    this.maxTokens = options?.maxTokens ?? 1000;
+    this.maxTokens = options?.maxTokens ?? 4000;
 
     console.log("Created agent", this.id, this.model);
   }
