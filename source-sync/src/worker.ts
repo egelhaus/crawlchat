@@ -73,8 +73,6 @@ async function checkCompletion(knowledgeGroupId: string) {
 itemEvents.on("failed", async ({ jobId, failedReason }) => {
   const job = await itemQueue.getJob(jobId);
   if (job && job.failedReason && "scrapeItemId" in job.data) {
-    await checkCompletion(job.data.knowledgeGroupId);
-
     const item = await prisma.scrapeItem.findFirst({
       where: { id: job.data.scrapeItemId },
     });
@@ -91,6 +89,8 @@ itemEvents.on("failed", async ({ jobId, failedReason }) => {
         willUpdate: false,
       },
     });
+
+    await checkCompletion(job.data.knowledgeGroupId);
   }
 });
 
