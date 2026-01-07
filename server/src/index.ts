@@ -6,9 +6,8 @@ import type { Express, NextFunction, Request, Response } from "express";
 import ws from "express-ws";
 import cors from "cors";
 import { prisma } from "./prisma";
-import { deleteByIds, deleteScrape, makeRecordId } from "./scrape/pinecone";
+import { deleteByIds, deleteScrape } from "./scrape/pinecone";
 import { authenticate, AuthMode, authoriseScrapeUser } from "libs/express-auth";
-import { splitMarkdown } from "./scrape/markdown-splitter";
 import { v4 as uuidv4 } from "uuid";
 import {
   LlmModel,

@@ -51,7 +51,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
   });
 
-  return { scrape, knowledgeGroup, items };
+  const token = createToken(user!.id, {
+    expiresInSeconds: 60 * 60,
+  });
+
+  return { scrape, knowledgeGroup, items, token };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -81,7 +85,11 @@ export async function action({ request, params }: Route.ActionArgs) {
     });
 
     const token = createToken(user!.id);
-    const shouldUseSourceSync = ["scrape_web", "upload", "github_discussions"].includes(group.type);
+    const shouldUseSourceSync = [
+      "scrape_web",
+      "upload",
+      "github_discussions",
+    ].includes(group.type);
     const host = shouldUseSourceSync
       ? process.env.VITE_SOURCE_SYNC_URL
       : process.env.VITE_SERVER_URL;
@@ -191,7 +199,12 @@ export default function KnowledgeGroupPage({
     <Page
       title={loaderData.knowledgeGroup.title ?? "Untitled"}
       icon={getIcon()}
-      right={<ActionButton group={loaderData.knowledgeGroup} />}
+      right={
+        <ActionButton
+          group={loaderData.knowledgeGroup}
+          token={loaderData.token}
+        />
+      }
     >
       <div className="flex flex-col gap-6 flex-1">
         {loaderData.knowledgeGroup.fetchError && (

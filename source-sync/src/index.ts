@@ -2,12 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors";
 import type { Express, Request, Response } from "express";
 import { authenticate, AuthMode, authoriseScrapeUser } from "libs/express-auth";
 import "./worker";
 import { Prisma, prisma } from "libs/dist/prisma";
 import { v4 as uuidv4 } from "uuid";
-import { scheduleGroup, scheduleUrl } from "./source/schedule";
+import { getPendingUrls, scheduleGroup, scheduleUrl } from "./source/schedule";
 
 declare global {
   namespace Express {
@@ -26,6 +27,7 @@ const app: Express = express();
 const PORT = process.env.PORT || 3007;
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
@@ -162,6 +164,31 @@ app.post(
     });
 
     res.json({ message: "ok" });
+  }
+);
+
+app.get(
+  "/process-status",
+  authenticate,
+  async function (req: Request, res: Response) {
+    const { knowledgeGroupId } = req.query;
+
+    const knowledgeGroup = await prisma.knowledgeGroup.findFirstOrThrow({
+      where: { id: knowledgeGroupId as string },
+    });
+
+    authoriseScrapeUser(req.user!.scrapeUsers, knowledgeGroup.scrapeId, res);
+
+    const state = {
+      pending: 0,
+      status: knowledgeGroup.status,
+    };
+
+    if (knowledgeGroup.updateProcessId) {
+      state.pending = await getPendingUrls(knowledgeGroup.updateProcessId);
+    }
+
+    res.json(state);
   }
 );
 

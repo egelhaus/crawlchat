@@ -17,6 +17,7 @@ declare global {
   interface Window {
     ENV: {
       VITE_SERVER_WS_URL: string;
+      VITE_SOURCE_SYNC_URL: string;
     };
   }
 }
@@ -39,6 +40,7 @@ export function loader() {
   return {
     ENV: {
       VITE_SERVER_WS_URL: process.env.VITE_SERVER_WS_URL,
+      VITE_SOURCE_SYNC_URL: process.env.VITE_SOURCE_SYNC_URL,
     },
   };
 }
