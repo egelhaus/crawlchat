@@ -391,7 +391,7 @@ app.post(
       body: JSON.stringify({
         title,
         text: markdown,
-        knowledgeGroupId,
+        knowledgeGroupId: knowledgeGroup.id,
         pageId: url,
       }),
     });
