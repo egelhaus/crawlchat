@@ -57,5 +57,9 @@ export async function learn(scrapeId: string, content: string, token: string) {
     }
   );
 
+  if (!result.ok) {
+    throw new Error(await result.text());
+  }
+
   return result.json();
 }
