@@ -24,6 +24,7 @@ export function makeSource(type: KnowledgeGroupType) {
     case "learn_discord":
     case "learn_slack":
     case "answer_corrections":
+    case "custom":
       return new TextSource();
     case "confluence":
       return new ConfluenceSource();
