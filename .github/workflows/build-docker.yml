@@ -68,14 +68,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-
-      - name: Image summary
-        run: |
-          echo "### 🐳 Built and pushed: ${{ matrix.image_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ steps.meta.outputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ steps.meta.outputs.release_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.meta.outputs.is_prerelease }}" == "false" ]; then
-            echo "- \`latest\`" >> $GITHUB_STEP_SUMMARY
-          fi
