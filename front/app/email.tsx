@@ -33,7 +33,7 @@ export const sendReactEmail = async (
   try {
     const resend = new Resend(process.env.RESEND_KEY!);
     await resend.emails.send({
-      from: "CrawlChat <welcome@mail.crawlchat.app>",
+      from: process.env.RESEND_FROM_EMAIL!,
       to,
       subject,
       react: component,
