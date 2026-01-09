@@ -51,7 +51,7 @@ jobs:
       - name: Extract metadata
         id: meta
         run: |
-          echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "commit_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           echo "release_tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           echo "is_prerelease=${{ github.event.release.prerelease }}" >> $GITHUB_OUTPUT
 
