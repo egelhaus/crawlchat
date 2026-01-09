@@ -62,6 +62,8 @@ services:
 
   discord_bot:
     image: ghcr.io/crawlchat/crawlchat-discord:latest
+    depends_on:
+      - database
     networks:
       - crawlchat-net
     environment:
