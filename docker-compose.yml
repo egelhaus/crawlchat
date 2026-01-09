@@ -82,6 +82,8 @@ services:
 
   slack_app:
     image: ghcr.io/crawlchat/crawlchat-slack:latest
+    depends_on:
+      - database
     networks:
       - crawlchat-net
     environment:
